@@ -1,0 +1,54 @@
+# Django
+*.log
+*.pot
+*.pyc
+__pycache__/
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+media/
+staticfiles/
+
+# Ambiente virtual
+venv/
+env/
+ENV/
+
+# Node.js
+node_modules/
+node_modules
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+
+# Arquivos compilados
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.so
+
+# Pacotes
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+# Logs e bancos de dados
+*.log
+*.sql
+*.sqlite
+
+# Configurações do sistema operacional
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db

@@ -1,0 +1,22 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Estilos para o modo de alto contraste */
+body.high-contrast {
+  background-color: var(--bg-color, #000) !important;
+  color: var(--text-color, #fff) !important;
+}
+
+body.high-contrast * {
+  background-color: var(--bg-color, #000) !important;
+  color: var(--text-color, #fff) !important;
+  border-color: var(--text-color, #fff) !important;
+}
+
+body.high-contrast a, 
+body.high-contrast button:not(.accessibility-button) {
+  background-color: #000 !important;
+  color: yellow !important;
+  border: 1px solid yellow !important;
+}

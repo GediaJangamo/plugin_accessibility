@@ -1,5 +1,5 @@
 <template>
-    <div v-if="isOpen" class="fixed bottom-20 right-4 bg-white rounded-lg shadow-xl p-4 w-64 border border-gray-200 z-50">
+  <div v-if="isOpen" class="fixed bottom-32 left-20 bg-white rounded-lg shadow-xl p-4 w-64 border border-gray-200 z-40">
       <h2 class="text-lg font-bold mb-3 text-gray-800">Acessibilidade</h2>
       
       <div class="space-y-4">
@@ -50,6 +50,7 @@
         </button>
       </div>
     </div>
+
   </template>
   
   <script>

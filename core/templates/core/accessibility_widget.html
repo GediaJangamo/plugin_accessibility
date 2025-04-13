@@ -1,198 +1,199 @@
-<!-- Este arquivo servirá como um ponto de montagem para o aplicativo Vue.js -->
+{% comment %} <!-- Este arquivo servirá como um ponto de montagem para o aplicativo Vue.js -->
+{% load static %}
 <script type="module">
-    import { createApp } from 'https://cdnjs.cloudflare.com/ajax/libs/vue/3.3.4/vue.esm-browser.prod.js';
+  import { createApp } from "https://cdnjs.cloudflare.com/ajax/libs/vue/3.3.4/vue.esm-browser.prod.js";
 
-    // Componente do botão de acessibilidade
-    const AccessibilityButton = {
-        template: `
+  // Componente do botão de acessibilidade
+  const AccessibilityButton = {
+    template: `
             <button @click="toggleMenu" 
-                    class="fixed bottom-4 right-4 bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                    aria-label="Opções de acessibilidade">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                          d="M18 13v6a2 2 0 01-2 2H8a2 2 0 01-2-2V6a2 2 0 012-2h4m4 2v4m0 0l-2-2m2 2l2-2" />
-                    <circle cx="12" cy="8" r="2" />
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                          d="M12 14s-1.5 2-3 2-3-2-3-2m9 0s-1.5 2-3 2-3-2-3-2" />
-                </svg>
-            </button>
-        `,
-        methods: {
-            toggleMenu() {
-                this.$emit('toggle-menu');
-            }
-        }
-    };
-
-    // Componente do menu de acessibilidade
-    const AccessibilityMenu = {
-        props: ['isOpen'],
-        template: `
-            <div v-if="isOpen" class="fixed bottom-20 right-4 bg-white rounded-lg shadow-xl p-4 w-64 border border-gray-200 z-50">
-                <h2 class="text-lg font-bold mb-3 text-gray-800">Acessibilidade</h2>
-                
-                <div class="space-y-4">
-                    <!-- Controle de tamanho da fonte -->
-                    <div>
-                        <h3 class="font-medium text-gray-700 mb-2">Tamanho da Fonte</h3>
-                        <div class="flex items-center justify-between">
-                            <button @click="decreaseFont" 
-                                    class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-1 rounded"
-                                    aria-label="Diminuir fonte">A-</button>
-                            <span class="text-gray-600">Normal</span>
-                            <button @click="increaseFont" 
-                                    class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-1 rounded"
-                                    aria-label="Aumentar fonte">A+</button>
-                        </div>
-                    </div>
-                    
-                    <!-- Controle de alto contraste -->
-                    <div>
-                        <label class="flex items-center cursor-pointer">
-                            <input type="checkbox" @change="toggleContrast" class="form-checkbox h-5 w-5 text-blue-600">
-                            <span class="ml-2 text-gray-700">Alto Contraste</span>
-                        </label>
-                    </div>
-                    
-                    <!-- Leitor de tela -->
-                    <div>
-                        <label class="flex items-center cursor-pointer">
-                            <input type="checkbox" @change="toggleScreenReader" class="form-checkbox h-5 w-5 text-blue-600">
-                            <span class="ml-2 text-gray-700">Leitor de Tela</span>
-                        </label>
-                    </div>
-                    
-                    <!-- Comandos por voz -->
-                    <div>
-                        <label class="flex items-center cursor-pointer">
-                            <input type="checkbox" @change="toggleVoiceCommands" class="form-checkbox h-5 w-5 text-blue-600">
-                            <span class="ml-2 text-gray-700">Comandos por Voz</span>
-                        </label>
-                    </div>
-                </div>
-                
-                <div class="mt-4 pt-3 border-t border-gray-200">
-                    <button @click="resetSettings" 
-                            class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 px-4 rounded"
-                            aria-label="Restaurar configurações padrão">
-                        Restaurar Padrão
-                    </button>
-                </div>
+            class="fixed bottom-32 left-0 text-white py-4 px-6 rounded-r-full shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 group z-50"
+            style="background-color: #246647;"
+            aria-label="Opções de acessibilidade">
+            <img
+                src="{% static 'core/images/accessibility_icon.png' %}"
+                alt="Icone de acessibilidade"
+                class="h-8 w-8 brightness-0 invert">
+            
+            <!-- Tooltip usando Tailwind -->
+            <div class="absolute left-full top-1/2 transform -translate-y-1/2 ml-3 px-3 py-2 bg-gray-800 text-white text-sm rounded whitespace-nowrap invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-opacity duration-300 z-50">
+              <!-- Triângulo/seta do tooltip -->
+              <div class="absolute top-1/2 right-full -mt-1 border-solid border-8 border-transparent border-r-gray-800"></div>
+              Clique para opções de acessibilidade
             </div>
+          </button>
         `,
-        data() {
-            return {
-                fontSize: 'normal',
-                highContrast: false,
-                screenReader: false,
-                voiceCommands: false
-            };
-        },
-        methods: {
-            increaseFont() {
-                const body = document.body;
-                const currentSize = window.getComputedStyle(body).fontSize;
-                const newSize = parseFloat(currentSize) * 1.1;
-                body.style.fontSize = `${newSize}px`;
-                this.fontSize = 'large';
-            },
-            decreaseFont() {
-                const body = document.body;
-                const currentSize = window.getComputedStyle(body).fontSize;
-                const newSize = parseFloat(currentSize) * 0.9;
-                body.style.fontSize = `${newSize}px`;
-                this.fontSize = 'small';
-            },
-            toggleContrast() {
-                this.highContrast = !this.highContrast;
-                if (this.highContrast) {
-                    document.body.classList.add('high-contrast');
-                    document.documentElement.style.setProperty('--bg-color', '#000');
-                    document.documentElement.style.setProperty('--text-color', '#fff');
-                } else {
-                    document.body.classList.remove('high-contrast');
-                    document.documentElement.style.removeProperty('--bg-color');
-                    document.documentElement.style.removeProperty('--text-color');
-                }
-            },
-            toggleScreenReader() {
-                this.screenReader = !this.screenReader;
-                // A implementação real exigiria integração com APIs de leitor de tela
-                console.log('Leitor de Tela:', this.screenReader ? 'Ativado' : 'Desativado');
-            },
-            toggleVoiceCommands() {
-                this.voiceCommands = !this.voiceCommands;
-                // A implementação real exigiria integração com APIs de reconhecimento de voz
-                console.log('Comandos por Voz:', this.voiceCommands ? 'Ativados' : 'Desativados');
-            },
-            resetSettings() {
-                // Restaurar tamanho de fonte
-                document.body.style.fontSize = '';
-                this.fontSize = 'normal';
-                
-                // Restaurar contraste
-                if (this.highContrast) {
-                    this.toggleContrast();
-                }
-                
-                // Desativar leitor de tela
-                if (this.screenReader) {
-                    this.toggleScreenReader();
-                }
-                
-                // Desativar comandos por voz
-                if (this.voiceCommands) {
-                    this.toggleVoiceCommands();
-                }
-            }
-        }
-    };
+    methods: {
+      toggleMenu() {
+        this.$emit("toggle-menu");
+      },
+    },
+  };
 
-    // Aplicativo Vue principal
-    const app = createApp({
-        components: {
-            AccessibilityButton,
-            AccessibilityMenu
-        },
-        data() {
-            return {
-                menuOpen: false
-            };
-        },
-        methods: {
-            toggleMenu() {
-                this.menuOpen = !this.menuOpen;
-            }
-        },
-        template: `
+  // Componente do menu de acessibilidade
+  const AccessibilityMenu = {
+    props: ["isOpen"],
+    template: `
+     <div v-if="isOpen" class="fixed bottom-32 left-20 bg-white rounded-lg shadow-xl p-4 w-64 border border-gray-200 z-40">
+      <h2 class="text-lg font-bold mb-3 text-gray-800">Acessibilidade</h2>
+      
+      <div class="space-y-4">
+        <!-- Controle de tamanho da fonte -->
+        <div>
+          <h3 class="font-medium text-gray-700 mb-2">Tamanho da Fonte</h3>
+          <div class="flex items-center justify-between">
+            <button @click="decreaseFont" 
+                    class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-1 rounded"
+                    aria-label="Diminuir fonte">A-</button>
+            <span class="text-gray-600">{{ fontSize }}</span>
+            <button @click="increaseFont" 
+                    class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-1 rounded"
+                    aria-label="Aumentar fonte">A+</button>
+          </div>
+        </div>
+        
+        <!-- Controle de alto contraste -->
+        <div>
+          <label class="flex items-center cursor-pointer">
+            <input type="checkbox" v-model="highContrast" @change="toggleContrast" class="form-checkbox h-5 w-5 text-blue-600">
+            <span class="ml-2 text-gray-700">Alto Contraste</span>
+          </label>
+        </div>
+        
+        <!-- Leitor de tela -->
+        <div>
+          <label class="flex items-center cursor-pointer">
+            <input type="checkbox" v-model="screenReader" @change="toggleScreenReader" class="form-checkbox h-5 w-5 text-blue-600">
+            <span class="ml-2 text-gray-700">Leitor de Tela</span>
+          </label>
+        </div>
+        
+        <!-- Comandos por voz -->
+        <div>
+          <label class="flex items-center cursor-pointer">
+            <input type="checkbox" v-model="voiceCommands" @change="toggleVoiceCommands" class="form-checkbox h-5 w-5 text-blue-600">
+            <span class="ml-2 text-gray-700">Comandos por Voz</span>
+          </label>
+        </div>
+      </div>
+      
+      <div class="mt-4 pt-3 border-t border-gray-200">
+        <button @click="resetSettings" 
+                class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 px-4 rounded"
+                aria-label="Restaurar configurações padrão">
+          Restaurar Padrão
+        </button>
+      </div>
+    </div>
+  </div>`,
+
+    data() {
+      return {
+        fontSize: "normal",
+        highContrast: false,
+        screenReader: false,
+        voiceCommands: false,
+      };
+    },
+    methods: {
+      increaseFont() {
+        const body = document.body;
+        const currentSize = window.getComputedStyle(body).fontSize;
+        const newSize = parseFloat(currentSize) * 1.1;
+        body.style.fontSize = `${newSize}px`;
+        this.fontSize = "large";
+      },
+      decreaseFont() {
+        const body = document.body;
+        const currentSize = window.getComputedStyle(body).fontSize;
+        const newSize = parseFloat(currentSize) * 0.9;
+        body.style.fontSize = `${newSize}px`;
+        this.fontSize = "small";
+      },
+      toggleContrast() {
+        this.highContrast = !this.highContrast;
+        if (this.highContrast) {
+          document.body.classList.add("high-contrast");
+          document.documentElement.style.setProperty("--bg-color", "#000");
+          document.documentElement.style.setProperty("--text-color", "#fff");
+        } else {
+          document.body.classList.remove("high-contrast");
+          document.documentElement.style.removeProperty("--bg-color");
+          document.documentElement.style.removeProperty("--text-color");
+        }
+      },
+      toggleScreenReader() {
+        this.screenReader = !this.screenReader;
+        // A implementação real exigiria integração com APIs de leitor de tela
+        console.log(
+          "Leitor de Tela:",
+          this.screenReader ? "Ativado" : "Desativado"
+        );
+      },
+      toggleVoiceCommands() {
+        this.voiceCommands = !this.voiceCommands;
+        // A implementação real exigiria integração com APIs de reconhecimento de voz
+        console.log(
+          "Comandos por Voz:",
+          this.voiceCommands ? "Ativados" : "Desativados"
+        );
+      },
+      resetSettings() {
+        // Restaurar tamanho de fonte
+        document.body.style.fontSize = "";
+        this.fontSize = "normal";
+
+        // Restaurar contraste
+        if (this.highContrast) {
+          this.toggleContrast();
+        }
+
+        // Desativar leitor de tela
+        if (this.screenReader) {
+          this.toggleScreenReader();
+        }
+
+        // Desativar comandos por voz
+        if (this.voiceCommands) {
+          this.toggleVoiceCommands();
+        }
+      },
+    },
+  };
+
+  // Aplicativo Vue principal
+  const app = createApp({
+    components: {
+      AccessibilityButton,
+      AccessibilityMenu,
+    },
+    data() {
+      return {
+        menuOpen: false,
+      };
+    },
+    methods: {
+      toggleMenu() {
+        this.menuOpen = !this.menuOpen;
+      },
+    },
+    template: `
             <div>
                 <accessibility-button @toggle-menu="toggleMenu"></accessibility-button>
                 <accessibility-menu :is-open="menuOpen"></accessibility-menu>
             </div>
-        `
-    });
+        `,
+  });
 
-    // Montar o aplicativo Vue
-    app.mount('#accessibility-app');
+  // Montar o aplicativo Vue
+  app.mount("#accessibility-app");
 </script>
+ {% endcomment %}
 
-<style>
-    /* Estilos para o modo de alto contraste */
-    body.high-contrast {
-        background-color: var(--bg-color, #000) !important;
-        color: var(--text-color, #fff) !important;
-    }
-    
-    body.high-contrast * {
-        background-color: var(--bg-color, #000) !important;
-        color: var(--text-color, #fff) !important;
-        border-color: var(--text-color, #fff) !important;
-    }
-    
-    body.high-contrast a, 
-    body.high-contrast button:not(.accessibility-button) {
-        background-color: #000 !important;
-        color: yellow !important;
-        border: 1px solid yellow !important;
-    }
-</style>
+
+ {% load static %}
+<div id="accessibility-app"></div>
+
+<!-- Incluir o bundle compilado -->
+<script src="{% static 'core/js/bundle.js' %}"></script>
+

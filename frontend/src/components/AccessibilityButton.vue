@@ -1,15 +1,30 @@
-<template>
-  <button @click="toggleMenu" 
-          class="fixed bottom-4 right-4 bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 accessibility-button z-50"
-          aria-label="Opções de acessibilidade">
-    <!-- SVG do ícone de cadeira de rodas (acessibilidade) -->
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <circle cx="12" cy="6" r="3" stroke-width="2"/>
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 21v-4m0 0H7c-.55 0-1-.45-1-1v-4m0 0h12M6 12V8c0-.55.45-1 1-1h4"/>
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 17h-4.09c-.86 0-1.66-.53-1.98-1.35L8 12"/>
-    </svg>
-  </button>
-</template>
+<script setup>
+
+
+</script>
+
+  <template>
+    <div class="relative">
+      <button 
+        @click="toggleMenu"
+        class="fixed bottom-32 left-0 bg-[#246647] hover:bg-[#579676] text-white py-4 px-6 rounded-r-full shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 z-50 group"
+        aria-label="Opcoes de acessibilidade"
+      >
+        <img 
+          src="../assets/img/accessibility_icon.png"
+          alt="Icone de acessibilidade"
+          class="h-8 w-8 brightness-0 invert"
+        >
+        
+        <!-- Tooltip usando apenas Tailwind -->
+        <div class="absolute left-full top-1/2 -translate-y-1/2 ml-3 px-3 py-2 bg-gray-800 text-white text-sm rounded whitespace-nowrap invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-opacity duration-300 z-50">
+          <!-- Triângulo/seta do tooltip -->
+          <div class="absolute top-1/2 right-full -mt-1 border-solid border-8 border-transparent border-r-gray-800"></div>
+          Clique para opcoes de acessibilidade
+        </div>
+      </button>
+    </div>
+  </template>
   
   <script>
   export default {

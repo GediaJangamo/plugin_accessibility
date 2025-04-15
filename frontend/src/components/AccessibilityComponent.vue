@@ -5,13 +5,14 @@
         Pular para o conteúdo principal
       </a>
   
-      <!-- Accessibility button -->
+      <!-- Accessibility button - only visible when menu is closed -->
       <button 
+        v-if="!isOpen"
         @click="toggleMenu"
         class="fixed bottom-32 left-0 bg-green-700 hover:bg-green-600 text-white py-4 px-6 rounded-r-full shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 z-50 group"
         aria-label="Opcoes de acessibilidade"
       >
-          <img src="/static/core/img/accessibility_icon.png" alt="Icone de acessibilidade" class="h-8 w-8 brightness-0 invert">
+        <img src="/static/core/img/accessibility_icon.png" alt="Icone de acessibilidade" class="h-8 w-8 brightness-0 invert">
         
         <div class="absolute left-full top-1/2 -translate-y-1/2 ml-3 px-3 py-2 bg-gray-800 text-white text-sm rounded whitespace-nowrap invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-opacity duration-300 z-50">
           <div class="absolute top-1/2 right-full -mt-1 border-solid border-8 border-transparent border-r-gray-800"></div>
@@ -19,15 +20,15 @@
         </div>
       </button>
   
-      <!-- Accessibility menu -->
+      <!-- Accessibility menu - wider and full-height, with better spacing -->
       <div 
         v-if="isOpen" 
-        class="fixed bottom-32 left-0 bg-white dark:bg-gray-900 rounded-lg shadow-xl p-5 w-80 border border-gray-200 dark:border-gray-700 z-40 transition-all duration-300"
+        class="fixed bottom-0 left-0 top-0 bg-white dark:bg-gray-900 rounded-r-lg shadow-xl border-r border-gray-200 dark:border-gray-700 z-40 transition-all duration-300 flex flex-col w-96"
         role="dialog"
         aria-labelledby="accessibility-title"
       >
         <!-- Header with logos -->
-        <div class="flex items-center justify-between mb-4 border-b pb-3 border-gray-200 dark:border-gray-700">
+        <div class="flex items-center justify-between p-4 border-b pb-4 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
           <div class="flex items-center space-x-3">
             <img src="/static/core/img/uem_logo.png" alt="Logo UEM" class="h-8">
             <div class="border-l border-gray-300 dark:border-gray-600 h-8"></div>
@@ -39,170 +40,176 @@
             class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 p-1 rounded-full"
             aria-label="Fechar menu de acessibilidade"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
         
-        <h2 id="accessibility-title" class="text-xl font-bold mb-4 text-gray-800 dark:text-white flex items-center">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-green-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-          </svg>
-          Acessibilidade SIGA
-        </h2>
-        
-        <div class="space-y-5">
-          <!-- Font size control -->
-          <div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg hover:shadow-md transition-shadow duration-300">
-            <h3 class="font-medium text-gray-800 dark:text-gray-200 mb-3 flex items-center">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
-              </svg>
-              Tamanho da Fonte
-            </h3>
-            <div class="flex items-center justify-between">
-              <button 
-                @click="decreaseFont" 
-                class="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-white px-4 py-2 rounded-lg font-bold shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                aria-label="Diminuir fonte"
-              >
-                A-
-              </button>
-              <div class="text-center">
-                <span class="text-sm text-gray-600 dark:text-gray-300 block">Tamanho</span>
-                <span class="font-medium text-gray-800 dark:text-white">{{ fontSize }}</span>
-              </div>
-              <button 
-                @click="increaseFont" 
-                class="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-white px-4 py-2 rounded-lg font-bold shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                aria-label="Aumentar fonte"
-              >
-                A+
-              </button>
-            </div>
-          </div>
-          
-          <!-- High contrast control -->
-          <div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg hover:shadow-md transition-shadow duration-300">
-            <label class="flex items-center cursor-pointer">
-              <div class="flex-shrink-0 mr-3">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                </svg>
-              </div>
-              <div class="flex-grow">
-                <span class="block text-gray-800 dark:text-white font-medium">Alto Contraste</span>
-                <span class="text-sm text-gray-600 dark:text-gray-300">Melhora visualização de textos</span>
-              </div>
-              <div class="flex items-center">
-                <input 
-                  type="checkbox" 
-                  id="high-contrast" 
-                  v-model="highContrast" 
-                  @change="toggleContrast" 
-                  class="sr-only"
-                >
-                <div class="relative w-12 h-6 bg-gray-300 dark:bg-gray-600 rounded-full transition duration-300 ease-in-out" :class="{'bg-green-500': highContrast}">
-                  <div class="absolute left-1 top-1 bg-white w-4 h-4 rounded-full shadow transition duration-300 ease-in-out" :class="{'transform translate-x-6': highContrast}"></div>
-                </div>
-              </div>
-            </label>
-          </div>
-          
-          <!-- Screen reader -->
-          <div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg hover:shadow-md transition-shadow duration-300">
-            <label class="flex items-center cursor-pointer">
-              <div class="flex-shrink-0 mr-3">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-                </svg>
-              </div>
-              <div class="flex-grow">
-                <span class="block text-gray-800 dark:text-white font-medium">Leitor de Tela</span>
-                <span class="text-sm text-gray-600 dark:text-gray-300">Narração de conteúdos</span>
-              </div>
-              <div class="flex items-center">
-                <input 
-                  type="checkbox" 
-                  id="screen-reader" 
-                  v-model="screenReader" 
-                  @change="toggleScreenReader" 
-                  class="sr-only"
-                >
-                <div class="relative w-12 h-6 bg-gray-300 dark:bg-gray-600 rounded-full transition duration-300 ease-in-out" :class="{'bg-green-500': screenReader}">
-                  <div class="absolute left-1 top-1 bg-white w-4 h-4 rounded-full shadow transition duration-300 ease-in-out" :class="{'transform translate-x-6': screenReader}"></div>
-                </div>
-              </div>
-            </label>
-          </div>
-          
-          <!-- Voice commands -->
-          <div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg hover:shadow-md transition-shadow duration-300">
-            <label class="flex items-center cursor-pointer">
-              <div class="flex-shrink-0 mr-3">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                </svg>
-              </div>
-              <div class="flex-grow">
-                <span class="block text-gray-800 dark:text-white font-medium">Comandos por Voz</span>
-                <span class="text-sm text-gray-600 dark:text-gray-300">Navegue com sua voz</span>
-              </div>
-              <div class="flex items-center">
-                <input 
-                  type="checkbox" 
-                  id="voice-commands" 
-                  v-model="voiceCommands" 
-                  @change="toggleVoiceCommands" 
-                  class="sr-only"
-                >
-                <div class="relative w-12 h-6 bg-gray-300 dark:bg-gray-600 rounded-full transition duration-300 ease-in-out" :class="{'bg-green-500': voiceCommands}">
-                  <div class="absolute left-1 top-1 bg-white w-4 h-4 rounded-full shadow transition duration-300 ease-in-out" :class="{'transform translate-x-6': voiceCommands}"></div>
-                </div>
-              </div>
-            </label>
-          </div>
-          
-          <!-- Cursor section -->
-          <div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg hover:shadow-md transition-shadow duration-300">
-            <div class="flex items-center mb-2">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-gray-700 dark:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
-              </svg>
-              <h3 class="font-medium text-gray-800 dark:text-white">Cursor</h3>
-            </div>
-            <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">Amplie o cursor e altere a sua cor</p>
-            <div class="flex gap-2">
-              <button 
-                @click="setCursorColor('white')" 
-                class="flex-1 py-2 text-center border border-gray-300 dark:border-gray-600 rounded-md font-medium"
-                :class="cursorColor === 'white' ? 'ring-2 ring-green-500 bg-white text-black' : 'bg-white text-black'"
-              >
-                BRANCO
-              </button>
-              <button 
-                @click="setCursorColor('black')" 
-                class="flex-1 py-2 text-center border border-gray-300 dark:border-gray-600 rounded-md font-medium"
-                :class="cursorColor === 'black' ? 'ring-2 ring-green-500 bg-gray-900 text-white' : 'bg-gray-900 text-white'"
-              >
-                PRETO
-              </button>
-            </div>
-          </div>
+        <div class="p-4">
+          <h2 id="accessibility-title" class="text-2xl font-bold mb-4 text-gray-800 dark:text-white flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mr-3 text-green-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            Acessibilidade SIGA
+          </h2>
         </div>
         
-        <div class="mt-5 pt-3 border-t border-gray-200 dark:border-gray-700">
-          <button 
-            @click="resetSettings" 
-            class="w-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-800 dark:text-white py-3 px-4 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center justify-center"
-            aria-label="Restaurar configurações padrão"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
-            Restaurar Configurações Padrão
-          </button>
+        <!-- Main content with reduced spacing between items -->
+        <div class="px-4 space-y-4 flex-grow flex flex-col justify-between">
+          <div class="space-y-3">
+            <!-- Font size control -->
+            <div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg hover:shadow-md transition-shadow duration-300">
+              <h3 class="font-medium text-lg text-gray-800 dark:text-gray-200 mb-3 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
+                </svg>
+                Tamanho da Fonte
+              </h3>
+              <div class="flex items-center justify-between">
+                <button 
+                  @click="decreaseFont" 
+                  class="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-white px-6 py-2 rounded-lg font-bold text-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  aria-label="Diminuir fonte"
+                >
+                  A-
+                </button>
+                <div class="text-center">
+                  <span class="text-base text-gray-600 dark:text-gray-300 block">Tamanho</span>
+                  <span class="font-medium text-lg text-gray-800 dark:text-white">{{ fontSize }}</span>
+                </div>
+                <button 
+                  @click="increaseFont" 
+                  class="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-white px-6 py-2 rounded-lg font-bold text-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  aria-label="Aumentar fonte"
+                >
+                  A+
+                </button>
+              </div>
+            </div>
+            
+            <!-- High contrast control -->
+            <div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg hover:shadow-md transition-shadow duration-300">
+              <label class="flex items-center cursor-pointer">
+                <div class="flex-shrink-0 mr-4">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                  </svg>
+                </div>
+                <div class="flex-grow">
+                  <span class="block text-lg text-gray-800 dark:text-white font-medium">Alto Contraste</span>
+                  <span class="text-sm text-gray-600 dark:text-gray-300">Melhora visualização de textos</span>
+                </div>
+                <div class="flex items-center">
+                  <input 
+                    type="checkbox" 
+                    id="high-contrast" 
+                    v-model="highContrast" 
+                    @change="toggleContrast" 
+                    class="sr-only"
+                  >
+                  <div class="relative w-14 h-7 bg-gray-300 dark:bg-gray-600 rounded-full transition duration-300 ease-in-out" :class="{'bg-green-500': highContrast}">
+                    <div class="absolute left-1 top-1 bg-white w-5 h-5 rounded-full shadow transition duration-300 ease-in-out" :class="{'transform translate-x-7': highContrast}"></div>
+                  </div>
+                </div>
+              </label>
+            </div>
+            
+            <!-- Screen reader -->
+            <div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg hover:shadow-md transition-shadow duration-300">
+              <label class="flex items-center cursor-pointer">
+                <div class="flex-shrink-0 mr-4">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                  </svg>
+                </div>
+                <div class="flex-grow">
+                  <span class="block text-lg text-gray-800 dark:text-white font-medium">Leitor de Tela</span>
+                  <span class="text-sm text-gray-600 dark:text-gray-300">Narração de conteúdos</span>
+                </div>
+                <div class="flex items-center">
+                  <input 
+                    type="checkbox" 
+                    id="screen-reader" 
+                    v-model="screenReader" 
+                    @change="toggleScreenReader" 
+                    class="sr-only"
+                  >
+                  <div class="relative w-14 h-7 bg-gray-300 dark:bg-gray-600 rounded-full transition duration-300 ease-in-out" :class="{'bg-green-500': screenReader}">
+                    <div class="absolute left-1 top-1 bg-white w-5 h-5 rounded-full shadow transition duration-300 ease-in-out" :class="{'transform translate-x-7': screenReader}"></div>
+                  </div>
+                </div>
+              </label>
+            </div>
+            
+            <!-- Voice commands -->
+            <div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg hover:shadow-md transition-shadow duration-300">
+              <label class="flex items-center cursor-pointer">
+                <div class="flex-shrink-0 mr-4">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <div class="flex-grow">
+                  <span class="block text-lg text-gray-800 dark:text-white font-medium">Comandos por Voz</span>
+                  <span class="text-sm text-gray-600 dark:text-gray-300">Navegue com sua voz</span>
+                </div>
+                <div class="flex items-center">
+                  <input 
+                    type="checkbox" 
+                    id="voice-commands" 
+                    v-model="voiceCommands" 
+                    @change="toggleVoiceCommands" 
+                    class="sr-only"
+                  >
+                  <div class="relative w-14 h-7 bg-gray-300 dark:bg-gray-600 rounded-full transition duration-300 ease-in-out" :class="{'bg-green-500': voiceCommands}">
+                    <div class="absolute left-1 top-1 bg-white w-5 h-5 rounded-full shadow transition duration-300 ease-in-out" :class="{'transform translate-x-7': voiceCommands}"></div>
+                  </div>
+                </div>
+              </label>
+            </div>
+            
+            <!-- Cursor section - more compact -->
+            <div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg hover:shadow-md transition-shadow duration-300">
+              <div class="flex items-center mb-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-gray-700 dark:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
+                </svg>
+                <h3 class="font-medium text-lg text-gray-800 dark:text-white">Cursor</h3>
+              </div>
+              <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">Amplie o cursor e altere a sua cor</p>
+              <div class="flex gap-3">
+                <button 
+                  @click="setCursorColor('white')" 
+                  class="flex-1 py-2 text-center border border-gray-300 dark:border-gray-600 rounded-md font-medium text-lg"
+                  :class="cursorColor === 'white' ? 'ring-2 ring-green-500 bg-white text-black' : 'bg-white text-black'"
+                >
+                  BRANCO
+                </button>
+                <button 
+                  @click="setCursorColor('black')" 
+                  class="flex-1 py-2 text-center border border-gray-300 dark:border-gray-600 rounded-md font-medium text-lg"
+                  :class="cursorColor === 'black' ? 'ring-2 ring-green-500 bg-gray-900 text-white' : 'bg-gray-900 text-white'"
+                >
+                  PRETO
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Bottom reset button - now placed in its own div to ensure visibility -->
+          <div class="py-3 mt-4 mb-4">
+            <button 
+              @click="resetSettings" 
+              class="w-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-800 dark:text-white py-3 px-4 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center justify-center text-lg"
+              aria-label="Restaurar configurações padrão"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              Restaurar Configurações Padrão
+            </button>
+          </div>
         </div>
       </div>
     </div>

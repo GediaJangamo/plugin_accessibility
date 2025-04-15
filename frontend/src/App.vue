@@ -1,30 +1,19 @@
 <template>
   <div>
-    <accessibility-button @toggle-menu="toggleMenu"></accessibility-button>
-    <accessibility-menu :is-open="menuOpen"></accessibility-menu>
+    <accessibility-component></accessibility-component>
+    <main id="main-content">
+      <!-- Your main content here -->
+    </main>
   </div>
 </template>
 
 <script>
-import AccessibilityButton from './components/AccessibilityButton.vue'
-import AccessibilityMenu from './components/AccessibilityMenu.vue'
+import AccessibilityComponent from './components/AccessibilityComponent.vue';
 
 export default {
   name: 'App',
   components: {
-    AccessibilityButton,
-    AccessibilityMenu
-  },
-  data() {
-    return {
-      menuOpen: false
-    }
-  },
-  methods: {
-    toggleMenu() {
-      this.menuOpen = !this.menuOpen
-    }
+    AccessibilityComponent
   }
 }
-</script> 
-
+</script>

@@ -28,11 +28,11 @@
         aria-labelledby="accessibility-title"
       >
         <!-- Header with logos -->
-        <div class="flex items-center justify-between p-4 border-b pb-4 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+        <div class="flex items-center justify-between p-2 bg-white border-b pb-2 border-gray-200 dark:border-gray-700  dark:bg-gray-900">
           <div class="flex items-center space-x-3">
-            <img src="/static/core/img/uem_logo.png" alt="Logo UEM" class="h-8">
-            <div class="border-l border-gray-300 dark:border-gray-600 h-8"></div>
-            <img src="/static/core/img/siga_logo.png" alt="Logo SIGA" class="h-6">
+            <img src="/static/core/img/logo-uem.png" alt="Logo UEM" class="h-16">
+            <div class="border-l border-gray-300 dark:border-gray-600 h-12"></div>
+            <img src="/static/core/img/siga.png" alt="Logo SIGA" class="h-8">
           </div>
           
           <button 
@@ -46,12 +46,9 @@
           </button>
         </div>
         
-        <div class="p-4">
-          <h2 id="accessibility-title" class="text-2xl font-bold mb-4 text-gray-800 dark:text-white flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mr-3 text-green-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-            Acessibilidade SIGA
+        <div class="p-2 bg-[#077b4b] mb-4">
+          <h2 id="accessibility-title" class="text-2xl  font-poppins text-white dark:text-white flex items-center justify-center">
+            Acessibilidade
           </h2>
         </div>
         
@@ -182,14 +179,14 @@
                 <button 
                   @click="setCursorColor('white')" 
                   class="flex-1 py-2 text-center border border-gray-300 dark:border-gray-600 rounded-md font-medium text-lg"
-                  :class="cursorColor === 'white' ? 'ring-2 ring-green-500 bg-white text-black' : 'bg-white text-black'"
+                  :class="cursorColor === 'white' ? 'ring-2 ring-[#077b4b] bg-white text-black' : 'bg-white text-black'"
                 >
                   BRANCO
                 </button>
                 <button 
                   @click="setCursorColor('black')" 
                   class="flex-1 py-2 text-center border border-gray-300 dark:border-gray-600 rounded-md font-medium text-lg"
-                  :class="cursorColor === 'black' ? 'ring-2 ring-green-500 bg-gray-900 text-white' : 'bg-gray-900 text-white'"
+                  :class="cursorColor === 'black' ? 'ring-2 ring-[#077b4b] bg-gray-900 text-white' : 'bg-gray-900 text-white'"
                 >
                   PRETO
                 </button>
@@ -198,18 +195,32 @@
           </div>
           
           <!-- Bottom reset button - now placed in its own div to ensure visibility -->
-          <div class="py-3 mt-4 mb-4">
-            <button 
-              @click="resetSettings" 
-              class="w-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-800 dark:text-white py-3 px-4 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center justify-center text-lg"
-              aria-label="Restaurar configurações padrão"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-              Restaurar Configurações Padrão
-            </button>
-          </div>
+          
+          <div class="py-3 mt-4 mb-4 space-y-3">
+          <!-- Save Preferences Button -->
+          <button 
+            @click="savePreferences" 
+            class="w-full bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 flex items-center justify-center text-lg"
+            aria-label="Salvar preferências de acessibilidade"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+            </svg>
+            Salvar Preferências
+          </button>
+          
+          <!-- Reset Settings Button -->
+          <button 
+            @click="resetSettings" 
+            class="w-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-800 dark:text-white py-3 px-4 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center justify-center text-lg"
+            aria-label="Restaurar configurações padrão"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            Restaurar Configurações Padrão
+          </button>
+        </div>
         </div>
       </div>
     </div>

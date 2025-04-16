@@ -28,7 +28,7 @@
         aria-labelledby="accessibility-title"
       >
         <!-- Header with logos -->
-        <div class="flex items-center justify-between p-2 bg-white border-b pb-2 border-gray-200 dark:border-gray-700  dark:bg-gray-900">
+        <div class="flex items-center justify-between p-2 bg-white border-b border-gray-200 dark:border-gray-700  dark:bg-gray-900">
           <div class="flex items-center space-x-3">
             <img src="/static/core/img/logo-uem.png" alt="Logo UEM" class="h-16">
             <div class="border-l border-gray-300 dark:border-gray-600 h-12"></div>
@@ -46,17 +46,17 @@
           </button>
         </div>
         
-        <div class="p-2 bg-[#077b4b] mb-4">
+        <div class="p-2 bg-[#077b4b] mb-2">
           <h2 id="accessibility-title" class="text-2xl  font-poppins text-white dark:text-white flex items-center justify-center">
             Acessibilidade
           </h2>
         </div>
         
         <!-- Main content with reduced spacing between items -->
-        <div class="px-4 space-y-4 flex-grow flex flex-col justify-between">
+        <div class="px-4 space-y-2 flex-grow flex flex-col justify-between">
           <div class="space-y-3">
             <!-- Font size control -->
-            <div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg hover:shadow-md transition-shadow duration-300">
+            <div class="p-3 bg-gray-100 dark:bg-gray-800 rounded-lg hover:shadow-md transition-shadow duration-300">
               <h3 class="font-medium text-lg text-gray-800 dark:text-gray-200 mb-3 flex items-center">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
@@ -86,7 +86,7 @@
             </div>
             
             <!-- High contrast control -->
-            <div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg hover:shadow-md transition-shadow duration-300">
+            <div class="p-3 bg-gray-100 dark:bg-gray-800 rounded-lg hover:shadow-md transition-shadow duration-300">
               <label class="flex items-center cursor-pointer">
                 <div class="flex-shrink-0 mr-4">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -113,7 +113,7 @@
             </div>
             
             <!-- Screen reader -->
-            <div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg hover:shadow-md transition-shadow duration-300">
+            <div class="p-3 bg-gray-100 dark:bg-gray-800 rounded-lg hover:shadow-md transition-shadow duration-300">
               <label class="flex items-center cursor-pointer">
                 <div class="flex-shrink-0 mr-4">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -140,7 +140,7 @@
             </div>
             
             <!-- Voice commands -->
-            <div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg hover:shadow-md transition-shadow duration-300">
+            <div class="p-3 bg-gray-100 dark:bg-gray-800 rounded-lg hover:shadow-md transition-shadow duration-300">
               <label class="flex items-center cursor-pointer">
                 <div class="flex-shrink-0 mr-4">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -167,7 +167,7 @@
             </div>
             
             <!-- Cursor section - more compact -->
-            <div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg hover:shadow-md transition-shadow duration-300">
+            <div class="p-3 bg-gray-100 dark:bg-gray-800 rounded-lg hover:shadow-md transition-shadow duration-300">
               <div class="flex items-center mb-2">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-gray-700 dark:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
@@ -196,11 +196,11 @@
           
           <!-- Bottom reset button - now placed in its own div to ensure visibility -->
           
-          <div class="py-3 mt-4 mb-4 space-y-3">
+          <div class="py-2 mb-4 space-y-1">
           <!-- Save Preferences Button -->
           <button 
             @click="savePreferences" 
-            class="w-full bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 flex items-center justify-center text-lg"
+            class="w-full bg-[#077b4b] hover:bg-green-600 text-white py-2 px-4 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 flex items-center justify-center text-lg"
             aria-label="Salvar preferências de acessibilidade"
           >
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -212,7 +212,7 @@
           <!-- Reset Settings Button -->
           <button 
             @click="resetSettings" 
-            class="w-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-800 dark:text-white py-3 px-4 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center justify-center text-lg"
+            class="w-full bg-gray-200 hover:bg-gray-100  dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-800 dark:text-white py-2 px-4 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center justify-center text-lg"
             aria-label="Restaurar configurações padrão"
           >
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">

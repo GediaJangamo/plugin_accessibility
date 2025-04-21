@@ -57,20 +57,20 @@ export default {
       document.body.classList.add(`cursor-color-${color}`);
     },
     
-    addCursorStyles() {
+addCursorStyles() {
   const styleEl = document.createElement('style');
   styleEl.innerHTML = `
-    /* Cursor de mão similar à imagem */
     body.cursor-color-white * {
-      cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24"><path fill="%23ffffff" stroke="%23000000" stroke-width="0.7" d="M7 1.5A2.5 2.5 0 009.5 4v7.8l1.7-1.7a2.5 2.5 0 013.5 0 2.5 2.5 0 010 3.5l-5 5a2.5 2.5 0 01-3.5 0l-5-5A2.5 2.5 0 014.5 10a2.5 2.5 0 013.5 0l1.5 1.5V4A2.5 2.5 0 017 1.5z"/></svg>') 10 10, pointer !important;
+      cursor: url('/static/core/img/hand_cursor_whiteSmall.png') 10 10, pointer !important;
     }
-    
+
     body.cursor-color-black * {
-      cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24"><path fill="%23000000" stroke="%23ffffff" stroke-width="0.7" d="M7 1.5A2.5 2.5 0 009.5 4v7.8l1.7-1.7a2.5 2.5 0 013.5 0 2.5 2.5 0 010 3.5l-5 5a2.5 2.5 0 01-3.5 0l-5-5A2.5 2.5 0 014.5 10a2.5 2.5 0 013.5 0l1.5 1.5V4A2.5 2.5 0 017 1.5z"/></svg>') 10 10, pointer !important;
+      cursor: url('/static/core/img/hand_cursor_black.png') 10 10, pointer !important;
     }
   `;
   document.head.appendChild(styleEl);
 }
+
   }
 }
 </script>

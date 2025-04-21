@@ -119,7 +119,12 @@
         </div>
       </div>
     </div>
-  </div>
+    
+    <!-- Persistent storage for the settings across page changes -->
+    <!-- <script v-if="settingsChanged" type="application/json" id="accessibility-settings-persist">
+      {{ JSON.stringify(settings) }}
+    </script>-->
+  </div> 
 </template>
 
 <script>
@@ -147,18 +152,26 @@ export default {
         screenReader: false,
         voiceCommands: false,
         cursorColor: 'black'
-      }
+      },
+      settingsChanged: false
     }
   },
   mounted() {
     this.loadSettings();
     window.addEventListener('keydown', this.handleKeyDown);
     
+    // Adiciona um event listener para persistir as configurações entre navegações de página
+    window.addEventListener('beforeunload', this.persistSettings);
+    
     // Add global style for screen-reader-only elements
     this.addGlobalStyles();
+    
+    // Verifica se há configurações persistentes entre navegações
+    this.checkForPersistentSettings();
   },
   beforeUnmount() {
     window.removeEventListener('keydown', this.handleKeyDown);
+    window.removeEventListener('beforeunload', this.persistSettings);
   },
   methods: {
     toggleMenu() {
@@ -167,7 +180,11 @@ export default {
     
     updateSetting(key, value) {
       this.settings[key] = value;
+      this.settingsChanged = true;
       this.saveSettings();
+      
+      // Aplicar configurações imediatamente
+      this.applySettings();
     },
     
     resetSettings() {
@@ -179,19 +196,73 @@ export default {
         cursorColor: 'black'
       };
       
+      this.settingsChanged = true;
       this.saveSettings();
+      this.applySettings();
       this.announceToScreenReader('Configurações restauradas para o padrão');
     },
     
     saveSettings() {
       localStorage.setItem('accessibility_settings', JSON.stringify(this.settings));
+      this.settingsChanged = true;
+      this.announceToScreenReader('Preferências de acessibilidade salvas');
     },
     
     loadSettings() {
       const savedSettings = localStorage.getItem('accessibility_settings');
       if (savedSettings) {
         this.settings = { ...this.settings, ...JSON.parse(savedSettings) };
+        this.applySettings();
       }
+    },
+    
+    persistSettings() {
+      // Salva as configurações em um script de dados para recuperação após navegação
+      const scriptElement = document.getElementById('accessibility-settings-persist');
+      if (scriptElement) {
+        scriptElement.textContent = JSON.stringify(this.settings);
+      }
+    },
+    
+    checkForPersistentSettings() {
+      // Procura por configurações persistentes em recarregamentos/navegações
+      const persistedElement = document.getElementById('accessibility-settings-persist');
+      if (persistedElement) {
+        try {
+          const persistedSettings = JSON.parse(persistedElement.textContent);
+          this.settings = { ...this.settings, ...persistedSettings };
+          this.applySettings();
+        } catch (e) {
+          console.error('Erro ao recuperar configurações persistentes:', e);
+        }
+      }
+    },
+    
+    applySettings() {
+      // Aplicar configurações de tamanho de fonte
+      const fontSize = {
+        'Pequeno': '0.85rem',
+        'Normal': '1rem',
+        'Grande': '1.15rem',
+        'Muito Grande': '1.3rem'
+      }[this.settings.fontSize] || '1rem';
+      
+      const mainContent = document.getElementById('main-content');
+      if (mainContent) {
+        mainContent.style.fontSize = fontSize;
+      }
+      
+      // Aplicar configurações de alto contraste
+      if (this.settings.highContrast) {
+        document.body.classList.add('high-contrast');
+      } else {
+        document.body.classList.remove('high-contrast');
+      }
+      
+      // Configurações de cursor personalizado
+      document.body.style.cursor = this.settings.cursorColor === 'white' ? 
+        'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'24\' height=\'24\' viewBox=\'0 0 24 24\' fill=\'white\'%3E%3Cpath d=\'M13 21l-7-7h14l-7 7z\'/%3E%3C/svg%3E"), auto' :
+        'default';
     },
     
     announceToScreenReader(message) {
@@ -208,85 +279,163 @@ export default {
     },
     
     handleKeyDown(event) {
+      // Atalho Alt+A para abrir/fechar o menu de acessibilidade
       if (event.altKey && event.key === 'a') {
         this.toggleMenu();
         event.preventDefault();
       }
+      
+      // Atalho Ctrl+Alt+H para alternar alto contraste
+      if (event.ctrlKey && event.altKey && event.key === 'h') {
+        this.updateSetting('highContrast', !this.settings.highContrast);
+        event.preventDefault();
+      }
+      
+      // Atalho Ctrl+Alt+S para alternar leitor de tela
+      if (event.ctrlKey && event.altKey && event.key === 's') {
+        this.updateSetting('screenReader', !this.settings.screenReader);
+        event.preventDefault();
+      }
+      
+      // Atalho Ctrl+Alt+V para alternar comandos de voz
+      if (event.ctrlKey && event.altKey && event.key === 'v') {
+        this.updateSetting('voiceCommands', !this.settings.voiceCommands);
+        event.preventDefault();
+      }
+      
+      // Atalhos para tamanho de fonte
+      if (event.ctrlKey && event.altKey) {
+        if (event.key === '1') {
+          this.updateSetting('fontSize', 'Pequeno');
+          event.preventDefault();
+        } else if (event.key === '2') {
+          this.updateSetting('fontSize', 'Normal');
+          event.preventDefault();
+        } else if (event.key === '3') {
+          this.updateSetting('fontSize', 'Grande');
+          event.preventDefault();
+        } else if (event.key === '4') {
+          this.updateSetting('fontSize', 'Muito Grande');
+          event.preventDefault();
+        }
+      }
+    },
+    
+    addGlobalStyles() {
+      // Adiciona estilos globais para acessibilidade
+      const styleEl = document.createElement('style');
+      styleEl.id = 'accessibility-global-styles';
+      styleEl.innerHTML = `
+        /* Classes para Alto Contraste */
+        body.high-contrast {
+          background-color: #000 !important;
+          color: #fff !important;
+        }
+        
+        body.high-contrast a {
+          color: #00ccff !important;
+          text-decoration: underline !important;
+        }
+        
+        body.high-contrast button, 
+        body.high-contrast input, 
+        body.high-contrast select, 
+        body.high-contrast textarea {
+          background-color: #000 !important;
+          color: #fff !important;
+          border: 2px solid #fff !important;
+        }
+        
+        body.high-contrast img {
+          filter: grayscale(100%) contrast(150%) !important;
+        }
+        
+        /* Classe para elementos visíveis apenas para leitores de tela */
+        .sr-only {
+          position: absolute;
+          width: 1px;
+          height: 1px;
+          padding: 0;
+          margin: -1px;
+          overflow: hidden;
+          clip: rect(0, 0, 0, 0);
+          white-space: nowrap;
+          border-width: 0;
+        }
+      `;
+      document.head.appendChild(styleEl);
     },
     
     handleVoiceCommand(command) {
-      if (command.includes('aumentar fonte') || command.includes('aumentar tamanho')) {
-        this.updateSetting('fontSize', 'Grande');
-      } else if (command.includes('diminuir fonte') || command.includes('diminuir tamanho')) {
-        this.updateSetting('fontSize', 'Pequeno');
-      } else if (command.includes('alto contraste')) {
-        this.updateSetting('highContrast', !this.settings.highContrast);
-      } else if (command.includes('resetar') || command.includes('restaurar')) {
-        this.resetSettings();
-      } else if (command.includes('fechar menu')) {
-        this.isOpen = false;
-      } else if (command.includes('cursor branco')) {
-        this.updateSetting('cursorColor', 'white');
-      } else if (command.includes('cursor preto')) {
-        this.updateSetting('cursorColor', 'black');
+      // Processar comandos de voz
+      const commands = {
+        "abrir menu": () => {
+          if (!this.isOpen) this.toggleMenu();
+        },
+        "fechar menu": () => {
+          if (this.isOpen) this.toggleMenu();
+        },
+        "ativar alto contraste": () => {
+          if (!this.settings.highContrast) this.updateSetting('highContrast', true);
+        },
+        "desativar alto contraste": () => {
+          if (this.settings.highContrast) this.updateSetting('highContrast', false);
+        },
+        "ativar leitor": () => {
+          if (!this.settings.screenReader) this.updateSetting('screenReader', true);
+        },
+        "desativar leitor": () => {
+          if (this.settings.screenReader) this.updateSetting('screenReader', false);
+        },
+        "aumentar fonte": () => {
+          const sizes = ['Pequeno', 'Normal', 'Grande', 'Muito Grande'];
+          const currentIndex = sizes.indexOf(this.settings.fontSize);
+          if (currentIndex < sizes.length - 1) {
+            this.updateSetting('fontSize', sizes[currentIndex + 1]);
+          }
+        },
+        "diminuir fonte": () => {
+          const sizes = ['Pequeno', 'Normal', 'Grande', 'Muito Grande'];
+          const currentIndex = sizes.indexOf(this.settings.fontSize);
+          if (currentIndex > 0) {
+            this.updateSetting('fontSize', sizes[currentIndex - 1]);
+          }
+        },
+        "salvar configurações": () => {
+          this.saveSettings();
+        },
+        "restaurar padrão": () => {
+          this.resetSettings();
+        }
+      };
+      
+      // Execute o comando se existir
+      const commandFn = commands[command.toLowerCase()];
+      if (commandFn) {
+        commandFn();
+        this.announceToScreenReader(`Comando executado: ${command}`);
+      } else {
+        this.announceToScreenReader(`Comando não reconhecido: ${command}`);
       }
-    },
-    
-    // No final do método addGlobalStyles() do componente principal
-// No componente principal, modifique o método addGlobalStyles
-addGlobalStyles() {
-  const styleEl = document.createElement('style');
-  styleEl.innerHTML = `
-    .sr-only {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      padding: 0;
-      margin: -1px;
-      overflow: hidden;
-      clip: rect(0, 0, 0, 0);
-      white-space: nowrap;
-      border-width: 0;
     }
-    
-    /* Isolar o menu de acessibilidade das mudanças de fonte */
-    [role="dialog"] {
-      font-size: 16px !important;
-    }
-    
-    /* Estilo para o código de exclusão do menu do seletor de fonte */
-    [role="dialog"] * {
-      font-size: inherit !important;
-    }
-    
-    /* Certifique-se de que o corpo da página possa ser alvo das mudanças de fonte */
-    body {
-      transition: font-size 0.3s ease;
-    }
-  `;
-  document.head.appendChild(styleEl);
-  
-  // Adicione uma classe ao corpo para identificar o conteúdo principal
-  if (!document.getElementById('main-content')) {
-    // Se não houver um elemento main-content, adicione uma div para conter o conteúdo principal
-    const mainContent = document.createElement('div');
-    mainContent.id = 'main-content';
-    
-    // Mova todo o conteúdo do body (exceto o menu de acessibilidade) para esta div
-    const accessibilityMenu = document.querySelector('[role="dialog"]');
-    const bodyChildren = Array.from(document.body.children);
-    
-    bodyChildren.forEach(child => {
-      if (child !== accessibilityMenu && child !== styleEl) {
-        mainContent.appendChild(child);
-      }
-    });
-    
-    document.body.appendChild(mainContent);
-  }
-}
-
-    
   }
 }
 </script>
+
+<style>
+/* Estilos específicos do componente */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+/* Animações para o menu de acessibilidade */
+.fixed[role="dialog"] {
+  animation: slideIn 0.3s ease-out, fadeIn 0.3s ease-out;
+}
+</style>

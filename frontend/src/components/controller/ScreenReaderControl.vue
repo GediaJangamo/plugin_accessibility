@@ -7,8 +7,9 @@
       <div class="flex items-center justify-between gap-2 p-3">
         <button 
           @click="playPause"
-          class="flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          class="flex items-center justify-center bg-green-600 hover:bg-green-700 text-white p-3 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
           :aria-label="isPlaying ? 'Pausar leitura' : 'Iniciar leitura'"
+          title="Iniciar/Pausar leitura"
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path v-if="!isPlaying" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
@@ -19,8 +20,9 @@
         
         <button 
           @click="previousElement"
-          class="flex items-center justify-center bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-white p-3 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          class="flex items-center justify-center bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-white p-3 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
           aria-label="Elemento anterior"
+          title="Elemento anterior"
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
@@ -29,8 +31,9 @@
         
         <button 
           @click="nextElement"
-          class="flex items-center justify-center bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-white p-3 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          class="flex items-center justify-center bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-white p-3 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
           aria-label="Próximo elemento"
+          title="Próximo elemento"
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -39,16 +42,44 @@
         
         <button 
           @click="restart"
-          class="flex items-center justify-center bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-white p-3 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          class="flex items-center justify-center bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-white p-3 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
           aria-label="Reiniciar leitura"
+          title="Reiniciar leitura"
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
           </svg>
         </button>
         
+        <!-- Botão para diminuir velocidade -->
+        <button 
+          @click="decreaseRate"
+          class="flex items-center justify-center bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-white p-3 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+          aria-label="Diminuir velocidade"
+          title="Diminuir velocidade"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
+          </svg>
+        </button>
+        
+        <!-- Botão para aumentar velocidade -->
+        <button 
+          @click="increaseRate"
+          class="flex items-center justify-center bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-white p-3 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+          aria-label="Aumentar velocidade"
+          title="Aumentar velocidade"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+          </svg>
+        </button>
+        
         <div class="px-3 text-gray-600 dark:text-gray-300 text-sm">
           {{ currentReadingStatus }}
+          <span v-if="speechRate !== 1.0" class="ml-2 text-green-600 dark:text-green-400 font-medium">
+            ({{ speechRate.toFixed(1) }}x)
+          </span>
         </div>
       </div>
     </div>
@@ -427,7 +458,7 @@
         if (this.currentElementIndex >= 0 && this.readableElements[this.currentElementIndex]) {
           const element = this.readableElements[this.currentElementIndex];
           element.classList.add('reading-highlight');
-          element.style.outline = '3px solid #077b4b'; // Borda mais espessa para maior visibilidade
+          element.style.outline = '3px solid #077b4b'; // Borda verde mais espessa
           
           // Garante que o elemento seja visível na tela
           element.scrollIntoView({ 
@@ -492,6 +523,8 @@
       
       // Exibe mensagem de confirmação temporária
       announceChange(message) {
+        // Armazena o status atual para restaurar depois
+       // const originalStatus = this.currentReadingStatus;
         this.currentReadingStatus = message;
         
         // Criar uma notificação temporária para usuários com visão
@@ -500,7 +533,7 @@
         notification.style.bottom = '80px';
         notification.style.left = '50%';
         notification.style.transform = 'translateX(-50%)';
-        notification.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+        notification.style.backgroundColor = 'rgba(7, 123, 75, 0.8)'; // Cor verde do sistema
         notification.style.color = 'white';
         notification.style.padding = '10px 20px';
         notification.style.borderRadius = '20px';
@@ -509,9 +542,14 @@
         
         document.body.appendChild(notification);
         
+        // Restaura o status original após um tempo
         setTimeout(() => {
           if (document.body.contains(notification)) {
             document.body.removeChild(notification);
+          }
+          // Não restaura o status se ele foi alterado por outra operação
+          if (this.currentReadingStatus === message) {
+            this.updateReadingStatus();
           }
         }, 2000);
       },
@@ -634,7 +672,14 @@
   
   /* Adicione estilos para melhorar a acessibilidade dos botões */
   button:focus {
-    outline: 2px solid #4299e1;
+    outline: 2px solid #077b4b;
     outline-offset: 2px;
+  }
+  
+  /* Adiciona efeito de hover para os botões */
+  button:hover {
+    opacity: 0.9;
+    transform: scale(1.05);
+    transition: all 0.2s ease;
   }
   </style>

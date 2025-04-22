@@ -1,3 +1,18 @@
+/*!**********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js??clonedRuleSet-12.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-12.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/controller/ScreenReaderControl.vue?vue&type=style&index=0&id=7ccc40ea&scoped=true&lang=css ***!
+  \**********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+
+  /* Adicione esta classe para garantir que o componente seja facilmente identificável */
+.screen-reader-control[data-v-7ccc40ea] {
+    z-index: 9999;
+}
+  
+  /* Adicione estilos para melhorar a acessibilidade dos botões */
+button[data-v-7ccc40ea]:focus {
+    outline: 2px solid #4299e1;
+    outline-offset: 2px;
+}
+  
 /*!**************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
   !*** css ./node_modules/css-loader/dist/cjs.js??clonedRuleSet-12.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-12.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/AccessibilityComponent.vue?vue&type=style&index=0&id=a9d96c02&lang=css ***!
   \**************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
@@ -674,6 +689,9 @@ video {
 }
 .block {
   display: block;
+}
+.inline {
+  display: inline;
 }
 .flex {
   display: flex;

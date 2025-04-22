@@ -91,32 +91,69 @@
     methods: {
       initializeSpeechSynthesis() {
         if ('speechSynthesis' in window) {
-          this.speechSynth = window.speechSynthesis;
-        } else {
-          console.error('API de Síntese de Fala não suportada no navegador');
-          this.currentReadingStatus = "Leitor não suportado";
+        this.speechSynth = window.speechSynthesis;
+        
+        // Carrega as vozes disponíveis quando estiverem prontas
+        if (this.speechSynth.onvoiceschanged !== undefined) {
+          this.speechSynth.onvoiceschanged = this.loadVoices;
         }
+        
+        // Tenta carregar vozes imediatamente (para navegadores que já têm as vozes carregadas)
+        this.loadVoices();
+      } else {
+        console.error('API de Síntese de Fala não suportada no navegador');
+        this.currentReadingStatus = "Leitor não suportado";
+      }
+      },
+
+      loadVoices() {
+      // Este método ajuda a garantir que as vozes sejam carregadas corretamente
+      if (this.speechSynth) {
+        this.availableVoices = this.speechSynth.getVoices();
+      }
       },
       
       gatherReadableElements() {
-        // Seleciona apenas elementos dentro do conteúdo principal, excluindo o menu de acessibilidade
-        const mainContent = document.getElementById('main-content');
-        if (!mainContent) return;
+      // Seleciona apenas elementos dentro do conteúdo principal
+      const mainContent = document.getElementById('main-content');
+      if (!mainContent) {
+        console.warn('Elemento #main-content não encontrado. Usando body como fallback.');
+        // Se não encontrar o main-content, usa o body inteiro exceto o menu de acessibilidade
+        const body = document.body;
         
         // Seleciona elementos de texto com conteúdo visível
+        const selector = 'p, h1, h2, h3, h4, h5, h6, li, td, th, button:not([aria-hidden="true"]), a:not([aria-hidden="true"])';
+        const allElements = body.querySelectorAll(selector);
+        
+        // Exclui elementos do menu de acessibilidade
+        this.readableElements = Array.from(allElements).filter(el => {
+          // Filtra elementos vazios ou ocultos ou dentro do menu de acessibilidade
+          const text = el.textContent.trim();
+          const isVisible = !!(el.offsetWidth || el.offsetHeight || el.getClientRects().length);
+          const isInAccessibilityMenu = el.closest('[role="dialog"]') !== null;
+          return text && isVisible && !isInAccessibilityMenu;
+        });
+      } else {
+        // Código original para quando o main-content existe
         const selector = 'p, h1, h2, h3, h4, h5, h6, li, td, th, button:not([aria-hidden="true"]), a:not([aria-hidden="true"])';
         const elements = mainContent.querySelectorAll(selector);
         
         this.readableElements = Array.from(elements).filter(el => {
-          // Filtra elementos vazios ou ocultos
           const text = el.textContent.trim();
           const isVisible = !!(el.offsetWidth || el.offsetHeight || el.getClientRects().length);
           return text && isVisible;
         });
-        
-        this.currentElementIndex = -1;
+      }
+      if (this.readableElements.length > 0) {
+        this.currentElementIndex = 0;
+        this.highlightCurrentElement();
         this.currentReadingStatus = `${this.readableElements.length} elementos para ler`;
-      },
+      } else {
+        this.currentReadingStatus = "Nenhum conteúdo para ler";
+      }
+    },
+
+
       
       playPause() {
         if (this.isPlaying) {
@@ -167,63 +204,84 @@
       },
       
       speakCurrentElement() {
-        if (!this.speechSynth || this.currentElementIndex < 0 || this.currentElementIndex >= this.readableElements.length) {
-          return;
-        }
-        
-        const currentElement = this.readableElements[this.currentElementIndex];
-        const textToSpeak = currentElement.textContent.trim();
-        
-        this.utterance = new SpeechSynthesisUtterance(textToSpeak);
-        
-        // Tenta definir a voz em português do Brasil, se disponível
-        if (this.speechSynth.getVoices) {
-          const voices = this.speechSynth.getVoices();
-          const portugueseVoice = voices.find(voice => 
-            voice.lang.includes('pt-BR') || voice.lang.includes('pt')
-          );
-          
-          if (portugueseVoice) {
-            this.utterance.voice = portugueseVoice;
-          }
-        }
-        
-        this.utterance.rate = 1.0;
-        this.utterance.pitch = 1.0;
-        this.utterance.lang = 'pt-BR';
-        
-        this.utterance.onend = () => {
-          this.isPlaying = false;
-          // Avança automaticamente para o próximo elemento
-          if (this.currentElementIndex < this.readableElements.length - 1) {
-            this.currentElementIndex++;
-            this.highlightCurrentElement();
-            this.updateReadingStatus();
-            this.speakCurrentElement();
-          } else {
-            this.currentReadingStatus = "Leitura concluída";
-          }
-        };
-        
-        this.utterance.onerror = (event) => {
-          console.error('Erro na síntese de fala:', event);
-          this.isPlaying = false;
-          this.currentReadingStatus = "Erro na leitura";
-        };
-        
-        this.highlightCurrentElement();
-        this.speechSynth.speak(this.utterance);
-        this.isPlaying = true;
-        this.updateReadingStatus();
-      },
+      if (!this.speechSynth || this.currentElementIndex < 0 || this.currentElementIndex >= this.readableElements.length) {
+        return;
+      }
       
-      pauseSpeaking() {
-        if (this.speechSynth && this.isPlaying) {
-          this.speechSynth.pause();
+      // Cancela qualquer fala anterior
+      this.stopSpeaking();
+      
+      const currentElement = this.readableElements[this.currentElementIndex];
+      const textToSpeak = currentElement.textContent.trim();
+      
+      this.utterance = new SpeechSynthesisUtterance(textToSpeak);
+      
+      // Tenta definir a voz em português do Brasil, se disponível
+      const voices = this.speechSynth.getVoices();
+      const portugueseVoice = voices.find(voice => 
+        voice.lang.includes('pt-BR') || voice.lang.includes('pt')
+      );
+      
+      if (portugueseVoice) {
+        this.utterance.voice = portugueseVoice;
+      }
+      
+      this.utterance.rate = 1.0;
+      this.utterance.pitch = 1.0;
+      this.utterance.lang = 'pt-BR';
+      
+      this.utterance.onend = () => {
+        // Verifica se ainda está ativo e se há mais elementos
+        if (this.active && this.currentElementIndex < this.readableElements.length - 1) {
+          this.currentElementIndex++;
+          this.highlightCurrentElement();
+          this.updateReadingStatus();
+          this.speakCurrentElement();
+        } else {
           this.isPlaying = false;
-          this.currentReadingStatus = "Leitura pausada";
+          this.currentReadingStatus = "Leitura concluída";
         }
-      },
+      };
+      
+      this.utterance.onerror = (event) => {
+        console.error('Erro na síntese de fala:', event);
+        this.isPlaying = false;
+        this.currentReadingStatus = "Erro na leitura";
+      };
+      
+      this.highlightCurrentElement();
+      this.speechSynth.speak(this.utterance);
+      this.isPlaying = true;
+      this.updateReadingStatus();
+    },
+      
+    pauseSpeaking() {
+      if (this.speechSynth && this.isPlaying) {
+        this.speechSynth.pause();
+        this.isPlaying = false;
+        this.currentReadingStatus = "Leitura pausada";
+        
+        // Alguns navegadores podem ter problemas com pause/resume
+        // Então adiciona um temporizador para evitar que a síntese trave
+        clearTimeout(this.pauseTimer);
+        this.pauseTimer = setTimeout(() => {
+          if (!this.isPlaying && this.speechSynth.paused) {
+            // Força retomada se ficar pausado por muito tempo
+            this.speechSynth.resume();
+            this.speechSynth.pause();
+          }
+        }, 5000);
+      }
+    },
+
+    resumeSpeaking() {
+      if (this.speechSynth && this.speechSynth.paused) {
+        clearTimeout(this.pauseTimer);
+        this.speechSynth.resume();
+        this.isPlaying = true;
+        this.currentReadingStatus = `${this.currentElementIndex + 1} de ${this.readableElements.length}`;
+      }
+    },
       
       stopSpeaking() {
         if (this.speechSynth) {
@@ -255,7 +313,32 @@
         }
         
         this.currentReadingStatus = `${this.currentElementIndex + 1} de ${this.readableElements.length}`;
-      }
+      },
+
+      // Adicione na seção methods
+      debounceGatherElements() {
+        if (this.gatherTimeout) clearTimeout(this.gatherTimeout);
+        this.gatherTimeout = setTimeout(() => {
+          this.gatherReadableElements();
+        }, 300);
+      },
+
+      // Adicione a inicialização do MutationObserver no método mounted nao sei se deve estar aqui esse mounted e o bedore
+      mounted() {
+        // ... código existente ...
+        
+        // Observa mudanças no DOM para atualizar elementos legíveis
+        if (window.MutationObserver) {
+          this.observer = new MutationObserver(this.debounceGatherElements);
+          this.observer.observe(document.body, { 
+            childList: true, 
+            subtree: true 
+          });
+        }
+          // Adiciona atalhos de teclado quando o leitor estiver ativo
+          window.addEventListener('keydown', this.handleKeyboardShortcuts);
+      },
+      
     },
     beforeUnmount() {
       this.stopSpeaking();
@@ -264,6 +347,41 @@
         el.classList.remove('reading-highlight');
         el.style.outline = '';
       });
-    }
+
+      if (this.observer) {
+          this.observer.disconnect();
+        }
+        window.removeEventListener('keydown', this.handleKeyboardShortcuts);
+    },
+    // Método para lidar com os atalhos de teclado
+    handleKeyboardShortcuts(event) {
+      // Só processa atalhos quando o componente está ativo
+      if (!this.active) return;
+      
+      switch(event.key) {
+        case 'p':
+        case 'P':
+        case ' ': // Espaço
+          this.playPause();
+          event.preventDefault();
+          break;
+        case 'ArrowRight':
+          this.nextElement();
+          event.preventDefault();
+          break;
+        case 'ArrowLeft':
+          this.previousElement();
+          event.preventDefault();
+          break;
+        case 'Home':
+          this.restart();
+          event.preventDefault();
+          break;
+        case 'Escape':
+          this.$emit('update:active', false);
+          event.preventDefault();
+          break;
+      }} 
+
   }
   </script>

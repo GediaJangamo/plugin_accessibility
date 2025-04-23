@@ -11,32 +11,33 @@
             <span class="text-gray-700 dark:text-gray-300 font-medium">{{ currentReadingStatus }}</span>
            
           </div>
-          <div class="flex space-x-2">
+          <div class="flex space-x-2 rounded-lg border-green-700 border-x-4 border-y-4">
             <!-- Botões de velocidade -->
-            <div class="flex items-center bg-gray-100 dark:bg-gray-700 rounded-lg">
-              <button 
-                @click="decreaseRate"
-                class="flex items-center justify-center text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white p-1.5 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors"
-                aria-label="Diminuir velocidade"
-                title="Diminuir velocidade"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
-                </svg>
-              </button>
-              <span class="px-2 text-sm p-4 bg-[#077b4b] text-white dark:text-gray-300">{{ speechRate.toFixed(1) }}x</span>
-              <button 
-                @click="increaseRate"
-                class="flex items-center justify-center text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white p-1.5 rounded-r-lg focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors"
-                aria-label="Aumentar velocidade"
-                title="Aumentar velocidade"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                </svg>
-              </button>
-            </div>
+          <div class="flex items-center  dark:bg-gray-700">
+            <button 
+              @click="decreaseRate"
+              class="flex items-center justify-center py-4 bg-gray-100 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600  p-1.5 rounded-l-lg"
+              aria-label="Diminuir velocidade"
+              title="Diminuir velocidade"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M20 12H4" />
+              </svg>
+            </button>
+            <span class="w-14 text-center text-sm p-4 bg-[#077b4b] text-white dark:text-gray-300">{{ speechRate.toFixed(1) }}x</span>
+            <button 
+              @click="increaseRate"
+              class="flex items-center justify-center py-4 bg-gray-100 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 p-1.5 rounded-r-lg"
+              aria-label="Aumentar velocidade"
+              title="Aumentar velocidade"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              </svg>
+            </button>
           </div>
+        </div>
+                  
         </div>
         
         <!-- Controles principais -->
@@ -64,7 +65,7 @@
               title="Elemento anterior"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-[#077b4b] " fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" />
               </svg>
             </button>
             
@@ -75,7 +76,7 @@
               title="Reiniciar leitura"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500 " fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
             </button>
             
@@ -86,7 +87,7 @@
               title="Próximo elemento"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-[#077b4b]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7" />
               </svg>
             </button>
           </div>

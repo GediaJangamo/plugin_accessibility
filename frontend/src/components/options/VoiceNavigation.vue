@@ -1,5 +1,5 @@
 <!-- Navegacao por voz -->
-<template>
+  <template>
     <div class="p-3 bg-gray-100 dark:bg-gray-800 rounded-lg hover:shadow-md transition-shadow duration-300">
       <label class="flex items-center cursor-pointer">
         <div class="flex-shrink-0 mr-4">
@@ -12,11 +12,11 @@
           <span class="text-sm text-gray-600 dark:text-gray-300">Navegue com sua voz</span>
         </div>
         <div class="flex items-center">
-          <input 
-            type="checkbox" 
-            id="voice-commands" 
-            :checked="voiceCommands" 
-            @change="toggleVoiceCommands" 
+          <input
+            type="checkbox"
+            id="voice-commands"
+            :checked="voiceCommands"
+            @change="toggleVoiceCommands"
             class="sr-only"
           >
           <div class="relative w-14 h-7 bg-gray-300 dark:bg-gray-600 rounded-full transition duration-300 ease-in-out" :class="{'bg-green-500': voiceCommands}">
@@ -24,37 +24,31 @@
           </div>
         </div>
       </label>
+      
+      <!-- Teleport para colocar o controle de voz no final do body -->
+      <teleport to="body">
+        <VoiceCommandController 
+          :active="voiceCommands" 
+          @announce="announceMessage"
+          @executeCommand="handleCommand"
+        />
+      </teleport>
     </div>
   </template>
   
   <script>
+  import VoiceCommandController from '../controller/VoiceCommandController.vue';
+  
   export default {
     name: 'VoiceNavigation',
+    components: {
+      VoiceCommandController
+    },
     props: {
       voiceCommands: {
         type: Boolean,
         default: false
       }
-    },
-    data() {
-      return {
-        recognition: null
-      }
-    },
-    watch: {
-      voiceCommands: {
-        immediate: true,
-        handler(newValue) {
-          if (newValue) {
-            this.startVoiceRecognition();
-          } else if (this.recognition) {
-            this.stopVoiceRecognition();
-          }
-        }
-      }
-    },
-    beforeUnmount() {
-      this.stopVoiceRecognition();
     },
     methods: {
       toggleVoiceCommands() {
@@ -62,36 +56,11 @@
         this.$emit('update:voiceCommands', newValue);
       },
       
-      startVoiceRecognition() {
-        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-          const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-          this.recognition = new SpeechRecognition();
-          this.recognition.continuous = true;
-          this.recognition.lang = 'pt-BR';
-          
-          this.recognition.onresult = (event) => {
-            const transcript = event.results[event.results.length - 1][0].transcript.toLowerCase();
-            this.processVoiceCommand(transcript);
-          };
-          
-          this.recognition.start();
-          this.$emit('announce', 'Comandos de voz ativados');
-        } else {
-          alert('Seu navegador não suporta reconhecimento de voz.');
-          this.$emit('update:voiceCommands', false);
-        }
+      announceMessage(message) {
+        this.$emit('announce', message);
       },
       
-      stopVoiceRecognition() {
-        if (this.recognition) {
-          this.recognition.stop();
-          this.recognition = null;
-          this.$emit('announce', 'Comandos de voz desativados');
-        }
-      },
-      
-      processVoiceCommand(command) {
-        // Envia o comando para o componente pai para execução
+      handleCommand(command) {
         this.$emit('executeCommand', command);
       }
     }

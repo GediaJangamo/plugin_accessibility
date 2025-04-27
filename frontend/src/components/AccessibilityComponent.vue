@@ -75,7 +75,7 @@
             @update:screenReader="updateSetting('screenReader', $event)"
             @announce="announceToScreenReader" 
           />
-          
+
           <!-- Voice commands component -->
           <VoiceNavigation 
             :voiceCommands="settings.voiceCommands" 
@@ -120,10 +120,42 @@
       </div>
     </div>
     
+    <!-- Componentes de acessibilidade invisíveis para manter funcionalidades ativas quando o menu está fechado -->
+    <div class="hidden">
+      <FontSizeToggle 
+        v-if="!isOpen"
+        :fontSize="settings.fontSize" 
+        @update:fontSize="updateSetting('fontSize', $event)"
+        @announce="announceToScreenReader" 
+      />
+      
+      <ContrastToggle 
+        v-if="!isOpen"
+        :highContrast="settings.highContrast" 
+        @update:highContrast="updateSetting('highContrast', $event)"
+        @announce="announceToScreenReader" 
+      />
+      
+      <ScreenReader 
+        v-if="!isOpen"
+        :screenReader="settings.screenReader" 
+        @update:screenReader="updateSetting('screenReader', $event)"
+        @announce="announceToScreenReader" 
+      />
+      
+      <VoiceNavigation 
+        v-if="!isOpen"
+        :voiceCommands="settings.voiceCommands" 
+        @update:voiceCommands="updateSetting('voiceCommands', $event)"
+        @announce="announceToScreenReader"
+        @executeCommand="handleVoiceCommand" 
+      />
+    </div>
+    
     <!-- Persistent storage for the settings across page changes -->
     <!-- <script v-if="settingsChanged" type="application/json" id="accessibility-settings-persist">
       {{ JSON.stringify(settings) }}
-    </script>-->
+    </script> -->
   </div> 
 </template>
 
@@ -153,7 +185,9 @@ export default {
         voiceCommands: false,
         cursorColor: 'black'
       },
-      settingsChanged: false
+      settingsChanged: false,
+      // Adicionar um intervalo para verificar e aplicar configurações periodicamente
+      settingsInterval: null
     }
   },
   mounted() {
@@ -168,14 +202,35 @@ export default {
     
     // Verifica se há configurações persistentes entre navegações
     this.checkForPersistentSettings();
+    
+    // Aplicar configurações imediatamente após montagem
+    this.applySettings();
+    
+    // Configurar um intervalo para verificar e aplicar configurações periodicamente
+    // Isso garante que as configurações permaneçam ativas mesmo quando o menu estiver fechado
+    this.settingsInterval = setInterval(() => {
+      this.applySettings();
+    }, 2000); // Verificar a cada 2 segundos
   },
   beforeUnmount() {
     window.removeEventListener('keydown', this.handleKeyDown);
     window.removeEventListener('beforeunload', this.persistSettings);
+
+    // Limpar o intervalo quando o componente for desmontado
+    if (this.settingsInterval) {
+      clearInterval(this.settingsInterval);
+    }
   },
   methods: {
     toggleMenu() {
       this.isOpen = !this.isOpen;
+      
+      // Garantir que as configurações sejam aplicadas imediatamente após fechar o menu
+      if (!this.isOpen) {
+        this.$nextTick(() => {
+          this.applySettings();
+        });
+      }
     },
     
     updateSetting(key, value) {
@@ -206,13 +261,22 @@ export default {
       localStorage.setItem('accessibility_settings', JSON.stringify(this.settings));
       this.settingsChanged = true;
       this.announceToScreenReader('Preferências de acessibilidade salvas');
+      
+      // Garantir que as configurações sejam aplicadas após salvar
+      this.applySettings();
     },
     
     loadSettings() {
       const savedSettings = localStorage.getItem('accessibility_settings');
       if (savedSettings) {
-        this.settings = { ...this.settings, ...JSON.parse(savedSettings) };
-        this.applySettings();
+        try {
+          const parsedSettings = JSON.parse(savedSettings);
+          this.settings = { ...this.settings, ...parsedSettings };
+          // Aplicar configurações imediatamente após carregar
+          this.applySettings();
+        } catch (e) {
+          console.error('Erro ao carregar configurações:', e);
+        }
       }
     },
     
@@ -247,6 +311,10 @@ export default {
         'Muito Grande': '1.3rem'
       }[this.settings.fontSize] || '1rem';
       
+      // Aplicar ao documento inteiro, não apenas ao main-content
+      // document.documentElement.style.fontSize = fontSize;
+  
+      // Aplicar fontsize ao main-content
       const mainContent = document.getElementById('main-content');
       if (mainContent) {
         mainContent.style.fontSize = fontSize;
@@ -263,6 +331,37 @@ export default {
       document.body.style.cursor = this.settings.cursorColor === 'white' ? 
         'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'24\' height=\'24\' viewBox=\'0 0 24 24\' fill=\'white\'%3E%3Cpath d=\'M13 21l-7-7h14l-7 7z\'/%3E%3C/svg%3E"), auto' :
         'default';
+        
+      // Garantir que as configurações de leitor de tela e comandos de voz permaneçam ativas
+      if (this.settings.screenReader) {
+        // Lógica para manter o leitor de tela ativo
+        this.ensureScreenReaderActive();
+      }
+      
+      if (this.settings.voiceCommands) {
+        // Lógica para manter os comandos de voz ativos
+        this.ensureVoiceCommandsActive();
+      }
+    },
+    
+    ensureScreenReaderActive() {
+      // Esta função garante que o leitor de tela permaneça ativo
+      // Implementação depende do componente ScreenReader
+      // Aqui você pode adicionar lógica específica para manter o leitor ativo
+      const screenReaderEvent = new CustomEvent('ensure-screen-reader-active', {
+        detail: { active: true }
+      });
+      document.dispatchEvent(screenReaderEvent);
+    },
+    
+    ensureVoiceCommandsActive() {
+      // Esta função garante que os comandos de voz permaneçam ativos
+      // Implementação depende do componente VoiceNavigation
+      // Aqui você pode adicionar lógica específica para manter os comandos de voz ativos
+      const voiceCommandsEvent = new CustomEvent('ensure-voice-commands-active', {
+        detail: { active: true }
+      });
+      document.dispatchEvent(voiceCommandsEvent);
     },
     
     announceToScreenReader(message) {

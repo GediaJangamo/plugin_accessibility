@@ -1,22 +1,29 @@
 <template>
-  <div>
-    <div v-if="active" class="fixed inset-x-0 bottom-6 mx-auto z-50 flex items-center bg-white dark:bg-gray-800 rounded-lg p-4 shadow-lg border border-gray-200 dark:border-gray-700 w-full max-w-xl justify-between">
+  <div v-if="showComponent">
+    <div class="fixed inset-x-0 bottom-6 mx-auto z-50 flex items-center bg-white dark:bg-gray-800 rounded-lg p-4 shadow-lg border border-gray-200 dark:border-gray-700 w-full max-w-xl justify-between">
       <div class="flex items-center space-x-4 flex-grow">
-        <!-- Ícone de microfone -->
-        <div class="relative">
-          <div class="w-10 h-10 rounded-full bg-emerald-600 dark:bg-emerald-700 flex items-center justify-center">
-            <div v-if="recognitionState === 'listening'" class="w-3 h-3 absolute top-0 right-0 rounded-full bg-green-500 animate-pulse"></div>
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" :class="{'text-green-300': isListening, 'text-white': !isListening}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
-              <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
-              <line x1="12" y1="19" x2="12" y2="23"></line>
-              <line x1="8" y1="23" x2="16" y2="23"></line>
-            </svg>
-          </div>
-        </div>
+        <!-- Botão de microfone clicável para ativar/desativar -->
+        <button 
+          @click="toggleRecognition"
+          class="relative w-10 h-10 rounded-full flex items-center justify-center transition-colors"
+          :class="isListening ? 'bg-emerald-600 dark:bg-emerald-700' : 'bg-emerald-600 dark:bg-emerald-700'"
+          aria-label="Alternar reconhecimento de voz"
+        >
+          <div v-if="!isListening" class="absolute w-8 h-0.5 bg-white rotate-45 rounded-full"></div>
+          <div v-if="recognitionState === 'listening'" class="w-3 h-3 absolute top-0 right-0 rounded-full bg-green-500 animate-pulse"></div>
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+            <line x1="12" y1="19" x2="12" y2="23"></line>
+            <line x1="8" y1="23" x2="16" y2="23"></line>
+          </svg>
+        </button>
 
         <!-- Status do microfone com largura fixa -->
-        <div class="bg-emerald-600 dark:bg-emerald-700 p-2 rounded-full text-white w-full max-w-xl">
+        <div 
+          class="p-2 rounded-full text-white w-full max-w-xl"
+          :class="isListening ? 'bg-emerald-600 dark:bg-emerald-700' : 'bg-emerald-600 dark:bg-emerald-700'"
+        >
           <span class="font-medium text-white px-2">
             {{ statusMessage }}
           </span>
@@ -29,7 +36,7 @@
       <!-- Botão de informações no canto direito -->
       <button 
         @click="toggleHelpMenu"
-        class="ml-4 p-2 rounded-full bg-emerald-600 text-white hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors"
+        class="ml-4 p-2 rounded-full text-white hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors bg-emerald-600"
         aria-label="Informações sobre comandos de voz"
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -40,9 +47,9 @@
       </button>
     </div>
 
-    <!-- Modal de ajuda para comandos de voz - Redesenhado -->
+    <!-- Modal de ajuda para comandos de voz -->
     <div 
-      v-if="showHelpMenu && active" 
+      v-if="showHelpMenu" 
       class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm"
     >
       <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[85vh] overflow-hidden flex flex-col">
@@ -165,6 +172,7 @@ export default {
       recognition: null,
       isListening: false,
       showHelpMenu: false,
+      showComponent: false, // Controla se o componente deve ser exibido ou não
       errorCount: 0,
       lastCommand: '',
       lastTranscript: '',
@@ -219,7 +227,7 @@ export default {
         case 'error':
           return `Erro: ${this.recognitionMessage}`;
         case 'silenced':
-          return 'Ative os comandos de voz';
+          return this.isListening ? 'Clique no microfone para desactivar' : 'Clique no microfone para activar';
         default:
           return 'Aguardando...';
       }
@@ -230,12 +238,10 @@ export default {
       immediate: true,
       handler(newValue) {
         if (newValue) {
-          // Adiciona um pequeno delay para evitar problemas de inicialização
-          setTimeout(() => {
-            this.startVoiceRecognition();
-          }, this.initDelay);
-        } else if (this.recognition) {
+          this.showComponent = true; // Mostra o componente quando ativado no menu
+        } else {
           this.stopVoiceRecognition();
+          this.showComponent = false; // Esconde o componente quando desativado no menu
         }
       }
     }
@@ -250,7 +256,21 @@ export default {
       this.showHelpMenu = !this.showHelpMenu;
     },
     
+    // Método para alternar o reconhecimento de voz
+    toggleRecognition() {
+      if (this.isListening) {
+        this.stopVoiceRecognition();
+      } else {
+        this.startVoiceRecognition();
+      }
+    },
+    
     startVoiceRecognition() {
+      if (!this.active) {
+        this.$emit('announce', 'Os comandos de voz estão desativados no sistema');
+        return;
+      }
+      
       if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
         try {
           // Para qualquer instância de reconhecimento existente primeiro
@@ -278,15 +298,22 @@ export default {
           };
           
           this.recognition.onend = () => {
-            this.isListening = false;
-            
-            // Reinicia automaticamente o reconhecimento se os comandos de voz ainda estiverem ativados
-            // e não foram parados manualmente
-            if (this.active && this.recognitionState !== 'silenced') {
-              // Usa um delay maior para evitar ciclos rápidos de reinicialização
+            // Se o estado ainda não for 'silenced', significa que o reconhecimento foi encerrado por um erro
+            // ou terminou naturalmente, não por uma ação do usuário
+            if (this.recognitionState !== 'silenced' && this.isListening) {
+              // Tenta reiniciar após um breve delay
               this.recognitionTimeout = setTimeout(() => {
-                this.startVoiceRecognition();
-              }, 2000); // Aumentado de 1000ms para 2000ms
+                if (this.isListening && this.active) {
+                  try {
+                    this.recognition.start();
+                  } catch (e) {
+                    console.error("Erro ao reiniciar reconhecimento:", e);
+                    this.isListening = false;
+                    this.recognitionState = 'error';
+                    this.recognitionMessage = 'Falha ao reiniciar o reconhecimento';
+                  }
+                }
+              }, 1000);
             }
           };
           
@@ -357,30 +384,23 @@ export default {
               this.recognition.start();
             } catch (e) {
               console.error("Erro ao iniciar reconhecimento:", e);
-              // Tenta novamente após um delay se houve um erro ao iniciar
-              setTimeout(() => {
-                try {
-                  this.recognition.start();
-                } catch (innerE) {
-                  console.error("Falha ao reiniciar reconhecimento após erro:", innerE);
-                }
-              }, 3000);
+              this.isListening = false;
+              this.recognitionState = 'error';
+              this.recognitionMessage = 'Falha ao iniciar o reconhecimento';
             }
           }, 500);
         } catch (error) {
           console.error('Erro ao inicializar o reconhecimento de voz:', error);
           this.$emit('announce', 'Erro ao inicializar o reconhecimento de voz');
-          
-          // Tenta recuperar após um delay maior
-          setTimeout(() => {
-            if (this.active) {
-              this.startVoiceRecognition();
-            }
-          }, 5000);
+          this.isListening = false;
+          this.recognitionState = 'error';
+          this.recognitionMessage = 'Falha ao inicializar';
         }
       } else {
         console.error('Seu navegador não suporta reconhecimento de voz.');
         this.$emit('announce', 'Seu navegador não suporta reconhecimento de voz.');
+        this.recognitionState = 'error';
+        this.recognitionMessage = 'Navegador incompatível';
       }
     },
     
@@ -417,6 +437,12 @@ export default {
       if (command.includes('ajuda')) {
         this.showHelpMenu = true;
         this.$emit('announce', 'Exibindo lista de comandos disponíveis');
+        return;
+      }
+      
+      // Tratamento para comandos específicos de ativação/desativação do reconhecimento
+      if (command.includes('desativar microfone') || command.includes('parar de ouvir') || command.includes('desligar microfone')) {
+        this.stopVoiceRecognition();
         return;
       }
       

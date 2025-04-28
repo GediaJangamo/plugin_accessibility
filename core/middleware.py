@@ -37,7 +37,7 @@ class AccessibilityMiddleware(MiddlewareMixin):
         if response.get('Content-Type', '').startswith('text/html'):
             if response.content:
                 # Use o caminho correto para seus templates
-                widget_html = render_to_string('core/accessibility_widget.html')
+                widget_html = render_to_string('core/base.html')
                 
              
                 

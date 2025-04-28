@@ -42,6 +42,8 @@ O plugin foi projetado para funcionar:
 ## 👩🏽‍💻 Autora
  Desenvolvido por **Gédia Jangamo**, estudante de Engenharia de Tecnologias e Sistemas de Informação, com foco em **inclusão digital e tecnologias assistivas** para
  a educação superior em Moçambique.
+ Email: gedyahgennyfah@gmail.com
+ Contacto: 845771303
 
 ## 📜 Licença
 Este projeto está sob a licença MIT. Sinta-se livre para usar, modificar e expandir este plugin.

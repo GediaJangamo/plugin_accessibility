@@ -7,7 +7,7 @@ Este documento apresenta o passo a passo completo para instalação e integraç�
 - Python 3.8 ou superior
 - Django 2.2 ou superior
 - pip (gerenciador de pacotes Python)
-- Um projeto Django existente onde o plugin será instalado
+- Um projecto Django existente onde o plugin será instalado
 
 ## 1. Instalação do Plugin
 
@@ -37,7 +37,7 @@ pip install -e .
 
 ### 2.1 Adicione o Plugin aos Aplicativos Instalados
 
-Abra o arquivo `settings.py` do seu projeto Django e adicione o plugin à lista `INSTALLED_APPS`:
+Abra o arquivo `settings.py` do seu projecto Django e adicione o plugin à lista `INSTALLED_APPS`:
 
 ```python
 INSTALLED_APPS = [
@@ -75,7 +75,7 @@ MIDDLEWARE = [
 
 ### 2.3 Configure os Arquivos Estáticos
 
-Certifique-se de que a configuração de arquivos estáticos esteja correta no seu `settings.py`:
+Certifique-se de que a configuração de arquivos estáticos esteja correcta no seu `settings.py`:
 
 ```python
 STATIC_URL = '/static/'
@@ -96,7 +96,7 @@ python manage.py collectstatic
 
 ## 4. Verificação da Instalação
 
-Para verificar se o plugin foi instalado corretamente:
+Para verificar se o plugin foi instalado correctamente:
 
 1. Inicie o servidor de desenvolvimento:
    ```bash
@@ -125,13 +125,13 @@ ACCESSIBILITY_EXCLUDE_PATHS = [
 
 Se o botão de acessibilidade não estiver aparecendo:
 
-1. Verifique se o `collectstatic` foi executado corretamente
-2. Confirme que o middleware está registrado na lista `MIDDLEWARE`
+1. Verifique se o `collectstatic` foi executado correctamente
+2. Confirme que o middleware está registado na lista `MIDDLEWARE`
 3. Verifique se há erros no console do navegador
 
 ### 7.2 Conflitos com JavaScript Existente
 
-Se o plugin estiver causando conflitos com outros scripts:
+Se o plugin estiver a causar conflitos com outros scripts:
 
 1. Certifique-se de que o plugin é carregado após bibliotecas como jQuery
 2. Verifique o console do navegador para identificar possíveis erros
@@ -140,7 +140,7 @@ Se o plugin estiver causando conflitos com outros scripts:
 
 ## 8. Suporte e Actualizações
 
-Para obter suporte ou reportar problemas, visite o repositório do projeto:
+Para obter suporte ou reportar problemas, visite o repositório do projecto:
 https://github.com/GediaJangamo/plugin_accessibility.git
 
 Email: gedyahgennyfah@gmail.com

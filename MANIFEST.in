@@ -1,0 +1,4 @@
+include README.md
+recursive-include core/static *
+recursive-include core/templates *
+recursive-include frontend/public *

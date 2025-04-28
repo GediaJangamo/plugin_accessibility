@@ -1,11 +1,11 @@
-# Guia de Instalação do Plugin de Tecnologias Assistivas para o SIGA
+# Guia de Instalação do Plugin
 
-Este documento apresenta o passo a passo completo para instalação e integração do Plugin de Tecnologias Assistivas em qualquer sistema baseado em Django e Python, desenvolvido como parte do trabalho "IMPLEMENTAÇÃO DE TECNOLOGIAS ASSISTIVAS NO SISTEMA INTEGRADO DE GESTÃO ACADÉMICA (SIGA): PROMOVENDO A INCLUSÃO DIGITAL DE ESTUDANTES COM DEFICIÊNCIA VISUAL".
+Este documento apresenta o passo a passo completo para instalação e integração do Plugin em qualquer sistema baseado em Django e Python, desenvolvido como parte do trabalho "IMPLEMENTAÇÃO DE TECNOLOGIAS ASSISTIVAS NO SISTEMA INTEGRADO DE GESTÃO ACADÉMICA (SIGA): PROMOVENDO A INCLUSÃO DIGITAL DE ESTUDANTES COM DEFICIÊNCIA VISUAL".
 
 ## Requisitos Prévios
 
 - Python 3.8 ou superior
-- Django 3.2 ou superior
+- Django 2.2 ou superior
 - pip (gerenciador de pacotes Python)
 - Um projeto Django existente onde o plugin será instalado
 
@@ -18,7 +18,7 @@ Este documento apresenta o passo a passo completo para instalação e integraç�
 pip install git+https://github.com/GediaJangamo/plugin_accessibility.git
 ```
 
-### 1.2 Instalação Local (opcional)
+### 1.2 Instalação Local (Modo de Desenvolvimento)
 
 Se preferir instalar a partir de uma cópia local:
 
@@ -48,9 +48,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    
     # Adicione o plugin de acessibilidade
-    'plugin_siga_accessibility.core',
+    'core' 
 ]
 ```
 
@@ -70,7 +69,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     
     # Adicione o middleware de acessibilidade
-    'plugin_siga_accessibility.core.middleware.AccessibilityMiddleware',
+    'core.middleware.AccessibilityMiddleware'
 ]
 ```
 
@@ -105,38 +104,8 @@ Para verificar se o plugin foi instalado corretamente:
    ```
 
 2. Acesse qualquer página do seu sistema no navegador.
-   O botão de acessibilidade deve aparecer automaticamente em todas as páginas.
+   O botão de acessibilidade deve aparecer automaticamente do lado esquerdo em todas as páginas.
 
-## 5. Configurações Específicas de Acessibilidade (Opcional)
-
-Adicione ao seu arquivo `settings.py`:
-
-```python
-# Configurações do plugin de acessibilidade
-ACCESSIBILITY_SETTINGS = {
-    'enable_screen_reader': True,
-    'enable_high_contrast': True,
-    'enable_text_zoom': True,
-    'default_font_size': 16,
-    'button_position': 'bottom-right',  # bottom-right, bottom-left, top-right, top-left
-}
-```
-
-## 6. Personalização (Opcional)
-
-### 6.1 Personalizando a Aparência do Botão
-
-Para personalizar a aparência do botão de acessibilidade, você pode sobrescrever as configurações padrão:
-
-```python
-# settings.py
-ACCESSIBILITY_BUTTON_STYLE = {
-    'background_color': '#0066cc',
-    'icon_color': '#ffffff',
-    'border_radius': '50%',
-    'size': '60px',
-}
-```
 
 ### 6.2 Excluindo o Botão de Páginas Específicas
 
@@ -168,27 +137,11 @@ Se o plugin estiver causando conflitos com outros scripts:
 2. Verifique o console do navegador para identificar possíveis erros
 3. Use as configurações `ACCESSIBILITY_SETTINGS` para ajustar o comportamento
 
-### 7.3 Problemas de Compatibilidade com Templates
 
-Se seu projeto usa um sistema de templates diferente ou framework front-end:
-
-1. Você pode implementar manualmente a inclusão do botão adicionando este código ao seu template base:
-
-```html
-<div id="accessibility-button-container"></div>
-<script src="{% static 'plugin_accessibility/js/accessibility-bundle.js' %}"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        initAccessibilityFeatures();
-    });
-</script>
-```
-
-## 8. Suporte e Atualizações
+## 8. Suporte e Actualizações
 
 Para obter suporte ou reportar problemas, visite o repositório do projeto:
-https://github.com/seu-usuario/plugin_siga_accessibility
+https://github.com/GediaJangamo/plugin_accessibility.git
 
----
-
-Este plugin foi desenvolvido como parte de um Trabalho de Conclusão de Curso, com o objetivo de promover a inclusão digital de estudantes com deficiência visual no Sistema Integrado de Gestão Acadêmica (SIGA).
+Email: gedyahgennyfah@gmail.com
+Telefone: 845771303

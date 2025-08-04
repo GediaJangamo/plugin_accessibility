@@ -1,14 +1,14 @@
 <template>
-  <div class="p-3 bg-gray-100 dark:bg-gray-800 rounded-lg hover:shadow-md transition-shadow duration-300">
+  <div class="p-3 bg-[#f1f5f9] border-[#64758b] dark:bg-gray-800 rounded-lg hover:shadow-md transition-shadow duration-300">
     <label class="flex items-center cursor-pointer">
       <div class="flex-shrink-0 mr-4">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-[#3b82f6]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
         </svg>
       </div>
       <div class="flex-grow">
-        <span class="block text-lg text-gray-800 dark:text-white font-medium">Leitor de Tela</span>
-        <span class="text-sm text-gray-600 dark:text-gray-300">Narração de conteúdos</span>
+        <span class="block text-lg text-gray-800 dark:text-white font-medium">Leitor de ecrã</span>
+        <span class="text-sm text-[#64748b] dark:text-gray-300">Narração de conteúdos</span>
       </div>
       <div class="flex items-center">
         <input

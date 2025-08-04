@@ -1,37 +1,39 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SIGA Accessibility Plugin</title>
     {% load static %}
     <!-- Aqui e importante que a ordem esteja correta: primeiro carregar o static, depois usar -->
-    <link rel="stylesheet" href="{% static 'core/css/main.css' %}">
-</head>
-<body class="bg-gray-100" >
-  
-
-   {% comment %} <main class="container mx-auto min-h-screen bg-pink-700 p-4" id="main-content">
-        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-             <h2 class="text-xl font-semibold mb-4 text-green-600">Conteúdo Principal da Aplicação</h2>
-            <p class="mb-4 ">
-                Este é um exemplo de conteúdo da sua aplicação. O plugin de acessibilidade estará 
-                disponível no canto inferior direito da tela.
-            </p>
-            <p class="mb-4 text-pink-400 font-bold">
-                O plugin oferece recursos como ajuste de tamanho da fonte, alto contraste, 
-                leitor de tela e comandos por voz.
-            </p> 
-        </div>
-    </main>  {% endcomment %}
+    <link rel="stylesheet" href="{% static 'core/css/main.css' %}" />
+  </head>
+  <body class="bg-gray-100">
+    <main
+      class="container mx-auto min-h-screen bg-pink-700 p-4"
+      id="main-content"
+    >
+      <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <h2 class="text-xl font-semibold mb-4 text-green-600">
+          Conteúdo Principal da Aplicação
+        </h2>
+        <p class="mb-4">
+          Este é um exemplo de conteúdo da sua aplicação. O plugin de
+          acessibilidade estará disponível no canto inferior direito da tela.
+        </p>
+        <p class="mb-4 text-red-700 font-bold">
+          O plugin oferece recursos como ajuste de tamanho da fonte, alto
+          contraste, leitor de tela e comandos por voz.
+        </p>
+      </div>
+    </main>
 
     <!-- Div onde o aplicativo Vue sera montado -->
-    <div id="accessibility-app" >
-        {% include 'core/accessibility_widget.html' %}
+    <div id="accessibility-app">
+      {% include 'core/accessibility_widget.html' %}
     </div>
-
 
     <!-- Incluir o JS do Vue compilado -->
     <script src="{% static 'core/js/bundle.js' %}"></script>
-</body>
+  </body>
 </html>

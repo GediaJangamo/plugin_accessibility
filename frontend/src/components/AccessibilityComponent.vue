@@ -9,7 +9,7 @@
     <button 
       v-if="!isOpen"
       @click="toggleMenu"
-      class="fixed bottom-32 left-0 bg-green-700 hover:bg-green-600 text-white py-4 px-6 rounded-r-full shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 z-50 group"
+      class="fixed bottom-32 left-0 bg-[#4A90E2] hover:bg-[#357ABD] text-white py-4 px-6 rounded-r-full shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 z-50 group"
       aria-label="Opcoes de acessibilidade"
     >
       <img src="/static/core/img/accessibility_icon.png" alt="Icone de acessibilidade" class="h-8 w-8 brightness-0 invert">
@@ -28,12 +28,15 @@
       aria-labelledby="accessibility-title"
     >
       <!-- Header with logos -->
-      <div class="flex items-center justify-between p-2 bg-white border-b border-gray-200 dark:border-gray-700 dark:bg-gray-900">
-        <div class="flex items-center space-x-3">
-          <img src="/static/core/img/logo-uem.png" alt="Logo UEM" class="h-16">
-          <div class="border-l border-gray-300 dark:border-gray-600 h-12"></div>
-          <img src="/static/core/img/siga.png" alt="Logo SIGA" class="h-8">
-        </div>
+      <div class="flex items-center justify-between p-2 bg-[#f8fafc] border-b border-gray-200 dark:border-gray-700 dark:bg-gray-900">
+      
+          <div class="flex justify-center items-center gap-3">
+                <div class="w-10 h-10 bg-[#3b82f6] rounded-md flex items-center justify-center text-white ">G</div>
+                <div class="text-[#1a202c]">
+                    <h3>AccessJay</h3>
+                    <p class="text-sm text-[#64758b]">Personalize sua experiência de navegação</p>
+                </div>
+            </div>
         
         <button 
           @click="toggleMenu" 
@@ -46,11 +49,6 @@
         </button>
       </div>
       
-      <div class="p-2 bg-[#077b4b] mb-2">
-        <h2 id="accessibility-title" class="text-2xl font-poppins text-white dark:text-white flex items-center justify-center">
-          Acessibilidade
-        </h2>
-      </div>
       
       <!-- Main content with reduced spacing between items -->
       <div class="px-4 space-y-2 flex-grow flex flex-col justify-between">
@@ -96,7 +94,7 @@
           <!-- Save Preferences Button -->
           <button 
             @click="saveSettings" 
-            class="w-full bg-[#077b4b] hover:bg-green-600 text-white py-2 px-4 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 flex items-center justify-center text-lg"
+            class="w-full bg-[#3b82f6] hover:bg-[#357ABD] text-white py-2 px-4 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 flex items-center justify-center text-lg"
             aria-label="Salvar preferências de acessibilidade"
           >
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -108,7 +106,7 @@
           <!-- Reset Settings Button -->
           <button 
             @click="resetSettings" 
-            class="w-full bg-gray-200 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-800 dark:text-white py-2 px-4 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center justify-center text-lg"
+            class="w-full bg-[#f1f5f9] hover:bg-slate-50 border-[#cedff6] border-[1px] dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-800 dark:text-white py-2 px-4 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center justify-center text-lg"
             aria-label="Restaurar configurações padrão"
           >
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">

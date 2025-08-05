@@ -11,26 +11,26 @@
         <span class="text-sm text-[#64748b] dark:text-gray-300">Narração de conteúdos</span>
       </div>
       <div class="flex items-center">
-        <input
-           type="checkbox"
-           id="screen-reader"
-           :checked="screenReader"
-           @change="toggleScreenReader"
-           class="sr-only"
+        <input 
+          type="checkbox"
+          id="screen-reader"
+          :checked="screenReader"
+          @change="toggleScreenReader"
+          class="sr-only"
         >
-        <div class="relative w-14 h-7 bg-gray-300  dark:bg-gray-600 rounded-full transition duration-300 ease-in-out" :class="{'bg-blue-500': screenReader}">
+        <div class="relative w-14 h-7 bg-gray-300 dark:bg-gray-600 rounded-full transition duration-300 ease-in-out" :class="{'bg-blue-500': screenReader}">
           <div class="absolute left-1 top-1 bg-white w-5 h-5 rounded-full shadow transition duration-300 ease-in-out" :class="{'transform translate-x-7': screenReader}"></div>
         </div>
       </div>
     </label>
-    
+         
     <!-- Teleport para colocar o controle do leitor de tela no final do body -->
     <teleport to="body">
-      <ScreenReaderControl :active="screenReader" />
+      <ScreenReaderControl :active="screenReader" @update:screenReader="updateScreenReader" />
     </teleport>
   </div>
 </template>
- 
+
 <script>
 import ScreenReaderControl from '../controller/ScreenReaderControl.vue';
 
@@ -49,44 +49,25 @@ export default {
     toggleScreenReader() {
       const newValue = !this.screenReader;
       this.$emit('update:screenReader', newValue);
-      this.$emit('announce', newValue ? 'Leitor de ecra activado' : 'Leitor de ecra desactivado');
-      
-      // Adicionar classes de estilo global para o leitor de tela
-      if (newValue) {
-        this.addScreenReaderStyles();
-      } else {
-        this.removeScreenReaderStyles();
-      }
+      this.$emit('announce', newValue ? 'Leitor de ecrã activado' : 'Leitor de ecrã desactivado');
     },
     
-    addScreenReaderStyles() {
-      const styleEl = document.createElement('style');
-      styleEl.id = 'screen-reader-styles';
-      styleEl.innerHTML = `
-        .reading-highlight {
-          outline: 2px solid #077b4b !important;
-          box-shadow: 0 0 5px rgba(7, 123, 75, 0.5) !important;
-          transition: outline 0.3s ease, box-shadow 0.3s ease !important;
-        }
-      `;
-      document.head.appendChild(styleEl);
-    },
-    
-    removeScreenReaderStyles() {
-      const styleEl = document.getElementById('screen-reader-styles');
-      if (styleEl) {
-        document.head.removeChild(styleEl);
-      }
-      
-      // Remove qualquer destaque existente
-      document.querySelectorAll('.reading-highlight').forEach(el => {
-        el.classList.remove('reading-highlight');
-        el.style.outline = '';
-      });
+    updateScreenReader(value) {
+      this.$emit('update:screenReader', value);
     }
-  },
-  beforeUnmount() {
-    this.removeScreenReaderStyles();
   }
 }
 </script>
+
+<style scoped>
+/* Estilos personalizados para o toggle */
+
+/* Animação suave para o switch */
+input:checked + div {
+  background: linear-gradient(135deg, #3b82f6);
+}
+
+input:checked + div > div {
+  box-shadow: 0 3px 8px #3b82f6;
+}
+</style>

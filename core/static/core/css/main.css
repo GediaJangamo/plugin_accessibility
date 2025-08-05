@@ -15,33 +15,18 @@
   border-color: rgb(75 85 99);
 }
 
-/*!**********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
-  !*** css ./node_modules/css-loader/dist/cjs.js??clonedRuleSet-12.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-12.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/controller/ScreenReaderControl.vue?vue&type=style&index=0&id=7ccc40ea&scoped=true&lang=css ***!
-  \**********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/*!************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js??clonedRuleSet-12.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-12.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/options/ScreenReader.vue?vue&type=style&index=0&id=16666c50&scoped=true&lang=css ***!
+  \************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
 
-/* Estilos para melhorar a aparência e acessibilidade */
-button[data-v-7ccc40ea] {
-  transition: all 0.2s ease;
-}
-button[data-v-7ccc40ea]:focus {
-  outline: 2px solid #077b4b;
-  outline-offset: 2px;
-}
-button[data-v-7ccc40ea]:hover {
-  transform: scale(1.05);
-  opacity: 0.95;
-}
+/* Estilos personalizados para o toggle */
 
-/* Estilo para o elemento destacado na leitura */
-.reading-highlight {
-  transition: outline 0.3s ease;
+/* Animação suave para o switch */
+input:checked + div[data-v-16666c50] {
+  background: linear-gradient(135deg, #3b82f6);
 }
-
-/* Animação suave para transições */
-.transition-all[data-v-7ccc40ea] {
-  transition-property: all;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 300ms;
+input:checked + div > div[data-v-16666c50] {
+  box-shadow: 0 3px 8px #3b82f6;
 }
 
 /*!*************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
@@ -1223,6 +1208,10 @@ video {
   padding-top: 1rem;
   padding-bottom: 1rem;
 }
+.py-1 {
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+}
 .pb-2 {
   padding-bottom: 0.5rem;
 }
@@ -1424,6 +1413,10 @@ video {
   --tw-ring-opacity: 1;
   --tw-ring-color: rgb(59 130 246 / var(--tw-ring-opacity, 1));
 }
+.blur {
+  --tw-blur: blur(8px);
+  filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow);
+}
 .brightness-0 {
   --tw-brightness: brightness(0);
   filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow);
@@ -1441,6 +1434,9 @@ video {
 }
 .backdrop-blur-sm {
   --tw-backdrop-blur: blur(4px);
+  backdrop-filter: var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);
+}
+.backdrop-filter {
   backdrop-filter: var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);
 }
 .transition {
@@ -1476,6 +1472,9 @@ video {
 }
 .ease-in-out {
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+.ease-out {
+  transition-timing-function: cubic-bezier(0, 0, 0.2, 1);
 }
 
 /* Estilos para o modo de alto contraste */

@@ -25,29 +25,53 @@
       </div>
 
       <div class="p-4">
-        <!-- Controle de velocidade -->
-        <div class="flex items-center justify-between mb-4">
-          <span class="text-sm text-gray-500 dark:text-gray-400">Velocidade</span>
-          <div class="flex items-center rounded-full bg-gray-100 dark:bg-gray-700 overflow-hidden">
-            <button 
-              @click="decreaseRate"
-              class="flex items-center justify-center p-2 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300"
-              aria-label="Diminuir velocidade"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M20 12H4" />
-              </svg>
-            </button>
-            <span class="w-14 text-center font-medium bg-[#3b82f6] text-white py-1.5">{{ speechRate.toFixed(1) }}x</span>
-            <button 
-              @click="increaseRate"
-              class="flex items-center justify-center p-2 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300"
-              aria-label="Aumentar velocidade"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-              </svg>
-            </button>
+        <!-- Controle de velocidade e modo de leitura -->
+        <div class="flex items-center justify-between mb-4 gap-4">
+          <!-- Modo de leitura -->
+          <div class="flex items-center gap-2">
+            <span class="text-sm text-gray-500 dark:text-gray-400">Modo</span>
+            <div class="flex items-center rounded-full bg-gray-100 dark:bg-gray-700 overflow-hidden">
+              <button 
+                @click="setReadingMode('element')"
+                :class="readingMode === 'element' ? 'bg-[#3b82f6] text-white' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'"
+                class="px-3 py-1 text-xs font-medium transition-colors"
+              >
+                Elemento
+              </button>
+              <button 
+                @click="setReadingMode('word')"
+                :class="readingMode === 'word' ? 'bg-[#3b82f6] text-white' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'"
+                class="px-3 py-1 text-xs font-medium transition-colors"
+              >
+                Palavra
+              </button>
+            </div>
+          </div>
+
+          <!-- Controle de velocidade -->
+          <div class="flex items-center gap-2">
+            <span class="text-sm text-gray-500 dark:text-gray-400">Velocidade</span>
+            <div class="flex items-center rounded-full bg-gray-100 dark:bg-gray-700 overflow-hidden">
+              <button 
+                @click="decreaseRate"
+                class="flex items-center justify-center p-2 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300"
+                aria-label="Diminuir velocidade"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M20 12H4" />
+                </svg>
+              </button>
+              <span class="w-14 text-center font-medium bg-[#3b82f6] text-white py-1.5">{{ speechRate.toFixed(1) }}x</span>
+              <button 
+                @click="increaseRate"
+                class="flex items-center justify-center p-2 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300"
+                aria-label="Aumentar velocidade"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -73,7 +97,7 @@
             <button 
               @click="previousElement"
               class="flex items-center justify-center bg-white dark:bg-gray-600 hover:bg-gray-100 dark:hover:bg-gray-500 text-[#3b82f6] dark:text-[#3b82f6] p-3 rounded-lg shadow-sm transition-colors"
-              aria-label="Elemento anterior"
+              :aria-label="readingMode === 'word' ? 'Palavra anterior' : 'Elemento anterior'"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
@@ -93,7 +117,7 @@
             <button 
               @click="nextElement"
               class="flex items-center justify-center bg-white dark:bg-gray-600 hover:bg-gray-100 dark:hover:bg-gray-500 text-[#3b82f6] dark:text-[#3b82f6] p-3 rounded-lg shadow-sm transition-colors"
-              aria-label="Próximo elemento"
+              :aria-label="readingMode === 'word' ? 'Próxima palavra' : 'Próximo elemento'"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -104,7 +128,7 @@
           <!-- Indicador de progresso -->
           <div class="flex-shrink-0 bg-gray-50 dark:bg-gray-700 px-4 py-3 rounded-lg text-center min-w-[80px]">
             <span class="text-gray-700 dark:text-gray-300 text-sm font-medium">
-              {{ currentElementIndex >= 0 ? `${currentElementIndex + 1}/${readableElements.length}` : '0/0' }}
+              {{ getProgressText() }}
             </span>
           </div>
         </div>
@@ -137,6 +161,10 @@ export default {
       isInitialized: false,
       keysEnabled: false,
       navigationDebounce: null,
+      readingMode: 'element', // 'element' ou 'word'
+      currentWords: [],
+      currentWordIndex: -1,
+      wordHighlightSpan: null,
     }
   },
   watch: {
@@ -155,11 +183,133 @@ export default {
   },
   mounted() {
     this.initMutationObserver()
+    this.addCustomStyles()
   },
   beforeUnmount() {
     this.cleanupReaderFeatures()
+    this.removeCustomStyles()
   },
   methods: {
+    // Adiciona estilos customizados para os destaques
+    addCustomStyles() {
+      if (!document.getElementById('screen-reader-highlight-styles')) {
+        const style = document.createElement('style')
+        style.id = 'screen-reader-highlight-styles'
+        style.textContent = `
+          .sr-element-highlight {
+            position: relative !important;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(147, 197, 253, 0.15)) !important;
+            border-radius: 8px !important;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.4), 0 0 20px rgba(59, 130, 246, 0.3) !important;
+            transform: scale(1.02) !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            z-index: 10 !important;
+          }
+          
+          .sr-element-highlight::before {
+            content: '' !important;
+            position: absolute !important;
+            top: -4px !important;
+            left: -4px !important;
+            right: -4px !important;
+            bottom: -4px !important;
+            background: linear-gradient(45deg, #3b82f6, #06b6d4) !important;
+            border-radius: 12px !important;
+            z-index: -1 !important;
+            opacity: 0.6 !important;
+            filter: blur(8px) !important;
+            animation: sr-glow-pulse 2s ease-in-out infinite alternate !important;
+          }
+          
+          .sr-word-highlight {
+            background: linear-gradient(135deg, #3b82f6, #06b6d4) !important;
+            color: white !important;
+            padding: 2px 4px !important;
+            border-radius: 4px !important;
+            box-shadow: 0 2px 8px #3b82f6 !important;
+            transform: scale(1.05) !important;
+            transition: all 0.2s ease !important;
+            font-weight: 600 !important;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+          }
+          
+          @keyframes sr-glow-pulse {
+            0% { opacity: 0.4; transform: scale(1); }
+            100% { opacity: 0.8; transform: scale(1.01); }
+          }
+          
+          .sr-reading-indicator {
+            position: fixed !important;
+            top: 50% !important;
+            right: 20px !important;
+            transform: translateY(-50%) !important;
+            background: linear-gradient(135deg, #3b82f6, #06b6d4) !important;
+            color: white !important;
+            padding: 12px 16px !important;
+            border-radius: 25px !important;
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3) !important;
+            z-index: 1000 !important;
+            font-size: 14px !important;
+            font-weight: 500 !important;
+            backdrop-filter: blur(10px) !important;
+            border: 1px solid rgba(255, 255, 255, 0.2) !important;
+            animation: sr-slide-in 0.3s ease-out !important;
+          }
+          
+          @keyframes sr-slide-in {
+            from { opacity: 0; transform: translateY(-50%) translateX(100px); }
+            to { opacity: 1; transform: translateY(-50%) translateX(0); }
+          }
+        `
+        document.head.appendChild(style)
+      }
+    },
+    
+    // Remove estilos customizados
+    removeCustomStyles() {
+      const style = document.getElementById('screen-reader-highlight-styles')
+      if (style) {
+        style.remove()
+      }
+    },
+
+    // Define o modo de leitura
+    setReadingMode(mode) {
+      this.stopSpeaking()
+      this.removeAllHighlights()
+      this.readingMode = mode
+      
+      if (mode === 'word' && this.currentElementIndex >= 0) {
+        this.setupWordReading()
+      } else {
+        this.currentWords = []
+        this.currentWordIndex = -1
+      }
+      
+      this.updateReadingStatus()
+    },
+
+    // Configura a leitura palavra por palavra
+    setupWordReading() {
+      if (this.currentElementIndex >= 0 && this.readableElements[this.currentElementIndex]) {
+        const element = this.readableElements[this.currentElementIndex]
+        const text = element.textContent.trim()
+        this.currentWords = text.split(/\s+/).filter(word => word.length > 0)
+        this.currentWordIndex = 0
+        this.highlightCurrentWord()
+      }
+    },
+
+    // Retorna o texto de progresso baseado no modo
+    getProgressText() {
+      if (this.readingMode === 'word' && this.currentWords.length > 0) {
+        return `${this.currentWordIndex + 1}/${this.currentWords.length}`
+      } else if (this.readableElements.length > 0) {
+        return this.currentElementIndex >= 0 ? `${this.currentElementIndex + 1}/${this.readableElements.length}` : '0/0'
+      }
+      return '0/0'
+    },
+
     // Método para fechar o leitor de tela
     closeReader() {
       this.stopSpeaking()
@@ -293,18 +443,22 @@ export default {
       } else {
         if (this.currentElementIndex === -1 && this.readableElements.length > 0) {
           this.currentElementIndex = 0
-          this.highlightCurrentElement()
+          if (this.readingMode === 'word') {
+            this.setupWordReading()
+          } else {
+            this.highlightCurrentElement()
+          }
         }
 
         if (this.speechSynth && this.speechSynth.paused) {
           this.resumeSpeaking()
         } else {
-          this.speakCurrentElement()
+          this.speakCurrent()
         }
       }
     },
 
-    // Navega para o elemento anterior
+    // Navega para o elemento/palavra anterior
     previousElement() {
       if (this.navigationDebounce) return
       this.navigationDebounce = setTimeout(() => {
@@ -313,22 +467,33 @@ export default {
 
       this.stopSpeaking()
 
-      if (this.currentElementIndex > 0) {
-        this.currentElementIndex--
-        this.highlightCurrentElement()
-        this.updateReadingStatus()
-
-        if (this.isPlaying) {
-          setTimeout(() => {
-            if (this.isPlaying) {
-              this.speakCurrentElement()
-            }
-          }, 100)
+      if (this.readingMode === 'word') {
+        if (this.currentWordIndex > 0) {
+          this.currentWordIndex--
+          this.highlightCurrentWord()
+        } else if (this.currentElementIndex > 0) {
+          this.currentElementIndex--
+          this.setupWordReading()
         }
+      } else {
+        if (this.currentElementIndex > 0) {
+          this.currentElementIndex--
+          this.highlightCurrentElement()
+        }
+      }
+
+      this.updateReadingStatus()
+
+      if (this.isPlaying) {
+        setTimeout(() => {
+          if (this.isPlaying) {
+            this.speakCurrent()
+          }
+        }, 100)
       }
     },
 
-    // Navega para o próximo elemento
+    // Navega para o próximo elemento/palavra
     nextElement() {
       if (this.navigationDebounce) return
       this.navigationDebounce = setTimeout(() => {
@@ -337,18 +502,29 @@ export default {
 
       this.stopSpeaking()
 
-      if (this.currentElementIndex < this.readableElements.length - 1) {
-        this.currentElementIndex++
-        this.highlightCurrentElement()
-        this.updateReadingStatus()
-
-        if (this.isPlaying) {
-          setTimeout(() => {
-            if (this.isPlaying) {
-              this.speakCurrentElement()
-            }
-          }, 100)
+      if (this.readingMode === 'word') {
+        if (this.currentWordIndex < this.currentWords.length - 1) {
+          this.currentWordIndex++
+          this.highlightCurrentWord()
+        } else if (this.currentElementIndex < this.readableElements.length - 1) {
+          this.currentElementIndex++
+          this.setupWordReading()
         }
+      } else {
+        if (this.currentElementIndex < this.readableElements.length - 1) {
+          this.currentElementIndex++
+          this.highlightCurrentElement()
+        }
+      }
+
+      this.updateReadingStatus()
+
+      if (this.isPlaying) {
+        setTimeout(() => {
+          if (this.isPlaying) {
+            this.speakCurrent()
+          }
+        }, 100)
       }
     },
 
@@ -358,13 +534,79 @@ export default {
 
       if (this.readableElements.length > 0) {
         this.currentElementIndex = 0
-        this.highlightCurrentElement()
+        if (this.readingMode === 'word') {
+          this.setupWordReading()
+        } else {
+          this.highlightCurrentElement()
+        }
         this.updateReadingStatus()
 
         if (this.isPlaying) {
-          this.speakCurrentElement()
+          this.speakCurrent()
         }
       }
+    },
+
+    // Fala o elemento ou palavra atual
+    speakCurrent() {
+      if (this.readingMode === 'word') {
+        this.speakCurrentWord()
+      } else {
+        this.speakCurrentElement()
+      }
+    },
+
+    // Lê em voz alta a palavra atual
+    speakCurrentWord() {
+      if (!this.speechSynth || this.currentWordIndex < 0 || this.currentWordIndex >= this.currentWords.length) {
+        return
+      }
+
+      this.stopSpeaking()
+
+      const word = this.currentWords[this.currentWordIndex]
+      this.utterance = new SpeechSynthesisUtterance(word)
+
+      const voices = this.speechSynth.getVoices()
+      const portugueseVoice = voices.find((voice) => voice.lang.includes("pt-BR") || voice.lang.includes("pt"))
+
+      if (portugueseVoice) {
+        this.utterance.voice = portugueseVoice
+      }
+
+      this.utterance.rate = this.speechRate
+      this.utterance.pitch = 1.0
+      this.utterance.lang = "pt-BR"
+
+      this.utterance.onend = () => {
+        if (this.active) {
+          if (this.currentWordIndex < this.currentWords.length - 1) {
+            this.currentWordIndex++
+            this.highlightCurrentWord()
+            this.updateReadingStatus()
+            this.speakCurrentWord()
+          } else if (this.currentElementIndex < this.readableElements.length - 1) {
+            this.currentElementIndex++
+            this.setupWordReading()
+            this.updateReadingStatus()
+            this.speakCurrentWord()
+          } else {
+            this.isPlaying = false
+            this.currentReadingStatus = "Leitura concluída"
+          }
+        }
+      }
+
+      this.utterance.onerror = (event) => {
+        console.error("Erro na síntese de fala:", event)
+        this.isPlaying = false
+        this.currentReadingStatus = "Erro na leitura"
+      }
+
+      this.highlightCurrentWord()
+      this.speechSynth.speak(this.utterance)
+      this.isPlaying = true
+      this.updateReadingStatus()
     },
 
     // Lê em voz alta o elemento atual
@@ -456,9 +698,24 @@ export default {
 
     // Remove todos os destaques visuais
     removeAllHighlights() {
-      document.querySelectorAll(".reading-highlight").forEach((el) => {
-        el.classList.remove("reading-highlight")
-        el.style.outline = ""
+      // Remove destaques de elementos
+      document.querySelectorAll(".sr-element-highlight").forEach((el) => {
+        el.classList.remove("sr-element-highlight")
+      })
+
+      // Remove destaques de palavras
+      if (this.wordHighlightSpan) {
+        const parent = this.wordHighlightSpan.parentNode
+        if (parent) {
+          parent.replaceChild(document.createTextNode(this.wordHighlightSpan.textContent), this.wordHighlightSpan)
+          parent.normalize()
+        }
+        this.wordHighlightSpan = null
+      }
+
+      // Remove indicadores de leitura
+      document.querySelectorAll(".sr-reading-indicator").forEach((el) => {
+        el.remove()
       })
     },
 
@@ -468,8 +725,10 @@ export default {
 
       if (this.currentElementIndex >= 0 && this.readableElements[this.currentElementIndex]) {
         const element = this.readableElements[this.currentElementIndex]
-        element.classList.add("reading-highlight")
-        element.style.outline = "3px solid #077b4b"
+        element.classList.add("sr-element-highlight")
+
+        // Adiciona indicador visual de leitura
+        this.showReadingIndicator("Lendo elemento")
 
         element.scrollIntoView({
           behavior: "smooth",
@@ -479,6 +738,101 @@ export default {
       }
     },
 
+    // Destaca visualmente a palavra atual
+    highlightCurrentWord() {
+      this.removeAllHighlights()
+
+      if (this.currentElementIndex >= 0 && this.currentWordIndex >= 0 && 
+          this.readableElements[this.currentElementIndex] && 
+          this.currentWords[this.currentWordIndex]) {
+        
+        const element = this.readableElements[this.currentElementIndex]
+        const word = this.currentWords[this.currentWordIndex]
+        
+        // Destaca o elemento pai também
+        element.classList.add("sr-element-highlight")
+        
+        // Encontra e destaca a palavra específica
+        this.highlightWordInElement(element, word, this.currentWordIndex)
+        
+        // Adiciona indicador visual de leitura
+        this.showReadingIndicator(`Palavra: ${word}`)
+
+        element.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+          inline: "nearest",
+        })
+      }
+    },
+
+    // Destaca uma palavra específica dentro de um elemento
+    highlightWordInElement(element, targetWord, wordIndex) {
+      const text = element.textContent
+      const words = text.split(/(\s+)/)
+      let actualWordIndex = 0
+      
+      // Cria um novo conteúdo com a palavra destacada
+      const newContent = document.createDocumentFragment()
+      
+      words.forEach((segment) => {
+        if (segment.trim().length > 0) {
+          if (actualWordIndex === wordIndex && segment.trim() === targetWord.trim()) {
+            const span = document.createElement('span')
+            span.className = 'sr-word-highlight'
+            span.textContent = segment
+            this.wordHighlightSpan = span
+            newContent.appendChild(span)
+          } else {
+            newContent.appendChild(document.createTextNode(segment))
+          }
+          actualWordIndex++
+        } else {
+          newContent.appendChild(document.createTextNode(segment))
+        }
+      })
+      
+      // Substitui o conteúdo do elemento
+      element.innerHTML = ''
+      element.appendChild(newContent)
+    },
+
+    // Mostra indicador visual de leitura
+    showReadingIndicator(text) {
+      // Remove indicadores existentes
+      document.querySelectorAll(".sr-reading-indicator").forEach((el) => {
+        el.remove()
+      })
+
+      const indicator = document.createElement('div')
+      indicator.className = 'sr-reading-indicator'
+      indicator.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="width: 12px; height: 12px; border-radius: 50%; background: rgba(255,255,255,0.8); animation: sr-pulse 1s ease-in-out infinite;"></div>
+          <span>${text}</span>
+        </div>
+      `
+      
+      // Adiciona animação de pulso
+      const pulseStyle = document.createElement('style')
+      pulseStyle.textContent = `
+        @keyframes sr-pulse {
+          0%, 100% { opacity: 0.4; transform: scale(0.8); }
+          50% { opacity: 1; transform: scale(1.2); }
+        }
+      `
+      document.head.appendChild(pulseStyle)
+      
+      document.body.appendChild(indicator)
+      
+      // Remove após 3 segundos se não estiver lendo
+      setTimeout(() => {
+        if (!this.isPlaying && document.body.contains(indicator)) {
+          indicator.remove()
+        }
+      }, 3000)
+    },
+
     // Atualiza o status de leitura exibido
     updateReadingStatus() {
       if (this.readableElements.length === 0) {
@@ -486,7 +840,9 @@ export default {
         return
       }
 
-      if (this.currentElementIndex >= 0) {
+      if (this.readingMode === 'word' && this.currentWords.length > 0) {
+        this.currentReadingStatus = `Palavra ${this.currentWordIndex + 1} de ${this.currentWords.length}`
+      } else if (this.currentElementIndex >= 0) {
         this.currentReadingStatus = `${this.currentElementIndex + 1} de ${this.readableElements.length}`
       } else {
         this.currentReadingStatus = `${this.readableElements.length} elementos para ler`
@@ -536,22 +892,45 @@ export default {
       this.currentReadingStatus = message
 
       const notification = document.createElement("div")
-      notification.style.position = "fixed"
-      notification.style.bottom = "80px"
-      notification.style.left = "50%"
-      notification.style.transform = "translateX(-50%)"
-      notification.style.backgroundColor = "rgba(7, 123, 75, 0.8)"
-      notification.style.color = "white"
-      notification.style.padding = "10px 20px"
-      notification.style.borderRadius = "20px"
-      notification.style.zIndex = "9999"
+      notification.style.cssText = `
+        position: fixed;
+        bottom: 80px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+        color: white;
+        padding: 12px 24px;
+        border-radius: 25px;
+        z-index: 9999;
+        font-size: 14px;
+        font-weight: 500;
+        box-shadow: 0 4px 20px #3b82f6;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        animation: sr-notification-slide 0.3s ease-out;
+      `
+      
+      // Adiciona animação para notificação
+      const notificationStyle = document.createElement('style')
+      notificationStyle.textContent = `
+        @keyframes sr-notification-slide {
+          from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+          to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+      `
+      document.head.appendChild(notificationStyle)
+      
       notification.textContent = message
-
       document.body.appendChild(notification)
 
       setTimeout(() => {
         if (document.body.contains(notification)) {
-          document.body.removeChild(notification)
+          notification.style.animation = 'sr-notification-slide 0.3s ease-out reverse'
+          setTimeout(() => {
+            if (document.body.contains(notification)) {
+              document.body.removeChild(notification)
+            }
+          }, 300)
         }
         if (this.currentReadingStatus === message) {
           this.updateReadingStatus()
@@ -623,6 +1002,14 @@ export default {
             event.preventDefault()
           }
           break
+        case "w":
+        case "W":
+          if (!event.ctrlKey && !event.altKey && !event.metaKey) {
+            this.setReadingMode(this.readingMode === 'word' ? 'element' : 'word')
+            this.announceChange(`Modo: ${this.readingMode === 'word' ? 'Palavra' : 'Elemento'}`)
+            event.preventDefault()
+          }
+          break
         case "Escape":
         case "Esc":
           this.stopSpeaking()
@@ -651,32 +1038,3 @@ export default {
   },
 }
 </script>
-
-<style scoped>
-/* Estilos para melhorar a aparência e acessibilidade */
-button {
-  transition: all 0.2s ease;
-}
-
-button:focus {
-  outline: 2px solid #077b4b;
-  outline-offset: 2px;
-}
-
-button:hover {
-  transform: scale(1.05);
-  opacity: 0.95;
-}
-
-/* Estilo para o elemento destacado na leitura */
-:global(.reading-highlight) {
-  transition: outline 0.3s ease;
-}
-
-/* Animação suave para transições */
-.transition-all {
-  transition-property: all;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 300ms;
-}
-</style>

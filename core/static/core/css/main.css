@@ -1,3 +1,20 @@
+/*!**************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js??clonedRuleSet-12.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-12.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/options/FontSizeToggle.vue?vue&type=style&index=0&id=340993a5&scoped=true&lang=css ***!
+  \**************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+
+/* Animações suaves para as transições */
+.transition-colors[data-v-340993a5] {
+  transition-property: color, background-color, border-color;
+}
+
+/* Melhor contraste para o modo escuro */
+.dark .bg-white[data-v-340993a5] {
+  background-color: rgb(55 65 81);
+}
+.dark .border-gray-200[data-v-340993a5] {
+  border-color: rgb(75 85 99);
+}
+
 /*!**********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
   !*** css ./node_modules/css-loader/dist/cjs.js??clonedRuleSet-12.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-12.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/controller/ScreenReaderControl.vue?vue&type=style&index=0&id=7ccc40ea&scoped=true&lang=css ***!
   \**********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
@@ -747,6 +764,12 @@ video {
 .mt-2 {
   margin-top: 0.5rem;
 }
+.mb-1 {
+  margin-bottom: 0.25rem;
+}
+.mt-3 {
+  margin-top: 0.75rem;
+}
 .block {
   display: block;
 }
@@ -788,6 +811,9 @@ video {
 }
 .h-px {
   height: 1px;
+}
+.h-2 {
+  height: 0.5rem;
 }
 .max-h-\[85vh\] {
   max-height: 85vh;
@@ -831,8 +857,14 @@ video {
 .w-px {
   width: 1px;
 }
+.w-2 {
+  width: 0.5rem;
+}
 .min-w-\[80px\] {
   min-width: 80px;
+}
+.min-w-0 {
+  min-width: 0px;
 }
 .max-w-2xl {
   max-width: 42rem;
@@ -895,6 +927,9 @@ video {
 .flex-col {
   flex-direction: column;
 }
+.items-start {
+  align-items: flex-start;
+}
 .items-center {
   align-items: center;
 }
@@ -912,6 +947,9 @@ video {
 }
 .gap-4 {
   gap: 1rem;
+}
+.gap-1 {
+  gap: 0.25rem;
 }
 .space-x-3 > :not([hidden]) ~ :not([hidden]) {
   --tw-space-x-reverse: 0;
@@ -1033,6 +1071,10 @@ video {
 }
 .border-transparent {
   border-color: transparent;
+}
+.border-\[\#e2e8f0\] {
+  --tw-border-opacity: 1;
+  border-color: rgb(226 232 240 / var(--tw-border-opacity, 1));
 }
 .border-r-gray-800 {
   --tw-border-opacity: 1;
@@ -1209,6 +1251,10 @@ video {
   font-size: 1.25rem;
   line-height: 1.75rem;
 }
+.text-xs {
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
 .font-bold {
   font-weight: 700;
 }
@@ -1217,6 +1263,15 @@ video {
 }
 .font-semibold {
   font-weight: 600;
+}
+.uppercase {
+  text-transform: uppercase;
+}
+.leading-tight {
+  line-height: 1.25;
+}
+.tracking-wide {
+  letter-spacing: 0.025em;
 }
 .text-\[\#1a202c\] {
   --tw-text-opacity: 1;
@@ -1293,6 +1348,10 @@ video {
 .text-white {
   --tw-text-opacity: 1;
   color: rgb(255 255 255 / var(--tw-text-opacity, 1));
+}
+.text-gray-900 {
+  --tw-text-opacity: 1;
+  color: rgb(17 24 39 / var(--tw-text-opacity, 1));
 }
 .underline {
   text-decoration-line: underline;
@@ -1450,6 +1509,11 @@ body.high-contrast button:not(.accessibility-button) {
   background-color: rgb(255 255 255 / 0.2);
 }
 
+.hover\:bg-gray-50:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(249 250 251 / var(--tw-bg-opacity, 1));
+}
+
 .hover\:text-gray-200:hover {
   --tw-text-opacity: 1;
   color: rgb(229 231 235 / var(--tw-text-opacity, 1));
@@ -1488,6 +1552,11 @@ body.high-contrast button:not(.accessibility-button) {
 
 .focus\:w-auto:focus {
   width: auto;
+}
+
+.focus\:border-blue-500:focus {
+  --tw-border-opacity: 1;
+  border-color: rgb(59 130 246 / var(--tw-border-opacity, 1));
 }
 
 .focus\:bg-white:focus {
@@ -1727,6 +1796,11 @@ body.high-contrast button:not(.accessibility-button) {
   .dark\:text-white {
     --tw-text-opacity: 1;
     color: rgb(255 255 255 / var(--tw-text-opacity, 1));
+  }
+
+  .dark\:text-gray-100 {
+    --tw-text-opacity: 1;
+    color: rgb(243 244 246 / var(--tw-text-opacity, 1));
   }
 
   .dark\:hover\:bg-gray-500:hover {

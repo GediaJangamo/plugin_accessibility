@@ -90,12 +90,14 @@
           }
           
           body.high-contrast-mode button,
+          body.high-contrast-mode switch,
+          body.high-contrast-mode toggle,
           body.high-contrast-mode input,
           body.high-contrast-mode select,
           body.high-contrast-mode textarea {
             background-color: #000 !important;
-            color: #fff !important;
-            border: 2px solid #fff !important;
+            color: #ffffff !important;
+            border: 2px solid #ffffff !important;
           }
         `;
         document.head.appendChild(styleEl);

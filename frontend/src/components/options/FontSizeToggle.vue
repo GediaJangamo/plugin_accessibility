@@ -59,12 +59,12 @@
     <div class="mt-3 flex justify-center">
       <div class="flex gap-1">
         <div 
-          v-for="(size, index) in fontSizes" 
+          v-for="(size) in fontSizes" 
           :key="size"
           class="w-2 h-2 rounded-full transition-colors duration-200"
           :class="fontSize === size ? 'bg-[#3b82f6]' : 'bg-gray-300 dark:bg-gray-600'"
           :aria-label="`${size} - ${fontSize === size ? 'Selecionado' : 'Não selecionado'}`"
-        />
+        ></div>
       </div>
     </div>
   </div>

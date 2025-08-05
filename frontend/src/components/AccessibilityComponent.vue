@@ -9,7 +9,7 @@
     <button 
       v-if="!isOpen"
       @click="toggleMenu"
-      class="fixed bottom-32 left-0 bg-[#4A90E2] hover:bg-[#357ABD] text-white py-4 px-6 rounded-r-full shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 z-50 group"
+      class="fixed bottom-32 left-0 bg-[#4A90E2] hover:bg-[#357ABD] text-white py-4 px-6 rounded-r-full shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 z-50 group accessibility-control"
       aria-label="Opcoes de acessibilidade"
     >
       <img src="/static/core/img/accessibility_icon.png" alt="Icone de acessibilidade" class="h-8 w-8 brightness-0 invert">
@@ -23,16 +23,16 @@
     <!-- Accessibility menu - responsivo -->
     <div 
       v-if="isOpen" 
-      class="fixed bottom-0 left-0 top-0 bg-white dark:bg-gray-900 rounded-r-lg shadow-xl border-r border-gray-200 dark:border-gray-700 z-40 transition-all duration-300 flex flex-col w-full sm:w-96 max-w-sm"
+      class="fixed bottom-0 left-0 top-0 bg-white dark:bg-gray-900 rounded-r-lg shadow-xl border-r border-gray-200 dark:border-gray-700 z-40 transition-all duration-300 flex flex-col w-full sm:w-96 max-w-sm accessibility-menu"
       role="dialog"
       aria-labelledby="accessibility-title"
     >
       <!-- Header with logos - mais espaçamento no topo -->
-      <div class="flex items-center justify-between p-2 pt-4 bg-[#f8fafc] border-b border-gray-200 dark:border-gray-700 dark:bg-gray-900">
+      <div class="flex items-center justify-between p-2 pt-4 bg-[#f8fafc] border-b border-gray-200 dark:border-gray-700 dark:bg-gray-900 accessibility-header">
       
           <div class="flex justify-center items-center gap-3">
-                <div class="w-10 h-10 bg-[#3b82f6] rounded-md flex items-center justify-center text-white ">G</div>
-                <div class="text-[#1a202c]">
+                <div class="w-10 h-10 bg-[#3b82f6] rounded-md flex items-center justify-center text-white accessibility-logo">G</div>
+                <div class="text-[#1a202c] accessibility-text">
                     <h3 class="text-lg font-semibold">AccessJay</h3>
                     <p class="text-sm text-[#64758b]">Personalize sua experiência de navegação</p>
                 </div>
@@ -40,7 +40,7 @@
         
         <button 
           @click="toggleMenu" 
-          class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 p-1 rounded-full"
+          class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 p-1 rounded-full accessibility-control"
           aria-label="Fechar menu de acessibilidade"
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -51,42 +51,52 @@
       
       
       <!-- Main content - responsivo com scroll se necessário -->
-      <div class="px-4 sm:px-6 py-4 space-y-2 flex-grow flex flex-col justify-between overflow-y-auto">
+      <div class="px-4 sm:px-6 py-4 space-y-2 flex-grow flex flex-col justify-between overflow-y-auto accessibility-content">
         <div class="space-y-4 sm:space-y-3">
           <!-- Font size control component -->
-          <FontSizeToggle 
-            :fontSize="settings.fontSize" 
-            @update:fontSize="updateSetting('fontSize', $event)"
-            @announce="announceToScreenReader" 
-          />
+          <div class="accessibility-control-wrapper">
+            <FontSizeToggle 
+              :fontSize="settings.fontSize" 
+              @update:fontSize="updateSetting('fontSize', $event)"
+              @announce="announceToScreenReader" 
+            />
+          </div>
           
           <!-- High contrast component -->
-          <ContrastToggle 
-            :highContrast="settings.highContrast" 
-            @update:highContrast="updateSetting('highContrast', $event)"
-            @announce="announceToScreenReader" 
-          />
+          <div class="accessibility-control-wrapper">
+            <ContrastToggle 
+              :highContrast="settings.highContrast" 
+              @update:highContrast="updateSetting('highContrast', $event)"
+              @announce="announceToScreenReader" 
+            />
+          </div>
           
           <!-- Screen reader component -->
-          <ScreenReader 
-            :screenReader="settings.screenReader" 
-            @update:screenReader="updateSetting('screenReader', $event)"
-            @announce="announceToScreenReader" 
-          />
+          <div class="accessibility-control-wrapper">
+            <ScreenReader 
+              :screenReader="settings.screenReader" 
+              @update:screenReader="updateSetting('screenReader', $event)"
+              @announce="announceToScreenReader" 
+            />
+          </div>
 
           <!-- Voice commands component -->
-          <VoiceNavigation 
-            :voiceCommands="settings.voiceCommands" 
-            @update:voiceCommands="updateSetting('voiceCommands', $event)"
-            @announce="announceToScreenReader"
-            @executeCommand="handleVoiceCommand" 
-          />
+          <div class="accessibility-control-wrapper">
+            <VoiceNavigation 
+              :voiceCommands="settings.voiceCommands" 
+              @update:voiceCommands="updateSetting('voiceCommands', $event)"
+              @announce="announceToScreenReader"
+              @executeCommand="handleVoiceCommand" 
+            />
+          </div>
           
           <!-- Cursor section component -->
-          <CursorCustomizer 
-            :cursorColor="settings.cursorColor" 
-            @update:cursorColor="updateSetting('cursorColor', $event)"
-          />
+          <div class="accessibility-control-wrapper">
+            <CursorCustomizer 
+              :cursorColor="settings.cursorColor" 
+              @update:cursorColor="updateSetting('cursorColor', $event)"
+            />
+          </div>
         </div>
         
         <!-- Bottom buttons - responsivo -->
@@ -94,7 +104,7 @@
           <!-- Save Preferences Button -->
           <button 
             @click="saveSettings" 
-            class="w-full bg-[#3b82f6] hover:bg-[#357ABD] text-white py-3 sm:py-2 px-4 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 flex items-center justify-center text-lg sm:text-base"
+            class="w-full bg-[#3b82f6] hover:bg-[#357ABD] text-white py-3 sm:py-2 px-4 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#3b82f6] flex items-center justify-center text-lg sm:text-base accessibility-control"
             aria-label="Salvar preferências de acessibilidade"
           >
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -106,7 +116,7 @@
           <!-- Reset Settings Button -->
           <button 
             @click="resetSettings" 
-            class="w-full bg-[#f1f5f9] hover:bg-slate-50 border-[#cedff6] border-[1px] dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-800 dark:text-white py-3 sm:py-2 px-4 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center justify-center text-lg sm:text-base"
+            class="w-full bg-[#f1f5f9] hover:bg-slate-50 border-[#cedff6] border-[1px] dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-800 dark:text-white py-3 sm:py-2 px-4 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center justify-center text-lg sm:text-base accessibility-control"
             aria-label="Restaurar configurações padrão"
           >
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -423,28 +433,106 @@ export default {
       const styleEl = document.createElement('style');
       styleEl.id = 'accessibility-global-styles';
       styleEl.innerHTML = `
-        /* Classes para Alto Contraste */
+        /* Classes para Alto Contraste - Aplicação mais específica */
         body.high-contrast {
           background-color: #000 !important;
           color: #fff !important;
         }
         
-        body.high-contrast a {
+        /* Links em alto contraste */
+        body.high-contrast a:not(.accessibility-control):not(.accessibility-control *) {
           color: #00ccff !important;
           text-decoration: underline !important;
         }
         
-        body.high-contrast button, 
-        body.high-contrast input, 
-        body.high-contrast select, 
-        body.high-contrast textarea {
+        /* Formulários em alto contraste - exceto controles de acessibilidade */
+        body.high-contrast button:not(.accessibility-control):not(.accessibility-control *), 
+        body.high-contrast input:not(.accessibility-control input):not(.accessibility-control-wrapper input):not(.accessibility-control-wrapper *),
+        body.high-contrast select:not(.accessibility-control select):not(.accessibility-control-wrapper select):not(.accessibility-control-wrapper *), 
+        body.high-contrast textarea:not(.accessibility-control textarea):not(.accessibility-control-wrapper textarea):not(.accessibility-control-wrapper *) {
           background-color: #000 !important;
           color: #fff !important;
           border: 2px solid #fff !important;
         }
         
-        body.high-contrast img {
+        /* Imagens em alto contraste - exceto no menu de acessibilidade */
+        body.high-contrast img:not(.accessibility-menu img):not(.accessibility-control img) {
           filter: grayscale(100%) contrast(150%) !important;
+        }
+        
+        /* Preservar estilos dos controles de acessibilidade */
+        .accessibility-control,
+        .accessibility-control *,
+        .accessibility-control-wrapper,
+        .accessibility-control-wrapper *,
+        .accessibility-menu,
+        .accessibility-menu *,
+        .accessibility-header,
+        .accessibility-header *,
+        .accessibility-content,
+        .accessibility-content *,
+        .accessibility-logo,
+        .accessibility-text {
+          /* Resetar estilos de alto contraste para controles de acessibilidade */
+        }
+        
+        body.high-contrast .accessibility-control {
+          background-color: #3b82f6 !important;
+          color: #ffffff !important;
+          border: 2px solid #ffffff !important;
+        }
+        
+        body.high-contrast .accessibility-control:hover {
+          background-color: #357ABD !important;
+        }
+        
+        body.high-contrast .accessibility-menu {
+          background-color: #ffffff !important;
+          color: #000000 !important;
+          border: 2px solid #000000 !important;
+        }
+        
+        body.high-contrast .accessibility-header {
+         
+          color: #1a202c !important;
+          border-bottom: 2px solid #000000 !important;
+        }
+        
+        body.high-contrast .accessibility-logo {
+          background-color: #ffff00 !important;
+          color: #000000 !important;
+        }
+        
+        body.high-contrast .accessibility-text h3 {
+          color: #ffffff !important;
+        }
+        
+        body.high-contrast .accessibility-text p {
+          color: #ffffff !important;
+        }
+        
+        /* Garantir visibilidade dos switches/toggles */
+        body.high-contrast .accessibility-control-wrapper input[type="checkbox"],
+        body.high-contrast .accessibility-control-wrapper input[type="radio"],
+        body.high-contrast .accessibility-control-wrapper select,
+        body.high-contrast .accessibility-control-wrapper button,
+        body.high-contrast .accessibility-control-wrapper .toggle,
+        body.high-contrast .accessibility-control-wrapper .switch,
+        body.high-contrast .accessibility-control-wrapper .slider {
+          background-color: #ffffff !important;
+          color: #000000 !important;
+          border: 2px solid #000000 !important;
+          opacity: 1 !important;
+          visibility: visible !important;
+        }
+        
+        /* Switches ativos */
+        body.high-contrast .accessibility-control-wrapper input[type="checkbox"]:checked,
+        body.high-contrast .accessibility-control-wrapper .toggle.active,
+        body.high-contrast .accessibility-control-wrapper .switch.active {
+          background-color: #ffff00  !important;
+          color: #ffffff  !important;
+          border: 2px solid #ffffff !important;
         }
         
         /* Classe para elementos visíveis apenas para leitores de tela */

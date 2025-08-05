@@ -18,7 +18,7 @@
            @change="toggleScreenReader"
            class="sr-only"
         >
-        <div class="relative w-14 h-7 bg-gray-300 dark:bg-gray-600 rounded-full transition duration-300 ease-in-out" :class="{'bg-green-500': screenReader}">
+        <div class="relative w-14 h-7 bg-gray-300  dark:bg-gray-600 rounded-full transition duration-300 ease-in-out" :class="{'bg-blue-400': screenReader}">
           <div class="absolute left-1 top-1 bg-white w-5 h-5 rounded-full shadow transition duration-300 ease-in-out" :class="{'transform translate-x-7': screenReader}"></div>
         </div>
       </div>
@@ -49,7 +49,7 @@ export default {
     toggleScreenReader() {
       const newValue = !this.screenReader;
       this.$emit('update:screenReader', newValue);
-      this.$emit('announce', newValue ? 'Leitor de tela ativado' : 'Leitor de tela desativado');
+      this.$emit('announce', newValue ? 'Leitor de ecra activado' : 'Leitor de ecra desactivado');
       
       // Adicionar classes de estilo global para o leitor de tela
       if (newValue) {

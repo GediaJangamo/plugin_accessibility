@@ -20,20 +20,20 @@
       </div>
     </button>
 
-    <!-- Accessibility menu - wider and full-height, with better spacing -->
+    <!-- Accessibility menu - responsivo -->
     <div 
       v-if="isOpen" 
-      class="fixed bottom-0 left-0 top-0 bg-white dark:bg-gray-900 rounded-r-lg shadow-xl border-r border-gray-200 dark:border-gray-700 z-40 transition-all duration-300 flex flex-col w-96"
+      class="fixed bottom-0 left-0 top-0 bg-white dark:bg-gray-900 rounded-r-lg shadow-xl border-r border-gray-200 dark:border-gray-700 z-40 transition-all duration-300 flex flex-col w-full sm:w-96 max-w-sm"
       role="dialog"
       aria-labelledby="accessibility-title"
     >
-      <!-- Header with logos -->
-      <div class="flex items-center justify-between p-2 bg-[#f8fafc] border-b border-gray-200 dark:border-gray-700 dark:bg-gray-900">
+      <!-- Header with logos - mais espaçamento no topo -->
+      <div class="flex items-center justify-between p-2 pt-4 bg-[#f8fafc] border-b border-gray-200 dark:border-gray-700 dark:bg-gray-900">
       
           <div class="flex justify-center items-center gap-3">
                 <div class="w-10 h-10 bg-[#3b82f6] rounded-md flex items-center justify-center text-white ">G</div>
                 <div class="text-[#1a202c]">
-                    <h3>AccessJay</h3>
+                    <h3 class="text-lg font-semibold">AccessJay</h3>
                     <p class="text-sm text-[#64758b]">Personalize sua experiência de navegação</p>
                 </div>
             </div>
@@ -50,9 +50,9 @@
       </div>
       
       
-      <!-- Main content with reduced spacing between items -->
-      <div class="px-4 space-y-2 flex-grow flex flex-col justify-between">
-        <div class="space-y-3">
+      <!-- Main content - responsivo com scroll se necessário -->
+      <div class="px-4 sm:px-6 py-4 space-y-2 flex-grow flex flex-col justify-between overflow-y-auto">
+        <div class="space-y-4 sm:space-y-3">
           <!-- Font size control component -->
           <FontSizeToggle 
             :fontSize="settings.fontSize" 
@@ -89,12 +89,12 @@
           />
         </div>
         
-        <!-- Bottom buttons -->
-        <div class="py-2 mb-4 space-y-1">
+        <!-- Bottom buttons - responsivo -->
+        <div class="py-4 pb-6 sm:pb-4 space-y-2 sm:space-y-1">
           <!-- Save Preferences Button -->
           <button 
             @click="saveSettings" 
-            class="w-full bg-[#3b82f6] hover:bg-[#357ABD] text-white py-2 px-4 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 flex items-center justify-center text-lg"
+            class="w-full bg-[#3b82f6] hover:bg-[#357ABD] text-white py-3 sm:py-2 px-4 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 flex items-center justify-center text-lg sm:text-base"
             aria-label="Salvar preferências de acessibilidade"
           >
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -106,7 +106,7 @@
           <!-- Reset Settings Button -->
           <button 
             @click="resetSettings" 
-            class="w-full bg-[#f1f5f9] hover:bg-slate-50 border-[#cedff6] border-[1px] dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-800 dark:text-white py-2 px-4 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center justify-center text-lg"
+            class="w-full bg-[#f1f5f9] hover:bg-slate-50 border-[#cedff6] border-[1px] dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-800 dark:text-white py-3 sm:py-2 px-4 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center justify-center text-lg sm:text-base"
             aria-label="Restaurar configurações padrão"
           >
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -534,5 +534,13 @@ export default {
 /* Animações para o menu de acessibilidade */
 .fixed[role="dialog"] {
   animation: slideIn 0.3s ease-out, fadeIn 0.3s ease-out;
+}
+
+/* Melhorias responsivas */
+@media (max-width: 640px) {
+  .fixed[role="dialog"] {
+    width: 100% !important;
+    max-width: none !important;
+  }
 }
 </style>

@@ -24,7 +24,7 @@
         </div>
         <div class="flex-grow">
           <span class="block text-lg text-gray-800 dark:text-white font-medium">Comandos de Voz</span>
-          <span class="text-sm text-[#64748b] dark:text-gray-300">Navegue com sua voz</span>
+          <span class="text-sm text-[#64748b] dark:text-gray-300">Navegue com a sua voz</span>
         </div>
         <div class="flex items-center">
           <input
@@ -34,7 +34,7 @@
             @change="toggleVoiceCommands"
             class="sr-only"
           >
-          <div class="relative w-14 h-7 bg-gray-300 dark:bg-gray-600 rounded-full transition duration-300 ease-in-out" :class="{'bg-green-500': voiceCommands}">
+          <div class="relative w-14 h-7 bg-gray-300 dark:bg-gray-600 rounded-full transition duration-300 ease-in-out" :class="{'bg-blue-500': voiceCommands}">
             <div class="absolute left-1 top-1 bg-white w-5 h-5 rounded-full shadow transition duration-300 ease-in-out" :class="{'transform translate-x-7': voiceCommands}"></div>
           </div>
         </div>

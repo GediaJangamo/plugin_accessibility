@@ -6,11 +6,11 @@
         <button 
           @click="toggleRecognition"
           class="relative w-10 h-10 rounded-full flex items-center justify-center transition-colors"
-          :class="isListening ? 'bg-emerald-600 dark:bg-emerald-700' : 'bg-emerald-600 dark:bg-emerald-700'"
+          :class="isListening ? 'bg-[#4A90E2] dark:bg-[#4A90E2]' : 'bg-[#2060a9] dark:bg-[#2060a9]'"
           aria-label="Alternar reconhecimento de voz"
         >
           <div v-if="!isListening" class="absolute w-8 h-0.5 bg-white rotate-45 rounded-full"></div>
-          <div v-if="recognitionState === 'listening'" class="w-3 h-3 absolute top-0 right-0 rounded-full bg-green-500 animate-pulse"></div>
+          <div v-if="recognitionState === 'listening'" class="w-3 h-3 absolute top-0 right-0 rounded-full bg-[#4A90E2] animate-pulse"></div>
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
             <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
@@ -22,12 +22,12 @@
         <!-- Status do microfone com largura fixa -->
         <div 
           class="p-2 rounded-full text-white w-full max-w-xl"
-          :class="isListening ? 'bg-emerald-600 dark:bg-emerald-700' : 'bg-emerald-600 dark:bg-emerald-700'"
+          :class="isListening ? 'bg-[#2060a9] dark:bg-[#2060a9]' : 'bg-[#2060a9] dark:bg-[#2060a9]'"
         >
           <span class="font-medium text-white px-2">
             {{ statusMessage }}
           </span>
-          <p v-if="lastTranscript" class="text-sm text-emerald-200 mt-1 truncate px-2">
+          <p v-if="lastTranscript" class="text-sm text-blue-200 mt-1 truncate px-2">
             {{ lastTranscript }}
           </p>
         </div>
@@ -36,7 +36,7 @@
       <!-- Botão de informações no canto direito -->
       <button 
         @click="toggleHelpMenu"
-        class="ml-4 p-2 rounded-full text-white hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors bg-emerald-600"
+        class="ml-4 p-2 rounded-full text-white hover:bg-[#4A90E2] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#4A90E2] transition-colors bg-[#4A90E2]"
         aria-label="Informações sobre comandos de voz"
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -54,7 +54,7 @@
     >
       <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[85vh] overflow-hidden flex flex-col">
         <!-- Header -->
-        <div class="p-6 bg-gradient-to-r from-emerald-600 to-emerald-700 dark:from-emerald-800 dark:to-emerald-900">
+        <div class="p-6 bg-gradient-to-r from-[#4A90E2] to-[#2060a9] dark:from-[#2060a9] dark:to-[#233e5c]">
           <div class="flex items-center justify-between">
             <div class="flex items-center space-x-3">
               <div class="bg-white bg-opacity-20 p-2 rounded-full">
@@ -80,7 +80,7 @@
               </svg>
             </button>
           </div>
-          <p class="text-emerald-100 mt-2 max-w-2xl">
+          <p class="text-blue-100 mt-2 max-w-2xl">
             Utilize estes comandos para navegar pelo sistema usando apenas sua voz. Diga "ajuda" a qualquer momento para ver esta lista.
           </p>
         </div>
@@ -89,12 +89,12 @@
         <div class="p-6 overflow-auto">
           <!-- Navegação Geral -->
           <div class="mb-6">
-            <h3 class="text-lg font-bold text-emerald-800 dark:text-emerald-300 mb-3 border-b border-emerald-200 dark:border-emerald-700 pb-2">
+            <h3 class="text-lg font-bold text-[#4A90E2] dark:text-[#72aae9] mb-3 border-b border-blue-200 dark:border-blue-700 pb-2">
               Navegação Geral
             </h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div v-for="(desc, cmd) in generalCommands" :key="cmd" class="flex flex-col md:flex-row bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm border border-emerald-100 dark:border-emerald-900 hover:shadow-md transition-shadow">
-                <div class="font-mono text-sm bg-emerald-50 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-200 px-3 py-2 rounded-md mb-2 md:mb-0 md:mr-3 flex-shrink-0 md:w-auto w-full">
+              <div v-for="(desc, cmd) in generalCommands" :key="cmd" class="flex flex-col md:flex-row bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm border border-blue-200 dark:border-blue-700 hover:shadow-md transition-shadow">
+                <div class="font-mono text-sm bg-blue-50 dark:bg-[#2060a9] text-[#2060a9] dark:text-blue-200 px-3 py-2 rounded-md mb-2 md:mb-0 md:mr-3 flex-shrink-0 md:w-auto w-full">
                   {{ cmd }}
                 </div>
                 <div class="text-gray-700 dark:text-gray-300 text-sm md:text-base flex items-center">
@@ -106,12 +106,12 @@
           
           <!-- Comandos do Sistema -->
           <div class="mb-6">
-            <h3 class="text-lg font-bold text-emerald-800 dark:text-emerald-300 mb-3 border-b border-emerald-200 dark:border-emerald-700 pb-2">
-              Módulos do Sistema
+            <h3 class="text-lg font-bold text-[#4A90E2] dark:text-[#72aae9]  mb-3 border-b border-blue-200 dark:border-blue-700 pb-2">
+              Páginas do Sistema
             </h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div v-for="(desc, cmd) in systemCommands" :key="cmd" class="flex flex-col md:flex-row bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm border border-emerald-100 dark:border-emerald-900 hover:shadow-md transition-shadow">
-                <div class="font-mono text-sm bg-emerald-50 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-200 px-3 py-2 rounded-md mb-2 md:mb-0 md:mr-3 flex-shrink-0 md:w-auto w-full">
+              <div v-for="(desc, cmd) in systemCommands" :key="cmd" class="flex flex-col md:flex-row bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm border border-blue-100 dark:border-blue-700 hover:shadow-md transition-shadow">
+                <div class="font-mono text-sm bg-blue-50 dark:bg-blue-700 text-blue-800 dark:text-blue-200 px-3 py-2 rounded-md mb-2 md:mb-0 md:mr-3 flex-shrink-0 md:w-auto w-full">
                   {{ cmd }}
                 </div>
                 <div class="text-gray-700 dark:text-gray-300 text-sm md:text-base flex items-center">
@@ -123,12 +123,12 @@
           
           <!-- Comandos de Acessibilidade -->
           <div class="mb-6">
-            <h3 class="text-lg font-bold text-emerald-800 dark:text-emerald-300 mb-3 border-b border-emerald-200 dark:border-emerald-700 pb-2">
+            <h3 class="text-lg font-bold text-[#4A90E2] dark:text-[#72aae9]  mb-3 border-b border-blue-200 dark:border-emerald-700 pb-2">
               Acessibilidade
             </h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div v-for="(desc, cmd) in accessibilityCommands" :key="cmd" class="flex flex-col md:flex-row bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm border border-emerald-100 dark:border-emerald-900 hover:shadow-md transition-shadow">
-                <div class="font-mono text-sm bg-emerald-50 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-200 px-3 py-2 rounded-md mb-2 md:mb-0 md:mr-3 flex-shrink-0 md:w-auto w-full">
+              <div v-for="(desc, cmd) in accessibilityCommands" :key="cmd" class="flex flex-col md:flex-row bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm border border-blue-100 dark:border-blue-700 hover:shadow-md transition-shadow">
+                <div class="font-mono text-sm bg-blue-50 dark:bg-blue-700 text-blue-800 dark:text-blue-200 px-3 py-2 rounded-md mb-2 md:mb-0 md:mr-3 flex-shrink-0 md:w-auto w-full">
                   {{ cmd }}
                 </div>
                 <div class="text-gray-700 dark:text-gray-300 text-sm md:text-base flex items-center">
@@ -140,14 +140,14 @@
         </div>
         
         <!-- Footer -->
-        <div class="p-4 border-t border-gray-200 dark:border-gray-700 bg-emerald-50 dark:bg-emerald-950">
+        <div class="p-4 border-t border-gray-200 dark:border-gray-700 bg-blue-50 dark:bg-emerald-950">
           <div class="flex items-center justify-between">
-            <p class="text-sm text-emerald-700 dark:text-emerald-300">
+            <p class="text-sm text-[#5194e0] dark:text-[#72aae9] ">
               <span class="font-bold">Dica:</span> Você pode dizer "ajuda" a qualquer momento para ver estes comandos novamente.
             </p>
             <button 
               @click="toggleHelpMenu"
-              class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
+              class="px-4 py-2 bg-[#4A90E2] hover:bg-[#2060a9] text-white rounded-lg shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-[#4A90E2] focus:ring-offset-2"
             >
               Fechar
             </button>
@@ -189,30 +189,30 @@ export default {
         "avançar": "Avança para a próxima página",
         "rolar para baixo": "Rola a página para baixo",
         "rolar para cima": "Rola a página para cima",
-        "atualizar página": "Recarrega a página atual",
-        "fechar": "Fecha a janela ou diálogo atual",
+        "actualizar página": "Recarrega a página actual",
+        "fechar": "Fecha a janela ou diálogo actual",
         "maximizar": "Maximiza a janela atual",
         "minimizar": "Minimiza a janela atual",
         "ajuda": "Exibe esta lista de comandos disponíveis"
       },
       systemCommands: {
-        "abrir avaliações": "Navega para o módulo de avaliações",
-        "abrir inscrições": "Navega para o módulo de inscrições",
-        "abrir matrículas": "Navega para o módulo de matrículas",
-        "abrir faturas": "Navega para o módulo de faturas",
-        "abrir mensalidades": "Navega para o módulo de mensalidades",
-        "abrir vula": "Navega para o módulo Vula",
-        "abrir perfil": "Acessa o perfil do usuário",
-        "abrir configurações": "Acessa as configurações do sistema",
+        "abrir avaliações": "Navega para a página de avaliações",
+        "abrir inscrições": "Navega para a página de inscrições",
+        "abrir matrículas": "Navega para a página de matrículas",
+        "abrir facturas": "Navega para a página de facturas",
+        "abrir mensalidades": "Navega para a página de mensalidades",
+        "abrir vula": "Navega para a página Vula",
+        "abrir perfil": "Acede ao perfil do utilizador",
+        "abrir configurações": "Acede às configurações do sistema",
       },
       accessibilityCommands: {
-        "ativar alto contraste": "Ativa o modo de alto contraste",
-        "desativar alto contraste": "Desativa o modo de alto contraste",
+        "activar alto contraste": "Activa o modo de alto contraste",
+        "desactivar alto contraste": "Desactiva o modo de alto contraste",
         "aumentar fonte": "Aumenta o tamanho da fonte",
         "diminuir fonte": "Diminui o tamanho da fonte",
         "tamanho normal": "Retorna a fonte ao tamanho normal",
-        "ativar leitor de tela": "Ativa o leitor de tela",
-        "desativar leitor de tela": "Desativa o leitor de tela",
+        "activar leitor de ecra": "Activa o leitor de ecra",
+        "desactivar leitor de ecra": "Desactiva o leitor de ecra",
         "modo normal": "Retorna ao modo de visualização padrão",
       }
     }

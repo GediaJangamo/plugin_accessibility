@@ -107,7 +107,7 @@
           <!-- Comandos do Sistema -->
           <div class="mb-6">
             <h3 class="text-lg font-bold text-[#4A90E2] dark:text-[#72aae9]  mb-3 border-b border-blue-200 dark:border-blue-700 pb-2">
-              Páginas do Sistema
+              Módulos do Sistema
             </h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div v-for="(desc, cmd) in systemCommands" :key="cmd" class="flex flex-col md:flex-row bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm border border-blue-100 dark:border-blue-700 hover:shadow-md transition-shadow">
@@ -196,12 +196,12 @@ export default {
         "ajuda": "Exibe esta lista de comandos disponíveis"
       },
       systemCommands: {
-        "abrir avaliações": "Navega para a página de avaliações",
-        "abrir inscrições": "Navega para a página de inscrições",
-        "abrir matrículas": "Navega para a página de matrículas",
-        "abrir facturas": "Navega para a página de facturas",
-        "abrir mensalidades": "Navega para a página de mensalidades",
-        "abrir vula": "Navega para a página Vula",
+        "abrir avaliações": "Navega para o módulo de avaliações",
+        "abrir inscrições": "Navega para o módulo de inscrições",
+        "abrir matrículas": "Navega para o módulo de matrículas",
+        "abrir facturas": "Navega para o módulo de facturas",
+        "abrir mensalidades": "Navega para o módulo de mensalidades",
+        "abrir vula": "Navega para o Vula",
         "abrir perfil": "Acede ao perfil do utilizador",
         "abrir configurações": "Acede às configurações do sistema",
       },
@@ -267,7 +267,7 @@ export default {
     
     startVoiceRecognition() {
       if (!this.active) {
-        this.$emit('announce', 'Os comandos de voz estão desativados no sistema');
+        this.$emit('announce', 'Os comandos de voz estão desactivados no sistema');
         return;
       }
       
@@ -430,54 +430,99 @@ export default {
       }
     },
     
-    processVoiceCommand(command) {
-      console.log('Comando recebido:', command);
+    // processVoiceCommand(command) {
+    //   console.log('Comando recebido:', command);
       
-      // Comando de ajuda
-      if (command.includes('ajuda')) {
-        this.showHelpMenu = true;
-        this.$emit('announce', 'Exibindo lista de comandos disponíveis');
-        return;
-      }
+    //   // Comando de ajuda
+    //   if (command.includes('ajuda')) {
+    //     this.showHelpMenu = true;
+    //     this.$emit('announce', 'Exibindo lista de comandos disponíveis');
+    //     return;
+    //   }
       
-      // Tratamento para comandos específicos de ativação/desativação do reconhecimento
-      if (command.includes('desativar microfone') || command.includes('parar de ouvir') || command.includes('desligar microfone')) {
-        this.stopVoiceRecognition();
-        return;
-      }
+    //   // Tratamento para comandos específicos de ativação/desativação do reconhecimento
+    //   if (command.includes('desativar microfone') || command.includes('parar de ouvir') || command.includes('desligar microfone')) {
+    //     this.stopVoiceRecognition();
+    //     return;
+    //   }
       
-      // Verifica todos os comandos disponíveis
-      const allCommands = {
-        ...this.generalCommands,
-        ...this.systemCommands,
-        ...this.accessibilityCommands
-      };
+    //   // Verifica todos os comandos disponíveis
+    //   const allCommands = {
+    //     ...this.generalCommands,
+    //     ...this.systemCommands,
+    //     ...this.accessibilityCommands
+    //   };
       
-      // Procura por correspondências aproximadas nos comandos
-      let bestMatch = null;
-      let bestScore = 0;
+    //   // Procura por correspondências aproximadas nos comandos
+    //   let bestMatch = null;
+    //   let bestScore = 0;
       
-      Object.keys(allCommands).forEach(cmd => {
-        const score = this.getSimilarityScore(command, cmd);
-        if (score > bestScore && score > 0.7) { // Threshold de 70% de similaridade
-          bestScore = score;
-          bestMatch = cmd;
-        }
-      });
+    //   Object.keys(allCommands).forEach(cmd => {
+    //     const score = this.getSimilarityScore(command, cmd);
+    //     if (score > bestScore && score > 0.7) { // Threshold de 70% de similaridade
+    //       bestScore = score;
+    //       bestMatch = cmd;
+    //     }
+    //   });
       
-      if (bestMatch) {
-        // Se encontrou uma correspondência, executa o comando
-        this.recognitionMessage = `Executando: ${bestMatch}`;
-        this.$emit('executeCommand', bestMatch);
-        this.$emit('announce', `Executando comando: ${bestMatch}`);
-      } else {
-        // Se não encontrou correspondência, informa o usuário
-        this.recognitionMessage = 'Comando não reconhecido';
-        this.$emit('announce', 'Comando não reconhecido. Diga "ajuda" para ver os comandos disponíveis.');
-      }
-    },
+    //   if (bestMatch) {
+    //     // Se encontrou uma correspondência, executa o comando
+    //     this.recognitionMessage = `Executando: ${bestMatch}`;
+    //     this.$emit('executeCommand', bestMatch);
+    //     this.$emit('announce', `Executando comando: ${bestMatch}`);
+    //   } else {
+    //     // Se não encontrou correspondência, informa o usuário
+    //     this.recognitionMessage = 'Comando não reconhecido';
+    //     this.$emit('announce', 'Comando não reconhecido. Diga "ajuda" para ver os comandos disponíveis.');
+    //   }
+    // },
     
     // Função melhorada para calcular similaridade entre strings
+    
+    processVoiceCommand(command) {
+     console.log('Comando recebido:', command);
+  
+    // Comando de ajuda
+    if (command.includes('ajuda')) {
+      this.showHelpMenu = true;
+      this.$emit('announce', 'Exibindo lista de comandos disponíveis');
+      return;
+    }
+    
+    // Tratamento para comandos específicos de ativação/desativação do reconhecimento
+    if (command.includes('desativar microfone') || command.includes('parar de ouvir') || command.includes('desligar microfone')) {
+      this.stopVoiceRecognition();
+      return;
+    }
+    
+    // Verifica todos os comandos disponíveis
+    const allCommands = {
+      ...this.generalCommands,
+      ...this.systemCommands,
+      ...this.accessibilityCommands
+    };
+    
+    // Procura por correspondências aproximadas nos comandos
+    let bestMatch = null;
+    let bestScore = 0;
+    
+    Object.keys(allCommands).forEach(cmd => {
+      const score = this.getSimilarityScore(command, cmd);
+      if (score > bestScore && score > 0.7) { // Threshold de 70% de similaridade
+        bestScore = score;
+        bestMatch = cmd;
+      }
+    });
+    
+    if (bestMatch) {
+      // Executa o comando usando o novo método
+      this.executeVoiceCommand(bestMatch);
+    } else {
+      // Se não encontrou correspondência, informa o usuário
+      this.recognitionMessage = 'Comando não reconhecido';
+      this.$emit('announce', 'Comando não reconhecido. Diga "ajuda" para ver os comandos disponíveis.');
+    }
+  },
     getSimilarityScore(str1, str2) {
       str1 = str1.toLowerCase().trim();
       str2 = str2.toLowerCase().trim();
@@ -509,7 +554,287 @@ export default {
       
       if (significantWords === 0) return 0;
       return commonWords / significantWords;
+    },
+
+    executeVoiceCommand(command) {
+      console.log('Executando comando:', command);
+      
+      // Mapeia os comandos de voz para as URLs do Django
+      const commandRoutes = {
+        // Navegação geral
+        "ir para início": "/dashboard/",
+        "voltar": "history_back",
+        "avançar": "history_forward", 
+        "rolar para baixo": "scroll_down",
+        "rolar para cima": "scroll_up",
+        "actualizar página": "reload_page",
+        "fechar": "close_modal",
+        "maximizar": "maximize_window",
+        "minimizar": "minimize_window",
+        
+        // Comandos do sistema SIGA - usando suas URLs exatas
+        "abrir avaliações": "/painel_estudante/avaliacoes/",
+        "abrir inscrições": "/painel_estudante/inscricoes/", 
+        "abrir matrículas": "/painel_estudante/matriculas/",
+        "abrir facturas": "/painel_estudante/facturas/",
+        "abrir mensalidades": "/painel_estudante/mensalidades/",
+        "abrir vula": "/painel_estudante/vula/",
+        "abrir perfil": "/painel_estudante/",
+        "ir para painel": "/painel_estudante/",
+        "ir para dashboard": "/dashboard/",
+        
+        // Comandos de autenticação
+        "fazer logout": "/logout/",
+        "sair do sistema": "/logout/",
+        "deslogar": "/logout/",
+        
+        // Comandos de acessibilidade (ações JavaScript)
+        "activar alto contraste": "toggle_high_contrast",
+        "desactivar alto contraste": "toggle_high_contrast", 
+        "aumentar fonte": "increase_font_size",
+        "diminuir fonte": "decrease_font_size",
+        "tamanho normal": "reset_font_size",
+        "activar leitor de ecra": "toggle_screen_reader",
+        "desactivar leitor de ecra": "toggle_screen_reader",
+        "modo normal": "reset_accessibility"
+      };
+      
+      const action = commandRoutes[command];
+      
+      if (!action) {
+        this.$emit('announce', 'Comando não encontrado');
+        return;
+      }
+      
+      // Executa ações especiais (não são URLs)
+      if (typeof action === 'string' && !action.startsWith('/')) {
+        this.executeSpecialAction(action);
+        return;
+      }
+      
+      // Navega para a URL do Django
+      if (action.startsWith('/')) {
+        this.navigateToUrl(action);
+      }
+   },
+
+   // Método para executar ações especiais (não navegação)
+  // executeSpecialAction(action) {
+  //   switch(action) {
+  //     case 'history_back':
+  //       window.history.back();
+  //       this.$emit('announce', 'Voltando para página anterior');
+  //       break;
+        
+  //     case 'history_forward':
+  //       window.history.forward();
+  //       this.$emit('announce', 'Avançando para próxima página');
+  //       break;
+        
+  //     case 'scroll_down':
+  //       window.scrollBy(0, 300);
+  //       this.$emit('announce', 'Rolando para baixo');
+  //       break;
+        
+  //     case 'scroll_up':
+  //       window.scrollBy(0, -300);
+  //       this.$emit('announce', 'Rolando para cima');
+  //       break;
+        
+  //     case 'reload_page':
+  //       window.location.reload();
+  //       this.$emit('announce', 'Recarregando página');
+  //       break;
+        
+  //     case 'close_modal':
+  //       // Fecha modais ou diálogos abertos
+  //       const modal = document.querySelector('.modal, .dialog, [role="dialog"]');
+  //       if (modal) {
+  //         modal.style.display = 'none';
+  //         this.$emit('announce', 'Fechando diálogo');
+  //       }
+  //       break;
+        
+  //     case 'maximize_window':
+  //       if (document.documentElement.requestFullscreen) {
+  //         document.documentElement.requestFullscreen();
+  //         this.$emit('announce', 'Maximizando janela');
+  //       }
+  //       break;
+        
+  //     case 'minimize_window':
+  //       if (document.exitFullscreen) {
+  //         document.exitFullscreen();
+  //         this.$emit('announce', 'Minimizando janela');
+  //       }
+  //       break;
+        
+  //     case 'toggle_high_contrast':
+  //       document.body.classList.toggle('high-contrast');
+  //       const isActive = document.body.classList.contains('high-contrast');
+  //       this.$emit('announce', isActive ? 'Alto contraste activado' : 'Alto contraste desactivado');
+  //       break;
+        
+  //     case 'increase_font_size':
+  //       this.adjustFontSize(1.1);
+  //       this.$emit('announce', 'Fonte aumentada');
+  //       break;
+        
+  //     case 'decrease_font_size':
+  //       this.adjustFontSize(0.9);
+  //       this.$emit('announce', 'Fonte diminuída');
+  //       break;
+        
+  //     case 'reset_font_size':
+  //       document.documentElement.style.fontSize = '16px';
+  //       this.$emit('announce', 'Fonte restaurada ao tamanho normal');
+  //       break;
+        
+  //     case 'toggle_screen_reader':
+  //       // Implementar funcionalidade de leitor de tela
+  //       this.$emit('announce', 'Função de leitor de tela em desenvolvimento');
+  //       break;
+        
+  //     case 'reset_accessibility':
+  //       document.body.classList.remove('high-contrast');
+  //       document.documentElement.style.fontSize = '16px';
+  //       this.$emit('announce', 'Configurações de acessibilidade restauradas');
+  //       break;
+        
+  //     default:
+  //       this.$emit('announce', 'Ação não reconhecida');
+  //   }
+  // },
+  executeSpecialAction(action) {
+  switch(action) {
+    case 'history_back':
+      window.history.back();
+      this.$emit('announce', 'Voltando para página anterior');
+      break;
+
+    case 'history_forward':
+      window.history.forward();
+      this.$emit('announce', 'Avançando para próxima página');
+      break;
+
+    case 'scroll_down':
+      window.scrollBy(0, 300);
+      this.$emit('announce', 'Rolando para baixo');
+      break;
+
+    case 'scroll_up':
+      window.scrollBy(0, -300);
+      this.$emit('announce', 'Rolando para cima');
+      break;
+
+    case 'reload_page':
+      window.location.reload();
+      this.$emit('announce', 'Recarregando página');
+      break;
+
+    case 'close_modal': {
+      const modal = document.querySelector('.modal, .dialog, [role="dialog"]');
+      if (modal) {
+        modal.style.display = 'none';
+        this.$emit('announce', 'Fechando diálogo');
+      }
+      break;
     }
+
+    case 'maximize_window':
+      if (document.documentElement.requestFullscreen) {
+        document.documentElement.requestFullscreen();
+        this.$emit('announce', 'Maximizando janela');
+      }
+      break;
+
+    case 'minimize_window':
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+        this.$emit('announce', 'Minimizando janela');
+      }
+      break;
+
+    case 'toggle_high_contrast': {
+      document.body.classList.toggle('high-contrast');
+      const isActive = document.body.classList.contains('high-contrast');
+      this.$emit('announce', isActive ? 'Alto contraste activado' : 'Alto contraste desactivado');
+      break;
+    }
+
+    case 'increase_font_size':
+      this.adjustFontSize(1.1);
+      this.$emit('announce', 'Fonte aumentada');
+      break;
+
+    case 'decrease_font_size':
+      this.adjustFontSize(0.9);
+      this.$emit('announce', 'Fonte diminuída');
+      break;
+
+    case 'reset_font_size':
+      document.documentElement.style.fontSize = '16px';
+      this.$emit('announce', 'Fonte restaurada ao tamanho normal');
+      break;
+
+    case 'toggle_screen_reader':
+      this.$emit('announce', 'Função de leitor de tela em desenvolvimento');
+      break;
+
+    case 'reset_accessibility':
+      document.body.classList.remove('high-contrast');
+      document.documentElement.style.fontSize = '16px';
+      this.$emit('announce', 'Configurações de acessibilidade restauradas');
+      break;
+
+    default:
+      this.$emit('announce', 'Ação não reconhecida');
+  }
+},
+
+
+  // Método para ajustar tamanho da fonte
+  adjustFontSize(factor) {
+    const currentSize = parseFloat(getComputedStyle(document.documentElement).fontSize);
+    const newSize = Math.max(12, Math.min(24, currentSize * factor));
+    document.documentElement.style.fontSize = newSize + 'px';
+  },
+
+  // Método para navegar para URLs do Django
+  navigateToUrl(url) {
+    try {
+      // Adiciona loading state
+      this.recognitionState = 'thinking';
+      this.recognitionMessage = 'Navegando...';
+      
+      // Navega para a URL
+      window.location.href = url;
+      
+      // Anuncia a navegação
+      const pageNames = {
+        '/dashboard/': 'painel principal',
+        '/painel_estudante/': 'painel do estudante', 
+        '/painel_estudante/avaliacoes/': 'avaliações',
+        '/painel_estudante/inscricoes/': 'inscrições',
+        '/painel_estudante/matriculas/': 'matrículas', 
+        '/painel_estudante/facturas/': 'facturas',
+        '/painel_estudante/mensalidades/': 'mensalidades',
+        '/painel_estudante/vula/': 'plataforma Vula',
+        '/logout/': 'saindo do sistema'
+      };
+      
+      const pageName = pageNames[url] || 'página solicitada';
+      this.$emit('announce', `Navegando para ${pageName}`);
+      
+    } catch (error) {
+      console.error('Erro na navegação:', error);
+      this.$emit('announce', 'Erro ao navegar para a página');
+      this.recognitionState = 'error';
+    }
+  },
+
+
+
   }
 }
 </script>

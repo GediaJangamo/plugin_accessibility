@@ -153,7 +153,7 @@ export default {
       currentElementIndex: -1,
       speechSynth: null,
       utterance: null,
-      currentReadingStatus: "Pronto para leitura",
+      currentReadingStatus: "",
       speechRate: 1.0,
       gatherTimeout: null,
       observer: null,
@@ -390,7 +390,7 @@ export default {
       }
     },
 
-    // Coleta elementos legíveis na página
+    
     gatherReadableElements() {
       const mainContent = document.getElementById("main-content")
       if (!mainContent) {
@@ -420,12 +420,13 @@ export default {
         })
       }
 
+      // Status mais limpo - só mostra se encontrou conteúdo ou não
       if (this.readableElements.length > 0) {
-        this.currentReadingStatus = `${this.readableElements.length} elementos para ler`
+        this.currentReadingStatus = "Leitor de ecrã activo"
       } else {
         this.currentReadingStatus = "Nenhum conteúdo para ler"
       }
-    },
+   },
 
     debounceGatherElements() {
       if (this.gatherTimeout) clearTimeout(this.gatherTimeout)
@@ -666,15 +667,8 @@ export default {
       if (this.speechSynth && this.isPlaying) {
         this.speechSynth.pause()
         this.isPlaying = false
-        this.currentReadingStatus = "Leitura pausada"
-
-        clearTimeout(this.pauseTimer)
-        this.pauseTimer = setTimeout(() => {
-          if (!this.isPlaying && this.speechSynth.paused) {
-            this.speechSynth.resume()
-            this.speechSynth.pause()
-          }
-        }, 5000)
+        // this.currentReadingStatus = "Leitura pausada"
+ 
       }
     },
 
@@ -727,9 +721,6 @@ export default {
         const element = this.readableElements[this.currentElementIndex]
         element.classList.add("sr-element-highlight")
 
-        // Adiciona indicador visual de leitura
-        this.showReadingIndicator("Lendo elemento")
-
         element.scrollIntoView({
           behavior: "smooth",
           block: "center",
@@ -754,9 +745,6 @@ export default {
         
         // Encontra e destaca a palavra específica
         this.highlightWordInElement(element, word, this.currentWordIndex)
-        
-        // Adiciona indicador visual de leitura
-        this.showReadingIndicator(`Palavra: ${word}`)
 
         element.scrollIntoView({
           behavior: "smooth",
@@ -797,57 +785,13 @@ export default {
       element.appendChild(newContent)
     },
 
-    // Mostra indicador visual de leitura
-    showReadingIndicator(text) {
-      // Remove indicadores existentes
-      document.querySelectorAll(".sr-reading-indicator").forEach((el) => {
-        el.remove()
-      })
-
-      const indicator = document.createElement('div')
-      indicator.className = 'sr-reading-indicator'
-      indicator.innerHTML = `
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <div style="width: 12px; height: 12px; border-radius: 50%; background: rgba(255,255,255,0.8); animation: sr-pulse 1s ease-in-out infinite;"></div>
-          <span>${text}</span>
-        </div>
-      `
-      
-      // Adiciona animação de pulso
-      const pulseStyle = document.createElement('style')
-      pulseStyle.textContent = `
-        @keyframes sr-pulse {
-          0%, 100% { opacity: 0.4; transform: scale(0.8); }
-          50% { opacity: 1; transform: scale(1.2); }
-        }
-      `
-      document.head.appendChild(pulseStyle)
-      
-      document.body.appendChild(indicator)
-      
-      // Remove após 3 segundos se não estiver lendo
-      setTimeout(() => {
-        if (!this.isPlaying && document.body.contains(indicator)) {
-          indicator.remove()
-        }
-      }, 3000)
-    },
-
-    // Atualiza o status de leitura exibido
     updateReadingStatus() {
       if (this.readableElements.length === 0) {
         this.currentReadingStatus = "Nenhum conteúdo para ler"
-        return
-      }
-
-      if (this.readingMode === 'word' && this.currentWords.length > 0) {
-        this.currentReadingStatus = `Palavra ${this.currentWordIndex + 1} de ${this.currentWords.length}`
-      } else if (this.currentElementIndex >= 0) {
-        this.currentReadingStatus = `${this.currentElementIndex + 1} de ${this.readableElements.length}`
       } else {
-        this.currentReadingStatus = `${this.readableElements.length} elementos para ler`
+        this.currentReadingStatus = "Leitor de ecrã activo"
       }
-    },
+   },
 
     // Aumenta a velocidade de leitura
     increaseRate() {

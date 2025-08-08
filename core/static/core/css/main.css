@@ -848,6 +848,9 @@ video {
 .min-w-\[80px\] {
   min-width: 80px;
 }
+.min-w-\[40px\] {
+  min-width: 40px;
+}
 .max-w-2xl {
   max-width: 42rem;
 }
@@ -1322,6 +1325,10 @@ video {
 .text-white {
   --tw-text-opacity: 1;
   color: rgb(255 255 255 / var(--tw-text-opacity, 1));
+}
+.text-gray-300 {
+  --tw-text-opacity: 1;
+  color: rgb(209 213 219 / var(--tw-text-opacity, 1));
 }
 .underline {
   text-decoration-line: underline;

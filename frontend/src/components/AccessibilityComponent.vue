@@ -20,9 +20,9 @@
       </div>
     </button>
 
-    <!-- Accessibility menu - responsivo -->
+    <!-- Accessibility menu - responsivo v-if-->
     <div 
-      v-if="isOpen" 
+      v-show="isOpen" 
       class="fixed bottom-0 left-0 top-0 bg-white dark:bg-gray-900 rounded-r-lg shadow-xl border-r border-gray-200 dark:border-gray-700 z-40 transition-all duration-300 flex flex-col w-full sm:w-96 max-w-sm accessibility-menu"
       role="dialog"
       aria-labelledby="accessibility-title"

@@ -52,6 +52,12 @@ export default {
     }
   },
   mounted() {
+    // Verifica se há uma preferência salva ao montar o componente
+    const savedColor = this.loadCursorPreference();
+    if (savedColor && savedColor !== this.cursorColor) {
+      this.$emit('update:cursorColor', savedColor);
+    }
+    
     this.addCursorStyles();
     this.startCursorWatcher();
   },
@@ -61,6 +67,67 @@ export default {
   methods: {
     setCursorColor(color) {
       this.$emit('update:cursorColor', color);
+      this.saveCursorPreference();
+    },
+    
+    saveCursorPreference() {
+      // Salva a preferência no localStorage para persistir entre navegações
+      try {
+        localStorage.setItem('customCursorColor', this.cursorColor);
+        localStorage.setItem('customCursorActive', 'true');
+      } catch (e) {
+        // Fallback se localStorage não estiver disponível
+        window.customCursorSettings = {
+          color: this.cursorColor,
+          active: true
+        };
+      }
+    },
+    
+    loadCursorPreference() {
+      try {
+        const savedColor = localStorage.getItem('customCursorColor');
+        const isActive = localStorage.getItem('customCursorActive') === 'true';
+        if (savedColor && isActive) {
+          return savedColor;
+        }
+      } catch (e) {
+        // Fallback para window object
+        if (window.customCursorSettings && window.customCursorSettings.active) {
+          return window.customCursorSettings.color;
+        }
+      }
+      return null;
+    },
+    
+    ensureCursorActive() {
+      if (this.isUpdating) return;
+      
+      const hasClass = document.documentElement.classList.contains('cursor-color-white') || 
+                       document.documentElement.classList.contains('cursor-color-black');
+      
+      if (!hasClass) {
+        // Reaplica a cor salva
+        const savedColor = this.loadCursorPreference();
+        if (savedColor) {
+          document.documentElement.classList.add(`cursor-color-${savedColor}`);
+          document.body.classList.add(`cursor-color-${savedColor}`);
+        } else {
+          // Aplica a cor atual do prop
+          document.documentElement.classList.add(`cursor-color-${this.cursorColor}`);
+          document.body.classList.add(`cursor-color-${this.cursorColor}`);
+        }
+      }
+      
+      // Sempre reaplica os estilos para garantir que funcionem
+      this.addCursorStyles();
+    },
+    
+    handleNavigation() {
+      // Callback para mudanças de navegação
+      setTimeout(() => {
+        this.ensureCursorActive();
+      }, 300);
     },
     
     applyCursorColor(color) {
@@ -157,64 +224,81 @@ export default {
     },
     
     startCursorWatcher() {
-      // Reaplica o cursor a cada 10 segundos (menos frequente para evitar bugs)
-      this.cursorInterval = setInterval(() => {
-        if (!this.isUpdating && 
-            (document.documentElement.classList.contains('cursor-color-white') || 
-             document.documentElement.classList.contains('cursor-color-black'))) {
-          this.addCursorStyles();
-        }
-      }, 10000);
+      // Salva a escolha do cursor no localStorage para persistir
+      this.saveCursorPreference();
       
-      // Observer mais simples para mudanças importantes no DOM
+      // Reaplica o cursor a cada 5 segundos para garantir persistência
+      this.cursorInterval = setInterval(() => {
+        if (!this.isUpdating) {
+          this.ensureCursorActive();
+        }
+      }, 5000);
+      
+      // Observer para qualquer mudança no DOM
       this.observer = new MutationObserver((mutations) => {
         if (this.isUpdating) return;
         
         let needsUpdate = false;
         
         mutations.forEach(mutation => {
-          // Só atualiza se elementos importantes foram adicionados
+          // Verifica se novos elementos foram adicionados
           if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
-            for (let node of mutation.addedNodes) {
-              if (node.nodeType === 1 && // Element node
-                  (node.tagName === 'MAIN' || 
-                   node.tagName === 'SECTION' || 
-                   node.id === 'app' || 
-                   node.id === 'root' ||
-                   node.classList.contains('page') ||
-                   node.classList.contains('content'))) {
-                needsUpdate = true;
-                break;
-              }
-            }
+            needsUpdate = true;
+          }
+          
+          // Verifica se classes foram removidas do html/body
+          if (mutation.type === 'attributes' && 
+              mutation.attributeName === 'class' &&
+              (mutation.target === document.documentElement || mutation.target === document.body)) {
+            needsUpdate = true;
           }
         });
         
         if (needsUpdate) {
           setTimeout(() => {
-            if (!this.isUpdating && 
-                (document.documentElement.classList.contains('cursor-color-white') || 
-                 document.documentElement.classList.contains('cursor-color-black'))) {
-              this.addCursorStyles();
-            }
-          }, 500);
+            this.ensureCursorActive();
+          }, 200);
         }
       });
       
-      this.observer.observe(document.body, {
+      this.observer.observe(document.documentElement, {
         childList: true,
-        subtree: true
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['class']
       });
+      
+      // Event listeners para navegação SPA
+      window.addEventListener('popstate', this.handleNavigation);
+      window.addEventListener('hashchange', this.handleNavigation);
+      
+      // Observer para mudanças na URL (para SPAs que não usam history API)
+      let currentUrl = window.location.href;
+      this.urlCheckInterval = setInterval(() => {
+        if (window.location.href !== currentUrl) {
+          currentUrl = window.location.href;
+          setTimeout(() => this.ensureCursorActive(), 300);
+        }
+      }, 1000);
     },
     
     cleanup() {
       this.isUpdating = false;
       
-      // Limpa o intervalo
+      // Limpa os intervalos
       if (this.cursorInterval) {
         clearInterval(this.cursorInterval);
         this.cursorInterval = null;
       }
+      
+      if (this.urlCheckInterval) {
+        clearInterval(this.urlCheckInterval);
+        this.urlCheckInterval = null;
+      }
+      
+      // Remove event listeners
+      window.removeEventListener('popstate', this.handleNavigation);
+      window.removeEventListener('hashchange', this.handleNavigation);
       
       // Desconecta o observer
       if (this.observer) {
@@ -228,9 +312,14 @@ export default {
         this.styleElement = null;
       }
       
-      // Remove as classes
-      document.documentElement.classList.remove('cursor-color-black', 'cursor-color-white');
-      document.body.classList.remove('cursor-color-black', 'cursor-color-white');
+      // Marca como inativo no localStorage mas mantém as classes para persistir
+      try {
+        localStorage.setItem('customCursorActive', 'false');
+      } catch (e) {
+        if (window.customCursorSettings) {
+          window.customCursorSettings.active = false;
+        }
+      }
     }
   }
 }

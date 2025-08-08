@@ -35,20 +35,29 @@
         A-
       </button>
       
-      <div class="flex-1 text-center px-2">
+      <!-- <div class="flex-1 text-center px-2">
         <div class="bg-white dark:bg-gray-700 rounded-lg py-2 px-3 border border-gray-200 dark:border-gray-600">
           <span class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-1">
             Actual
           </span>
-          <!-- <span class="font-semibold text-base text-gray-900 dark:text-white block">
+           <span class="font-semibold text-base text-gray-900 dark:text-white block">
             {{ fontSize }}
-          </span> -->
-          <span class="font-semibold text-base text-gray-900 dark:text-white block whitespace-nowrap">
+          </span> 
+    
+        </div>
+      </div> -->
+
+      <div class="flex-1 text-center px-2 truncate">
+        <div class="bg-white dark:bg-gray-700 rounded-lg py-2 px-3 border border-gray-200 dark:border-gray-600">
+          <span class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-1">
+            Actual
+          </span>
+          <span class="font-semibold text-base text-gray-900 dark:text-white block whitespace-nowrap overflow-hidden text-ellipsis">
             {{ fontSize }}
           </span>
-
         </div>
       </div>
+
       
       <button 
         @click="increaseFont"

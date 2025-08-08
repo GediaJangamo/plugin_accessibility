@@ -40,9 +40,13 @@
           <span class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-1">
             Actual
           </span>
-          <span class="font-semibold text-base text-gray-900 dark:text-white block">
+          <!-- <span class="font-semibold text-base text-gray-900 dark:text-white block">
+            {{ fontSize }}
+          </span> -->
+          <span class="font-semibold text-base text-gray-900 dark:text-white block whitespace-nowrap">
             {{ fontSize }}
           </span>
+
         </div>
       </div>
       

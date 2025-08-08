@@ -3,7 +3,6 @@
   <div class="p-2 bg-[#f1f5f9] dark:bg-gray-800 dark:border-gray-700 rounded-lg hover:shadow-md transition-shadow duration-300">
     <!-- Header Section -->
     <div class="flex items-start gap-3 mb-4">
-      <!-- <div class="flex-shrink-0 w-10 h-10 bg-[#3b82f6] rounded-lg flex items-center justify-center"> -->
         <svg xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
           fill="none"
@@ -16,7 +15,6 @@
           <line x1="9" y1="20" x2="15" y2="20" />
           <line x1="12" y1="4" x2="12" y2="20" />
         </svg>
-      <!-- </div> -->
       
       <div class="flex-1 min-w-0">
         <h3 class="font-semibold text-lg text-gray-900 dark:text-gray-100 leading-tight">
@@ -34,18 +32,6 @@
       >
         A-
       </button>
-      
-      <!-- <div class="flex-1 text-center px-2">
-        <div class="bg-white dark:bg-gray-700 rounded-lg py-2 px-3 border border-gray-200 dark:border-gray-600">
-          <span class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-1">
-            Actual
-          </span>
-           <span class="font-semibold text-base text-gray-900 dark:text-white block">
-            {{ fontSize }}
-          </span> 
-    
-        </div>
-      </div> -->
 
       <div class="flex-1 text-center px-2 truncate">
         <div class="bg-white dark:bg-gray-700 rounded-lg py-2 px-3 border border-gray-200 dark:border-gray-600">

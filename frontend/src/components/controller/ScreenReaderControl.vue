@@ -425,23 +425,26 @@ export default {
       input[aria-label]:not(.sr-skip),
       textarea[aria-label]:not(.sr-skip)
 
+
       `
       
       // Primeiro, encontra todos os elementos, incluindo os em accordions fechados
       const allElements = mainContent.querySelectorAll(selector)
       
       this.readableElements = Array.from(allElements).filter((el) => {
-        let text = "";
+        let text = el.textContent.trim();
 
+        // Para imagens, usar o alt
         if (el.tagName.toLowerCase() === "img") {
-            text = el.alt?.trim() || "";
-        } else if (el.tagName.toLowerCase() === "svg") {
-            text = el.getAttribute("aria-label")?.trim() || "";
-        } else {
-            text = el.textContent.trim();
+          text = el.alt?.trim() || "";
         }
 
-        if (!text || text.length < 3) return false;
+        // Para ícones SVG, usar aria-label
+        if (el.tagName.toLowerCase() === "svg") {
+          text = el.getAttribute("aria-label")?.trim() || "";
+        }
+
+        if (!text || text.length > 0) return false;
         
         // Ignora elementos do próprio leitor de tela
         if (el.closest('.screen-reader-control') || el.closest('[data-screen-reader-ignore]')) {

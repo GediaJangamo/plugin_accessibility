@@ -403,23 +403,27 @@ export default {
       
       // Seletor mais específico para evitar duplicatas
       const selector = `
-        p:not(.sr-skip),
-        h1:not(.sr-skip),
-        h2:not(.sr-skip),
-        h3:not(.sr-skip),
-        h4:not(.sr-skip),
-        h5:not(.sr-skip),
-        h6:not(.sr-skip),
-        .course-header h6,
-        .accordion-button,
-        span:not(.sr-skip):not(.text-muted),
-        li:not(.sr-skip),
-        td:not(.sr-skip),
-        th:not(.sr-skip),
-        button:not([aria-hidden="true"]):not(.sr-skip),
-        a:not([aria-hidden="true"]):not(.sr-skip),
-        img:not(.sr-skip),
-        svg[aria-label]:not(.sr-skip)
+
+      img:not(.sr-skip),
+      svg[aria-label]:not(.sr-skip),
+      h1:not(.sr-skip),
+      h2:not(.sr-skip),
+      h3:not(.sr-skip),
+      h4:not(.sr-skip),
+      h5:not(.sr-skip),
+      h6:not(.sr-skip),
+      .course-header h6,
+      .accordion-button,
+      p:not(.sr-skip),
+      a:not([aria-hidden="true"]):not(.sr-skip),,
+      span:not(.sr-skip):not(.text-muted),
+      li:not(.sr-skip),
+      td:not(.sr-skip),
+      th:not(.sr-skip),
+      button:not(.sr-skip),
+      label:not(.sr-skip),
+      input[aria-label]:not(.sr-skip),
+      textarea[aria-label]:not(.sr-skip)
 
       `
       
@@ -427,19 +431,17 @@ export default {
       const allElements = mainContent.querySelectorAll(selector)
       
       this.readableElements = Array.from(allElements).filter((el) => {
-        let text = el.textContent.trim();
+        let text = "";
 
-        // Para imagens, usar o alt
         if (el.tagName.toLowerCase() === "img") {
-          text = el.alt?.trim() || "";
+            text = el.alt?.trim() || "";
+        } else if (el.tagName.toLowerCase() === "svg") {
+            text = el.getAttribute("aria-label")?.trim() || "";
+        } else {
+            text = el.textContent.trim();
         }
 
-        // Para ícones SVG, usar aria-label
-        if (el.tagName.toLowerCase() === "svg") {
-          text = el.getAttribute("aria-label")?.trim() || "";
-        }
-
-        if (!text || text.length < 2) return false;
+        if (!text || text.length < 1) return false;
         
         // Ignora elementos do próprio leitor de tela
         if (el.closest('.screen-reader-control') || el.closest('[data-screen-reader-ignore]')) {

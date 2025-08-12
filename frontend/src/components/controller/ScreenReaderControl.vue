@@ -417,7 +417,8 @@ export default {
         td:not(.sr-skip),
         th:not(.sr-skip),
         button:not([aria-hidden="true"]):not(.sr-skip),
-        a:not([aria-hidden="true"]):not(.sr-skip)
+        a:not([aria-hidden="true"]):not(.sr-skip),
+        img:not([aria-hidden="true"]):not(.sr-skip)
       `
       
       // Primeiro, encontra todos os elementos, incluindo os em accordions fechados
@@ -448,6 +449,7 @@ export default {
             return false
           }
         }
+        
         
         return true
       })
@@ -687,11 +689,35 @@ export default {
       this.stopSpeaking()
 
       const currentElement = this.readableElements[this.currentElementIndex]
+
+      let textToSpeak = '';
+  if (currentElement.tagName.toLowerCase() === 'img') {
+    textToSpeak = currentElement.alt || '';
+  } else {
+    textToSpeak = currentElement.textContent.trim();
+  }
+
+  // Verifique se há texto para falar antes de continuar
+  if (!textToSpeak) {
+    // Se o elemento não tiver texto (ex: img sem alt),
+    // pule para o próximo elemento.
+    this.currentElementIndex++;
+    if (this.currentElementIndex < this.readableElements.length) {
+      this.speakCurrentElement();
+    } else {
+      this.isPlaying = false;
+      this.currentReadingStatus = "Leitura concluída";
+    }
+    return;
+  }
+
+  // Crie a pronúncia com o texto que você acabou de obter
+  this.utterance = new SpeechSynthesisUtterance(textToSpeak);
       
       // Expande accordion se necessário antes de ler
       await this.expandAccordionForElement(currentElement)
       
-      const textToSpeak = currentElement.textContent.trim()
+       textToSpeak = currentElement.textContent.trim()
 
       this.utterance = new SpeechSynthesisUtterance(textToSpeak)
 

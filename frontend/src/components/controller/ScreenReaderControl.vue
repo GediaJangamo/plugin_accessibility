@@ -441,7 +441,7 @@ export default {
             text = el.textContent.trim();
         }
 
-        if (!text || text.length < 1) return false;
+        if (!text || text.length > 0) return false;
         
         // Ignora elementos do próprio leitor de tela
         if (el.closest('.screen-reader-control') || el.closest('[data-screen-reader-ignore]')) {

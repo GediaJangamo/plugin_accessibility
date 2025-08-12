@@ -10,8 +10,8 @@
         <div class="flex items-center gap-2">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5L6 9H2v6h4l5 4V5zm10.293 2.707a1 1 0 00-1.414 1.414A5.978 5.978 0 0120 12a5.978 5.978 0 01-1.121 3.879 1 1 0 001.414 1.414A7.978 7.978 0 0022 12a7.978 7.978 0 00-1.707-4.293z" />
-         </svg>
-           <span class="text-white font-medium">{{ currentReadingStatus }}</span>
+          </svg>
+          <span class="text-white font-medium">{{ currentReadingStatus }}</span>
         </div>
         <button
           @click="closeReader" 
@@ -161,10 +161,11 @@ export default {
       isInitialized: false,
       keysEnabled: false,
       navigationDebounce: null,
-      readingMode: 'element', // 'element' ou 'word'
+      readingMode: 'element',
       currentWords: [],
       currentWordIndex: -1,
       wordHighlightSpan: null,
+      processedAccordions: new Set(),
     }
   },
   watch: {
@@ -236,29 +237,6 @@ export default {
           @keyframes sr-glow-pulse {
             0% { opacity: 0.4; transform: scale(1); }
             100% { opacity: 0.8; transform: scale(1.01); }
-          }
-          
-          .sr-reading-indicator {
-            position: fixed !important;
-            top: 50% !important;
-            right: 20px !important;
-            transform: translateY(-50%) !important;
-            background: linear-gradient(135deg, #3b82f6, #06b6d4) !important;
-            color: white !important;
-            padding: 12px 16px !important;
-            border-radius: 25px !important;
-            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3) !important;
-            z-index: 1000 !important;
-            font-size: 14px !important;
-            font-weight: 500 !important;
-            backdrop-filter: blur(10px) !important;
-            border: 1px solid rgba(255, 255, 255, 0.2) !important;
-            animation: sr-slide-in 0.3s ease-out !important;
-          }
-          
-          @keyframes sr-slide-in {
-            from { opacity: 0; transform: translateY(-50%) translateX(100px); }
-            to { opacity: 1; transform: translateY(-50%) translateX(0); }
           }
         `
         document.head.appendChild(style)
@@ -350,6 +328,8 @@ export default {
         this.observer.observe(document.body, {
           childList: true,
           subtree: true,
+          attributes: true,
+          attributeFilter: ['class', 'style', 'aria-expanded']
         })
       }
     },
@@ -390,43 +370,126 @@ export default {
       }
     },
 
-    
-    gatherReadableElements() {
-      const mainContent = document.getElementById("main-content")
-      if (!mainContent) {
-        console.warn("Elemento #main-content não encontrado. Usando body como fallback.")
-        const body = document.body
-
-        const selector =
-          'p, h1, h2, h3, h4, h5, h6, li, td, th, button:not([aria-hidden="true"]), a:not([aria-hidden="true"])'
-        const allElements = body.querySelectorAll(selector)
-
-        this.readableElements = Array.from(allElements).filter((el) => {
-          const text = el.textContent.trim()
-          const isVisible = !!(el.offsetWidth || el.offsetHeight || el.getClientRects().length)
-          const isInAccessibilityMenu = el.closest('[role="dialog"]') !== null
-          const isPartOfReaderControl = el.closest(".screen-reader-control") !== null
-          return text && isVisible && !isInAccessibilityMenu && !isPartOfReaderControl
-        })
-      } else {
-        const selector =
-          'p, h1, h2, h3, h4, h5, h6, li, td, th, button:not([aria-hidden="true"]), a:not([aria-hidden="true"])'
-        const elements = mainContent.querySelectorAll(selector)
-
-        this.readableElements = Array.from(elements).filter((el) => {
-          const text = el.textContent.trim()
-          const isVisible = !!(el.offsetWidth || el.offsetHeight || el.getClientRects().length)
-          return text && isVisible
-        })
+    // Função melhorada para abrir accordions automaticamente
+    expandAccordionForElement(element) {
+      let current = element
+      while (current && current !== document.body) {
+        // Verifica se está dentro de um accordion fechado
+        const accordionCollapse = current.closest('.accordion-collapse.collapse:not(.show)')
+        if (accordionCollapse) {
+          const targetId = accordionCollapse.id
+          const trigger = document.querySelector(`[data-bs-target="#${targetId}"]`)
+          
+          if (trigger && !accordionCollapse.classList.contains('show')) {
+            // Simula um clique no botão do accordion
+            trigger.click()
+            
+            // Aguarda a animação de abertura
+            return new Promise(resolve => {
+              setTimeout(() => {
+                resolve()
+              }, 350) // Tempo da animação do Bootstrap
+            })
+          }
+        }
+        current = current.parentElement
       }
+      return Promise.resolve()
+    },
 
-      // Status mais limpo - só mostra se encontrou conteúdo ou não
+    // Coleta elementos que podem ser lidos, incluindo os em accordions
+    async gatherReadableElements() {
+      const mainContent = document.getElementById("main-content") || document.body
+      
+      // Seletor mais específico para evitar duplicatas
+      const selector = `
+        p:not(.sr-skip),
+        h1:not(.sr-skip),
+        h2:not(.sr-skip),
+        h3:not(.sr-skip),
+        h4:not(.sr-skip),
+        h5:not(.sr-skip),
+        h6:not(.sr-skip),
+        .course-header h6,
+        .accordion-button,
+        span:not(.sr-skip):not(.text-muted),
+        li:not(.sr-skip),
+        td:not(.sr-skip),
+        th:not(.sr-skip),
+        button:not([aria-hidden="true"]):not(.sr-skip),
+        a:not([aria-hidden="true"]):not(.sr-skip)
+      `
+      
+      // Primeiro, encontra todos os elementos, incluindo os em accordions fechados
+      const allElements = mainContent.querySelectorAll(selector)
+      
+      this.readableElements = Array.from(allElements).filter((el) => {
+        const text = el.textContent.trim()
+        if (!text || text.length < 2) return false
+        
+        // Ignora elementos do próprio leitor de tela
+        if (el.closest('.screen-reader-control') || el.closest('[data-screen-reader-ignore]')) {
+          return false
+        }
+        
+        // Ignora elementos com classes específicas que não devem ser lidos
+        if (el.classList.contains('text-muted') && el.tagName.toLowerCase() !== 'small') {
+          return false
+        }
+        
+        // Verifica se é um elemento duplicado (mesmo texto no mesmo contexto)
+        const parent = el.closest('.course-item, .accordion-item')
+        if (parent) {
+          const siblings = parent.querySelectorAll(el.tagName.toLowerCase())
+          const sameTextSiblings = Array.from(siblings).filter(sibling => 
+            sibling.textContent.trim() === text && sibling !== el
+          )
+          if (sameTextSiblings.length > 0 && Array.from(siblings).indexOf(el) > 0) {
+            return false
+          }
+        }
+        
+        return true
+      })
+
+      // Remove elementos duplicados baseado no conteúdo e posição
+      this.readableElements = this.removeDuplicateElements(this.readableElements)
+
       if (this.readableElements.length > 0) {
         this.currentReadingStatus = "Leitor de ecrã activo"
       } else {
         this.currentReadingStatus = "Nenhum conteúdo para ler"
       }
-   },
+    },
+
+    // Remove elementos duplicados
+    removeDuplicateElements(elements) {
+      const seen = new Map()
+      
+      return elements.filter(el => {
+        const text = el.textContent.trim().toLowerCase()
+        const tag = el.tagName.toLowerCase()
+        const key = `${tag}:${text}`
+        
+        // Para elementos muito pequenos ou comuns, é mais restritivo
+        if (text.length < 10 || ['sim', 'não', 'ok', 'cancelar'].includes(text)) {
+          const rect = el.getBoundingClientRect()
+          const positionKey = `${key}:${Math.round(rect.top)}:${Math.round(rect.left)}`
+          
+          if (seen.has(positionKey)) {
+            return false
+          }
+          seen.set(positionKey, true)
+          return true
+        }
+        
+        if (seen.has(key)) {
+          return false
+        }
+        seen.set(key, true)
+        return true
+      })
+    },
 
     debounceGatherElements() {
       if (this.gatherTimeout) clearTimeout(this.gatherTimeout)
@@ -434,7 +497,7 @@ export default {
         if (this.active) {
           this.gatherReadableElements()
         }
-      }, 300)
+      }, 500) // Aumentado para evitar muitas atualizações
     },
 
     // Iniciar/pausar a leitura
@@ -549,16 +612,16 @@ export default {
     },
 
     // Fala o elemento ou palavra atual
-    speakCurrent() {
+    async speakCurrent() {
       if (this.readingMode === 'word') {
-        this.speakCurrentWord()
+        await this.speakCurrentWord()
       } else {
-        this.speakCurrentElement()
+        await this.speakCurrentElement()
       }
     },
 
     // Lê em voz alta a palavra atual
-    speakCurrentWord() {
+    async speakCurrentWord() {
       if (!this.speechSynth || this.currentWordIndex < 0 || this.currentWordIndex >= this.currentWords.length) {
         return
       }
@@ -579,7 +642,7 @@ export default {
       this.utterance.pitch = 1.0
       this.utterance.lang = "pt-BR"
 
-      this.utterance.onend = () => {
+      this.utterance.onend = async () => {
         if (this.active) {
           if (this.currentWordIndex < this.currentWords.length - 1) {
             this.currentWordIndex++
@@ -588,6 +651,7 @@ export default {
             this.speakCurrentWord()
           } else if (this.currentElementIndex < this.readableElements.length - 1) {
             this.currentElementIndex++
+            await this.expandAccordionForElement(this.readableElements[this.currentElementIndex])
             this.setupWordReading()
             this.updateReadingStatus()
             this.speakCurrentWord()
@@ -611,7 +675,7 @@ export default {
     },
 
     // Lê em voz alta o elemento atual
-    speakCurrentElement() {
+    async speakCurrentElement() {
       if (
         !this.speechSynth ||
         this.currentElementIndex < 0 ||
@@ -623,6 +687,10 @@ export default {
       this.stopSpeaking()
 
       const currentElement = this.readableElements[this.currentElementIndex]
+      
+      // Expande accordion se necessário antes de ler
+      await this.expandAccordionForElement(currentElement)
+      
       const textToSpeak = currentElement.textContent.trim()
 
       this.utterance = new SpeechSynthesisUtterance(textToSpeak)
@@ -638,9 +706,10 @@ export default {
       this.utterance.pitch = 1.0
       this.utterance.lang = "pt-BR"
 
-      this.utterance.onend = () => {
+      this.utterance.onend = async () => {
         if (this.active && this.currentElementIndex < this.readableElements.length - 1) {
           this.currentElementIndex++
+          await this.expandAccordionForElement(this.readableElements[this.currentElementIndex])
           this.highlightCurrentElement()
           this.updateReadingStatus()
           this.speakCurrentElement()
@@ -667,8 +736,6 @@ export default {
       if (this.speechSynth && this.isPlaying) {
         this.speechSynth.pause()
         this.isPlaying = false
-        // this.currentReadingStatus = "Leitura pausada"
- 
       }
     },
 
@@ -706,19 +773,18 @@ export default {
         }
         this.wordHighlightSpan = null
       }
-
-      // Remove indicadores de leitura
-      document.querySelectorAll(".sr-reading-indicator").forEach((el) => {
-        el.remove()
-      })
     },
 
     // Destaca visualmente o elemento atual
-    highlightCurrentElement() {
+    async highlightCurrentElement() {
       this.removeAllHighlights()
 
       if (this.currentElementIndex >= 0 && this.readableElements[this.currentElementIndex]) {
         const element = this.readableElements[this.currentElementIndex]
+        
+        // Expande accordion se necessário
+        await this.expandAccordionForElement(element)
+        
         element.classList.add("sr-element-highlight")
 
         element.scrollIntoView({
@@ -791,7 +857,7 @@ export default {
       } else {
         this.currentReadingStatus = "Leitor de ecrã activo"
       }
-   },
+    },
 
     // Aumenta a velocidade de leitura
     increaseRate() {
@@ -853,16 +919,6 @@ export default {
         border: 1px solid rgba(255, 255, 255, 0.2);
         animation: sr-notification-slide 0.3s ease-out;
       `
-      
-      // Adiciona animação para notificação
-      const notificationStyle = document.createElement('style')
-      notificationStyle.textContent = `
-        @keyframes sr-notification-slide {
-          from { opacity: 0; transform: translateX(-50%) translateY(20px); }
-          to { opacity: 1; transform: translateX(-50%) translateY(0); }
-        }
-      `
-      document.head.appendChild(notificationStyle)
       
       notification.textContent = message
       document.body.appendChild(notification)
@@ -957,14 +1013,14 @@ export default {
         case "Escape":
         case "Esc":
           this.stopSpeaking()
-          this.$emit("update:active", false)
+          this.$emit("update:screenReader", false)
           event.preventDefault()
           break
         case "q":
         case "Q":
           if (!event.ctrlKey && !event.altKey && !event.metaKey) {
             this.stopSpeaking()
-            this.$emit("update:active", false)
+            this.$emit("update:screenReader", false)
             event.preventDefault()
           }
           break

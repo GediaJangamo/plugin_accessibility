@@ -415,7 +415,7 @@ export default {
       .course-header h6,
       .accordion-button,
       p:not(.sr-skip),
-      a:not([aria-hidden="true"]):not(.sr-skip),,
+      a:not([aria-hidden="true"]):not(.sr-skip),
       span:not(.sr-skip):not(.text-muted),
       li:not(.sr-skip),
       td:not(.sr-skip),

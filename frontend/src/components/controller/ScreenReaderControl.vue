@@ -444,7 +444,10 @@ export default {
           text = el.getAttribute("aria-label")?.trim() || "";
         }
 
-        if (!text || text.length > 0) return false;
+        // if (!text || text.length > 0) return false;
+        if (!text || (text.length < 2 && el.tagName.toLowerCase() !== "img" && el.tagName.toLowerCase() !== "svg")) {
+        return false;
+    }
         
         // Ignora elementos do próprio leitor de tela
         if (el.closest('.screen-reader-control') || el.closest('[data-screen-reader-ignore]')) {

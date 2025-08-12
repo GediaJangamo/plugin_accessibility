@@ -431,48 +431,45 @@ export default {
       // Primeiro, encontra todos os elementos, incluindo os em accordions fechados
       const allElements = mainContent.querySelectorAll(selector)
       
-      this.readableElements = Array.from(allElements).filter((el) => {
-        let text = el.textContent.trim();
+     this.readableElements = Array.from(allElements).filter((el) => {
+        let text = "";
 
-        // Para imagens, usar o alt
         if (el.tagName.toLowerCase() === "img") {
           text = el.alt?.trim() || "";
-        }
-
-        // Para ícones SVG, usar aria-label
-        if (el.tagName.toLowerCase() === "svg") {
+        } else if (el.tagName.toLowerCase() === "svg") {
           text = el.getAttribute("aria-label")?.trim() || "";
+        } else {
+          text = el.textContent.trim();
         }
 
-        // if (!text || text.length > 0) return false;
-        if (!text || (text.length < 2 && el.tagName.toLowerCase() !== "img" && el.tagName.toLowerCase() !== "svg")) {
-        return false;
-    }
-        
+        // Ignora elementos sem texto
+        if (!text || text.trim().length === 0) return false;
+
         // Ignora elementos do próprio leitor de tela
         if (el.closest('.screen-reader-control') || el.closest('[data-screen-reader-ignore]')) {
-          return false
+          return false;
         }
-        
+
         // Ignora elementos com classes específicas que não devem ser lidos
         if (el.classList.contains('text-muted') && el.tagName.toLowerCase() !== 'small') {
-          return false
+          return false;
         }
-        
-        // Verifica se é um elemento duplicado (mesmo texto no mesmo contexto)
-        const parent = el.closest('.course-item, .accordion-item')
+
+        // Verifica duplicados
+        const parent = el.closest('.course-item, .accordion-item');
         if (parent) {
-          const siblings = parent.querySelectorAll(el.tagName.toLowerCase())
-          const sameTextSiblings = Array.from(siblings).filter(sibling => 
+          const siblings = parent.querySelectorAll(el.tagName.toLowerCase());
+          const sameTextSiblings = Array.from(siblings).filter(sibling =>
             sibling.textContent.trim() === text && sibling !== el
-          )
+          );
           if (sameTextSiblings.length > 0 && Array.from(siblings).indexOf(el) > 0) {
-            return false
+            return false;
           }
         }
-        
-        return true
-      })
+
+        return text.trim().length > 0;
+      });
+
 
       // Remove elementos duplicados baseado no conteúdo e posição
       this.readableElements = this.removeDuplicateElements(this.readableElements)

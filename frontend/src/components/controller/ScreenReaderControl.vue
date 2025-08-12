@@ -418,15 +418,28 @@ export default {
         th:not(.sr-skip),
         button:not([aria-hidden="true"]):not(.sr-skip),
         a:not([aria-hidden="true"]):not(.sr-skip),
-        img:not([aria-hidden="true"]):not(.sr-skip)
+        img:not(.sr-skip),
+        svg[aria-label]:not(.sr-skip)
+
       `
       
       // Primeiro, encontra todos os elementos, incluindo os em accordions fechados
       const allElements = mainContent.querySelectorAll(selector)
       
       this.readableElements = Array.from(allElements).filter((el) => {
-        const text = el.textContent.trim()
-        if (!text || text.length < 2) return false
+        let text = el.textContent.trim();
+
+        // Para imagens, usar o alt
+        if (el.tagName.toLowerCase() === "img") {
+          text = el.alt?.trim() || "";
+        }
+
+        // Para ícones SVG, usar aria-label
+        if (el.tagName.toLowerCase() === "svg") {
+          text = el.getAttribute("aria-label")?.trim() || "";
+        }
+
+        if (!text || text.length < 2) return false;
         
         // Ignora elementos do próprio leitor de tela
         if (el.closest('.screen-reader-control') || el.closest('[data-screen-reader-ignore]')) {
@@ -449,7 +462,6 @@ export default {
             return false
           }
         }
-        
         
         return true
       })
@@ -689,35 +701,11 @@ export default {
       this.stopSpeaking()
 
       const currentElement = this.readableElements[this.currentElementIndex]
-
-      let textToSpeak = '';
-  if (currentElement.tagName.toLowerCase() === 'img') {
-    textToSpeak = currentElement.alt || '';
-  } else {
-    textToSpeak = currentElement.textContent.trim();
-  }
-
-  // Verifique se há texto para falar antes de continuar
-  if (!textToSpeak) {
-    // Se o elemento não tiver texto (ex: img sem alt),
-    // pule para o próximo elemento.
-    this.currentElementIndex++;
-    if (this.currentElementIndex < this.readableElements.length) {
-      this.speakCurrentElement();
-    } else {
-      this.isPlaying = false;
-      this.currentReadingStatus = "Leitura concluída";
-    }
-    return;
-  }
-
-  // Crie a pronúncia com o texto que você acabou de obter
-  this.utterance = new SpeechSynthesisUtterance(textToSpeak);
       
       // Expande accordion se necessário antes de ler
       await this.expandAccordionForElement(currentElement)
       
-       textToSpeak = currentElement.textContent.trim()
+      const textToSpeak = currentElement.textContent.trim()
 
       this.utterance = new SpeechSynthesisUtterance(textToSpeak)
 

@@ -4,7 +4,7 @@
     class="fixed bottom-5 left-1/2 transform -translate-x-1/2 z-50 transition-all duration-300 ease-in-out"
     aria-live="polite"
   >
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden w-auto max-w-3xl">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden w-auto max-w-4xl">
       <!-- Header com status e botão de fechar -->
       <div class="bg-gradient-to-r bg-[#3b82f6] p-3 flex items-center justify-between">
         <div class="flex items-center gap-2">
@@ -25,6 +25,15 @@
       </div>
 
       <div class="p-4">
+        <!-- Informações do elemento atual -->
+        <div class="mb-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+          <div class="text-sm text-gray-600 dark:text-gray-300 mb-1">Elemento actual:</div>
+          <div class="font-medium text-gray-800 dark:text-white">{{ getCurrentElementInfo() }}</div>
+          <div v-if="getCurrentElementDescription()" class="text-sm text-blue-600 dark:text-blue-400 mt-1">
+            {{ getCurrentElementDescription() }}
+          </div>
+        </div>
+
         <!-- Controle de velocidade e modo de leitura -->
         <div class="flex items-center justify-between mb-4 gap-4">
           <!-- Modo de leitura -->
@@ -76,7 +85,7 @@
         </div>
 
         <!-- Controles principais -->
-        <div class="flex items-center gap-4">
+        <div class="flex items-center gap-4 mb-3">
           <!-- Botão principal de play/pause -->
           <button 
             @click="playPause"
@@ -101,6 +110,18 @@
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            
+            <!-- Botão de activar elemento -->
+            <button 
+              @click="activateElement"
+              class="flex items-center justify-center bg-green-500 hover:bg-green-600 text-white p-3 rounded-lg shadow-sm transition-colors"
+              :disabled="!canActivateCurrentElement()"
+              aria-label="Activar elemento (Enter)"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
             </button>
             
@@ -131,6 +152,11 @@
               {{ getProgressText() }}
             </span>
           </div>
+        </div>
+
+        <!-- Instruções de teclado -->
+        <div class="text-xs text-gray-500 dark:text-gray-400 text-center">
+          <div>Espaço/P: Play/Pause | ←→: Navegar | Enter: Activar | R: Reiniciar | W: Modo | Esc: Sair</div>
         </div>
       </div>
     </div>
@@ -199,9 +225,9 @@ export default {
         style.textContent = `
           .sr-element-highlight {
             position: relative !important;
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(147, 197, 253, 0.15)) !important;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(147, 197, 253, 0.2)) !important;
             border-radius: 8px !important;
-            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.4), 0 0 20px rgba(59, 130, 246, 0.3) !important;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5), 0 0 25px rgba(59, 130, 246, 0.3) !important;
             transform: scale(1.02) !important;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
             z-index: 10 !important;
@@ -210,33 +236,55 @@ export default {
           .sr-element-highlight::before {
             content: '' !important;
             position: absolute !important;
-            top: -4px !important;
-            left: -4px !important;
-            right: -4px !important;
-            bottom: -4px !important;
+            top: -6px !important;
+            left: -6px !important;
+            right: -6px !important;
+            bottom: -6px !important;
             background: linear-gradient(45deg, #3b82f6, #06b6d4) !important;
-            border-radius: 12px !important;
+            border-radius: 14px !important;
             z-index: -1 !important;
-            opacity: 0.6 !important;
-            filter: blur(8px) !important;
+            opacity: 0.4 !important;
+            filter: blur(10px) !important;
             animation: sr-glow-pulse 2s ease-in-out infinite alternate !important;
           }
           
           .sr-word-highlight {
             background: linear-gradient(135deg, #3b82f6, #06b6d4) !important;
             color: white !important;
-            padding: 2px 4px !important;
+            padding: 2px 6px !important;
             border-radius: 4px !important;
-            box-shadow: 0 2px 8px #3b82f6 !important;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4) !important;
             transform: scale(1.05) !important;
             transition: all 0.2s ease !important;
             font-weight: 600 !important;
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
           }
           
+          .sr-interactive-indicator::after {
+            content: '⚡' !important;
+            position: absolute !important;
+            top: -8px !important;
+            right: -8px !important;
+            background: #10b981 !important;
+            color: white !important;
+            border-radius: 50% !important;
+            width: 20px !important;
+            height: 20px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            font-size: 10px !important;
+            animation: sr-pulse 1s ease-in-out infinite !important;
+          }
+          
           @keyframes sr-glow-pulse {
-            0% { opacity: 0.4; transform: scale(1); }
-            100% { opacity: 0.8; transform: scale(1.01); }
+            0% { opacity: 0.3; transform: scale(1); }
+            100% { opacity: 0.6; transform: scale(1.01); }
+          }
+          
+          @keyframes sr-pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
           }
         `
         document.head.appendChild(style)
@@ -249,6 +297,124 @@ export default {
       if (style) {
         style.remove()
       }
+    },
+
+    // Retorna informações sobre o elemento atual
+    getCurrentElementInfo() {
+      if (this.currentElementIndex < 0 || !this.readableElements[this.currentElementIndex]) {
+        return 'Nenhum elemento selecionado'
+      }
+      
+      const element = this.readableElements[this.currentElementIndex]
+      const tag = element.tagName.toLowerCase()
+      
+      if (tag === 'img') {
+        return `Imagem: ${element.alt || 'Sem descrição'}`
+      }
+      
+      const elementTypes = {
+        'h1': 'Título Principal',
+        'h2': 'Título Secundário', 
+        'h3': 'Subtítulo',
+        'h4': 'Subtítulo',
+        'h5': 'Subtítulo',
+        'h6': 'Subtítulo',
+        'p': 'Parágrafo',
+        'button': 'Botão',
+        'a': 'Link',
+        'input': 'Campo de entrada',
+        'textarea': 'Área de texto',
+        'li': 'Item de lista',
+        'td': 'Célula de tabela',
+        'th': 'Cabeçalho de tabela',
+        'label': 'Rótulo'
+      }
+      
+      const type = elementTypes[tag] || tag.toUpperCase()
+      const text = element.textContent.trim()
+      
+      return `${type}: ${text.length > 50 ? text.substring(0, 50) + '...' : text}`
+    },
+
+    // Retorna descrição adicional do elemento
+    getCurrentElementDescription() {
+      if (this.currentElementIndex < 0 || !this.readableElements[this.currentElementIndex]) {
+        return ''
+      }
+      
+      const element = this.readableElements[this.currentElementIndex]
+      
+      if (this.isInteractiveElement(element)) {
+        return 'Pressione Enter para activar'
+      }
+      
+      if (element.closest('.accordion-item')) {
+        return 'Elemento dentro de accordion'
+      }
+      
+      return ''
+    },
+
+    // Verifica se o elemento atual pode ser activado
+    canActivateCurrentElement() {
+      if (this.currentElementIndex < 0 || !this.readableElements[this.currentElementIndex]) {
+        return false
+      }
+      
+      return this.isInteractiveElement(this.readableElements[this.currentElementIndex])
+    },
+
+    // Verifica se um elemento é interativo
+    isInteractiveElement(element) {
+      const tag = element.tagName.toLowerCase()
+      const interactiveTags = ['button', 'a', 'input', 'textarea', 'select']
+      
+      if (interactiveTags.includes(tag)) {
+        return true
+      }
+      
+      // Verifica elementos com papel interativo
+      const role = element.getAttribute('role')
+      if (role && ['button', 'link', 'tab', 'menuitem'].includes(role)) {
+        return true
+      }
+      
+      // Verifica elementos clicáveis
+      if (element.onclick || element.getAttribute('data-bs-toggle') || element.classList.contains('accordion-button')) {
+        return true
+      }
+      
+      return false
+    },
+
+    // Activa o elemento atual (simula clique)
+    activateElement() {
+      if (!this.canActivateCurrentElement()) {
+        this.announceChange('Elemento não pode ser activado')
+        return
+      }
+      
+      const element = this.readableElements[this.currentElementIndex]
+      
+      this.announceChange('Activando elemento...')
+      
+      // Simula um clique no elemento
+      if (element.click) {
+        element.click()
+      } else {
+        // Fallback para elementos que não têm método click
+        const event = new MouseEvent('click', {
+          bubbles: true,
+          cancelable: true
+        })
+        element.dispatchEvent(event)
+      }
+      
+      // Aguarda um pouco e atualiza os elementos
+      setTimeout(() => {
+        this.gatherReadableElements()
+        this.announceChange('Elemento activado')
+      }, 500)
     },
 
     // Define o modo de leitura
@@ -271,7 +437,7 @@ export default {
     setupWordReading() {
       if (this.currentElementIndex >= 0 && this.readableElements[this.currentElementIndex]) {
         const element = this.readableElements[this.currentElementIndex]
-        const text = element.textContent.trim()
+        const text = this.getElementText(element)
         this.currentWords = text.split(/\s+/).filter(word => word.length > 0)
         this.currentWordIndex = 0
         this.highlightCurrentWord()
@@ -292,7 +458,7 @@ export default {
     closeReader() {
       this.stopSpeaking()
       this.removeAllHighlights()
-      this.$emit('update:screenReader', false);
+      this.$emit('update:screenReader', false)
     },
     
     // Inicializa todos os recursos do leitor
@@ -370,112 +536,113 @@ export default {
       }
     },
 
-    // Função melhorada para abrir accordions automaticamente
-    expandAccordionForElement(element) {
-      let current = element
-      while (current && current !== document.body) {
-        // Verifica se está dentro de um accordion fechado
-        const accordionCollapse = current.closest('.accordion-collapse.collapse:not(.show)')
-        if (accordionCollapse) {
-          const targetId = accordionCollapse.id
-          const trigger = document.querySelector(`[data-bs-target="#${targetId}"]`)
-          
-          if (trigger && !accordionCollapse.classList.contains('show')) {
-            // Simula um clique no botão do accordion
-            trigger.click()
-            
-            // Aguarda a animação de abertura
-            return new Promise(resolve => {
-              setTimeout(() => {
-                resolve()
-              }, 350) // Tempo da animação do Bootstrap
-            })
-          }
+    // Obtém o texto adequado para leitura de um elemento
+    getElementText(element) {
+      const tag = element.tagName.toLowerCase()
+      
+      if (tag === 'img') {
+        const alt = element.alt?.trim()
+        const title = element.title?.trim()
+        const src = element.src
+        
+        if (alt) {
+          return `Imagem: ${alt}`
+        } else if (title) {
+          return `Imagem: ${title}`
+        } else if (src) {
+          const filename = src.split('/').pop().split('?')[0]
+          return `Imagem: ${filename}`
+        } else {
+          return 'Imagem sem descrição'
         }
-        current = current.parentElement
       }
-      return Promise.resolve()
+      
+      if (tag === 'svg') {
+        return element.getAttribute('aria-label') || 'Gráfico sem descrição'
+      }
+      
+      if (this.isInteractiveElement(element)) {
+        const text = element.textContent.trim()
+        if (tag === 'button') {
+          return `Botão: ${text}`
+        } else if (tag === 'a') {
+          return `Link: ${text}`
+        } else {
+          return `Elemento clicável: ${text}`
+        }
+      }
+      
+      return element.textContent.trim()
     },
 
-    // Coleta elementos que podem ser lidos, incluindo os em accordions
+    // Coleta elementos que podem ser lidos - VERSÃO MELHORADA
     async gatherReadableElements() {
       const mainContent = document.getElementById("main-content") || document.body
       
-      // Seletor mais específico para evitar duplicatas
+      // Selector mais abrangente incluindo imagens
       const selector = `
-
-      img:not(.sr-skip),
-      svg[aria-label]:not(.sr-skip),
-      h1:not(.sr-skip),
-      h2:not(.sr-skip),
-      h3:not(.sr-skip),
-      h4:not(.sr-skip),
-      h5:not(.sr-skip),
-      h6:not(.sr-skip),
-      .course-header h6,
-      .accordion-button,
-      p:not(.sr-skip),
-      a:not([aria-hidden="true"]):not(.sr-skip),
-      span:not(.sr-skip):not(.text-muted),
-      li:not(.sr-skip),
-      td:not(.sr-skip),
-      th:not(.sr-skip),
-      button:not(.sr-skip),
-      label:not(.sr-skip),
-      input[aria-label]:not(.sr-skip),
-      textarea[aria-label]:not(.sr-skip)
-
-
+        img,
+        svg[aria-label],
+        h1, h2, h3, h4, h5, h6,
+        p,
+        a:not([aria-hidden="true"]),
+        button,
+        input[type="text"], input[type="email"], input[type="password"], input[type="search"],
+        textarea,
+        select,
+        label,
+        li,
+        td, th,
+        span.badge,
+        span.text-muted,
+        div[role="button"],
+        div[onclick],
+        [data-bs-toggle],
+        .accordion-button,
+        .btn,
+        .card-title,
+        .card-text
       `
       
-      // Primeiro, encontra todos os elementos, incluindo os em accordions fechados
-      const allElements = mainContent.querySelectorAll(selector)
+      // Coleta todos os elementos
+      const allElements = Array.from(mainContent.querySelectorAll(selector))
       
-     this.readableElements = Array.from(allElements).filter((el) => {
-        let text = "";
-
-        if (el.tagName.toLowerCase() === "img") {
-          text = el.alt?.trim() || "";
-        } else if (el.tagName.toLowerCase() === "svg") {
-          text = el.getAttribute("aria-label")?.trim() || "";
-        } else {
-          text = el.textContent.trim();
-        }
-
-        // Ignora elementos sem texto
-        if (!text || text.trim().length === 0) return false;
-
-        // Ignora elementos do próprio leitor de tela
+      // Filtra e ordena os elementos
+      this.readableElements = allElements.filter(el => {
+        // Ignora elementos do próprio leitor
         if (el.closest('.screen-reader-control') || el.closest('[data-screen-reader-ignore]')) {
-          return false;
+          return false
         }
-
-        // Ignora elementos com classes específicas que não devem ser lidos
-        if (el.classList.contains('text-muted') && el.tagName.toLowerCase() !== 'small') {
-          return false;
+        
+        // Verifica se o elemento tem conteúdo legível
+        const text = this.getElementText(el)
+        if (!text || text.trim().length === 0) {
+          return false
         }
-
-        // Verifica duplicados
-        const parent = el.closest('.course-item, .accordion-item');
-        if (parent) {
-          const siblings = parent.querySelectorAll(el.tagName.toLowerCase());
-          const sameTextSiblings = Array.from(siblings).filter(sibling =>
-            sibling.textContent.trim() === text && sibling !== el
-          );
-          if (sameTextSiblings.length > 0 && Array.from(siblings).indexOf(el) > 0) {
-            return false;
-          }
+        
+        // Ignora elementos ocultos
+        const style = window.getComputedStyle(el)
+        if (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0') {
+          return false
         }
+        
+        return true
+      }).sort((a, b) => {
+        // Ordena os elementos por posição na página (top para bottom, left para right)
+        const rectA = a.getBoundingClientRect()
+        const rectB = b.getBoundingClientRect()
+        
+        if (Math.abs(rectA.top - rectB.top) > 10) {
+          return rectA.top - rectB.top
+        }
+        return rectA.left - rectB.left
+      })
 
-        return text.trim().length > 0;
-      });
-
-
-      // Remove elementos duplicados baseado no conteúdo e posição
+      // Remove duplicatas baseado no conteúdo
       this.readableElements = this.removeDuplicateElements(this.readableElements)
 
       if (this.readableElements.length > 0) {
-        this.currentReadingStatus = "Leitor de ecrã activo"
+        this.currentReadingStatus = `Leitor activo - ${this.readableElements.length} elementos`
       } else {
         this.currentReadingStatus = "Nenhum conteúdo para ler"
       }
@@ -486,25 +653,24 @@ export default {
       const seen = new Map()
       
       return elements.filter(el => {
-        const text = el.textContent.trim().toLowerCase()
+        const text = this.getElementText(el).toLowerCase().trim()
         const tag = el.tagName.toLowerCase()
-        const key = `${tag}:${text}`
         
-        // Para elementos muito pequenos ou comuns, é mais restritivo
-        if (text.length < 10 || ['sim', 'não', 'ok', 'cancelar'].includes(text)) {
-          const rect = el.getBoundingClientRect()
-          const positionKey = `${key}:${Math.round(rect.top)}:${Math.round(rect.left)}`
-          
-          if (seen.has(positionKey)) {
-            return false
-          }
-          seen.set(positionKey, true)
+        // Para imagens, usa src como chave adicional
+        if (tag === 'img') {
+          const key = `${tag}:${text}:${el.src}`
+          if (seen.has(key)) return false
+          seen.set(key, true)
           return true
         }
+        
+        // Para outros elementos, verifica por texto e posição
+        const key = `${tag}:${text}`
         
         if (seen.has(key)) {
           return false
         }
+        
         seen.set(key, true)
         return true
       })
@@ -516,7 +682,7 @@ export default {
         if (this.active) {
           this.gatherReadableElements()
         }
-      }, 500) // Aumentado para evitar muitas atualizações
+      }, 500)
     },
 
     // Iniciar/pausar a leitura
@@ -670,7 +836,6 @@ export default {
             this.speakCurrentWord()
           } else if (this.currentElementIndex < this.readableElements.length - 1) {
             this.currentElementIndex++
-            await this.expandAccordionForElement(this.readableElements[this.currentElementIndex])
             this.setupWordReading()
             this.updateReadingStatus()
             this.speakCurrentWord()
@@ -706,11 +871,7 @@ export default {
       this.stopSpeaking()
 
       const currentElement = this.readableElements[this.currentElementIndex]
-      
-      // Expande accordion se necessário antes de ler
-      await this.expandAccordionForElement(currentElement)
-      
-      const textToSpeak = currentElement.textContent.trim()
+      const textToSpeak = this.getElementText(currentElement)
 
       this.utterance = new SpeechSynthesisUtterance(textToSpeak)
 
@@ -728,7 +889,6 @@ export default {
       this.utterance.onend = async () => {
         if (this.active && this.currentElementIndex < this.readableElements.length - 1) {
           this.currentElementIndex++
-          await this.expandAccordionForElement(this.readableElements[this.currentElementIndex])
           this.highlightCurrentElement()
           this.updateReadingStatus()
           this.speakCurrentElement()
@@ -780,7 +940,7 @@ export default {
     removeAllHighlights() {
       // Remove destaques de elementos
       document.querySelectorAll(".sr-element-highlight").forEach((el) => {
-        el.classList.remove("sr-element-highlight")
+        el.classList.remove("sr-element-highlight", "sr-interactive-indicator")
       })
 
       // Remove destaques de palavras
@@ -801,10 +961,12 @@ export default {
       if (this.currentElementIndex >= 0 && this.readableElements[this.currentElementIndex]) {
         const element = this.readableElements[this.currentElementIndex]
         
-        // Expande accordion se necessário
-        await this.expandAccordionForElement(element)
-        
         element.classList.add("sr-element-highlight")
+        
+        // Adiciona indicador se é um elemento interativo
+        if (this.isInteractiveElement(element)) {
+          element.classList.add("sr-interactive-indicator")
+        }
 
         element.scrollIntoView({
           behavior: "smooth",
@@ -827,6 +989,9 @@ export default {
         
         // Destaca o elemento pai também
         element.classList.add("sr-element-highlight")
+        if (this.isInteractiveElement(element)) {
+          element.classList.add("sr-interactive-indicator")
+        }
         
         // Encontra e destaca a palavra específica
         this.highlightWordInElement(element, word, this.currentWordIndex)
@@ -873,6 +1038,13 @@ export default {
     updateReadingStatus() {
       if (this.readableElements.length === 0) {
         this.currentReadingStatus = "Nenhum conteúdo para ler"
+      } else if (this.currentElementIndex >= 0) {
+        const element = this.readableElements[this.currentElementIndex]
+        if (this.isInteractiveElement(element)) {
+          this.currentReadingStatus = "Elemento interativo - pressione Enter"
+        } else {
+          this.currentReadingStatus = "A ler..."
+        }
       } else {
         this.currentReadingStatus = "Leitor de ecrã activo"
       }
@@ -933,7 +1105,7 @@ export default {
         z-index: 9999;
         font-size: 14px;
         font-weight: 500;
-        box-shadow: 0 4px 20px #3b82f6;
+        box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
         backdrop-filter: blur(10px);
         border: 1px solid rgba(255, 255, 255, 0.2);
         animation: sr-notification-slide 0.3s ease-out;
@@ -957,7 +1129,7 @@ export default {
       }, 2000)
     },
 
-    // Processa comandos de teclado
+    // Processa comandos de teclado - VERSÃO MELHORADA
     handleKeyboardShortcuts(event) {
       if (!this.active || !this.isInitialized) return
 
@@ -1005,6 +1177,12 @@ export default {
         case "B":
           if (!event.ctrlKey && !event.altKey && !event.metaKey) {
             this.previousElement()
+            event.preventDefault()
+          }
+          break
+        case "Enter":
+          if (!event.ctrlKey && !event.altKey && !event.metaKey) {
+            this.activateElement()
             event.preventDefault()
           }
           break

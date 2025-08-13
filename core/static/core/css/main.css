@@ -85,64 +85,6 @@ kbd[data-v-3d9a4370] {
   text-shadow: 0 0 3px rgba(255,255,255,0.8) !important;
 }
 
-/*!***************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
-  !*** css ./node_modules/css-loader/dist/cjs.js??clonedRuleSet-12.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-12.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/options/VoiceNavigation.vue?vue&type=style&index=0&id=27e636f5&scoped=true&lang=css ***!
-  \***************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
-
-/* Transições suaves */
-.transition-colors[data-v-27e636f5] {
-  transition-property: background-color, border-color, color, fill, stroke;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 200ms;
-}
-.transition-all[data-v-27e636f5] {
-  transition-property: all;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 300ms;
-}
-
-/* Animações */
-.animate-pulse[data-v-27e636f5] {
-  animation: pulse-27e636f5 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-@keyframes pulse-27e636f5 {
-0%, 100% {
-    opacity: 1;
-}
-50% {
-    opacity: 0.5;
-}
-}
-
-/* Estilo dos atalhos de teclado */
-kbd[data-v-27e636f5] {
-  font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
-  font-weight: 600;
-  box-shadow: inset 0 -2px 0 #e2e8f0, inset 0 0 1px 1px #f8fafc, 0 1px 2px 1px rgba(30,35,90,0.4);
-}
-.dark kbd[data-v-27e636f5] {
-  box-shadow: inset 0 -2px 0 #374151, inset 0 0 1px 1px #4b5563, 0 1px 2px 1px rgba(0,0,0,0.4);
-}
-
-/* Estados de hover aprimorados */
-.group:hover .group-hover\:text-blue-700[data-v-27e636f5] {
-  color: #1d4ed8;
-}
-.dark .group:hover .dark\:group-hover\:text-blue-300[data-v-27e636f5] {
-  color: #93c5fd;
-}
-
-/* Gradientes personalizados */
-.bg-gradient-to-r.from-blue-50.to-indigo-50[data-v-27e636f5] {
-  background-image: linear-gradient(to right, #eff6ff, #eef2ff);
-}
-.dark .dark\:from-gray-800.dark\:to-gray-700[data-v-27e636f5] {
-  background-image: linear-gradient(to right, #1f2937, #374151);
-}
-.bg-gradient-to-r.from-green-400.to-green-600[data-v-27e636f5] {
-  background-image: linear-gradient(to right, #4ade80, #16a34a);
-}
-
 /*!**************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
   !*** css ./node_modules/css-loader/dist/cjs.js??clonedRuleSet-12.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-12.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/AccessibilityComponent.vue?vue&type=style&index=0&id=a9d96c02&lang=css ***!
   \**************************************************************************************************************************************************************************************************************************************************************************************************************************************************/

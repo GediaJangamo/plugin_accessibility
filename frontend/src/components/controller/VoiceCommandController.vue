@@ -1,17 +1,25 @@
 <template>
   <div v-if="showComponent">
-    <div class="fixed inset-x-0 bottom-6 mx-auto z-50 flex items-center bg-white dark:bg-gray-800 rounded-lg p-4 shadow-lg border border-gray-200 dark:border-gray-700 w-full max-w-xl justify-between">
+    <div class="fixed inset-x-0 bottom-6 mx-auto z-50 flex items-center bg-white dark:bg-gray-800 rounded-lg p-4 shadow-lg border border-gray-200 dark:border-gray-700 w-full max-w-2xl justify-between">
       <div class="flex items-center space-x-4 flex-grow">
-        <!-- Botão de microfone clicável para ativar/desativar -->
+        <!-- Botão de microfone com atalho de teclado -->
         <button 
+          ref="micButton"
           @click="toggleRecognition"
-          class="relative w-10 h-10 rounded-full flex items-center justify-center transition-colors"
-          :class="isListening ? 'bg-[#4A90E2] dark:bg-[#4A90E2]' : 'bg-[#2060a9] dark:bg-[#2060a9]'"
-          aria-label="Alternar reconhecimento de voz"
+          @keydown.enter="toggleRecognition"
+          @keydown.space.prevent="toggleRecognition"
+          class="relative w-12 h-12 rounded-full flex items-center justify-center transition-colors focus:outline-none focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-600"
+          :class="isListening ? 'bg-green-500 hover:bg-green-600' : 'bg-red-500 hover:bg-red-600'"
+          :aria-label="isListening ? 'Desativar microfone - Pressione Ctrl+M' : 'Ativar microfone - Pressione Ctrl+M'"
+          :title="isListening ? 'Microfone Ativo (Ctrl+M para desativar)' : 'Microfone Inativo (Ctrl+M para ativar)'"
         >
-          <div v-if="!isListening" class="absolute w-8 h-0.5 bg-white rotate-45 rounded-full"></div>
-          <div v-if="recognitionState === 'listening'" class="w-3 h-3 absolute top-0 right-0 rounded-full bg-[#4A90E2] animate-pulse"></div>
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <!-- Ícone de microfone cortado quando inativo -->
+          <div v-if="!isListening" class="absolute w-10 h-1 bg-white rotate-45 rounded-full z-10"></div>
+          
+          <!-- Indicador de atividade quando ouvindo -->
+          <div v-if="recognitionState === 'listening'" class="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-green-300 animate-ping"></div>
+          
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-white relative z-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
             <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
             <line x1="12" y1="19" x2="12" y2="23"></line>
@@ -19,120 +27,178 @@
           </svg>
         </button>
 
-        <!-- Status do microfone com largura fixa -->
-        <div 
-          class="p-2 rounded-full text-white w-full max-w-xl"
-          :class="isListening ? 'bg-[#2060a9] dark:bg-[#2060a9]' : 'bg-[#2060a9] dark:bg-[#2060a9]'"
-        >
-          <span class="font-medium text-white px-2">
-            {{ statusMessage }}
-          </span>
-          <p v-if="lastTranscript" class="text-sm text-blue-200 mt-1 truncate px-2">
-            {{ lastTranscript }}
+        <!-- Status do microfone com informações detalhadas -->
+        <div class="flex-1 p-3 rounded-lg text-white" :class="getStatusColor()">
+          <div class="flex items-center justify-between">
+            <span class="font-medium text-sm">
+              {{ statusMessage }}
+            </span>
+            <span v-if="isListening" class="text-xs opacity-75">
+              Ctrl+M para pausar
+            </span>
+          </div>
+          
+          <!-- Último comando reconhecido -->
+          <p v-if="lastTranscript && isListening" class="text-xs mt-1 opacity-90 bg-black bg-opacity-20 px-2 py-1 rounded">
+            "{{ lastTranscript }}"
+          </p>
+          
+          <!-- Indicador de processamento -->
+          <p v-if="recognitionState === 'thinking'" class="text-xs mt-1 animate-pulse">
+            Processando comando...
           </p>
         </div>
       </div>
 
-      <!-- Botão de informações no canto direito -->
-      <button 
-        @click="toggleHelpMenu"
-        class="ml-4 p-2 rounded-full text-white hover:bg-[#4A90E2] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#4A90E2] transition-colors bg-[#4A90E2]"
-        aria-label="Informações sobre comandos de voz"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10"></circle>
-          <line x1="12" y1="16" x2="12" y2="12"></line>
-          <line x1="12" y1="8" x2="12.01" y2="8"></line>
-        </svg>
-      </button>
+      <!-- Botões de controle -->
+      <div class="flex items-center space-x-2 ml-4">
+        <!-- Botão de volume/speaker -->
+        <button 
+          @click="toggleSpeaker"
+          @keydown.enter="toggleSpeaker"
+          class="p-2 rounded-full text-white transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-400"
+          :class="speakerEnabled ? 'bg-blue-500 hover:bg-blue-600' : 'bg-gray-500 hover:bg-gray-600'"
+          :aria-label="speakerEnabled ? 'Desativar feedback de voz' : 'Ativar feedback de voz'"
+          :title="speakerEnabled ? 'Áudio ativado (Ctrl+S para desativar)' : 'Áudio desativado (Ctrl+S para ativar)'"
+        >
+          <svg v-if="speakerEnabled" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <path d="m19.07 4.93-1.41 1.41A9 9 0 0 1 20 12a9 9 0 0 1-2.34 5.66l1.41 1.41A11 11 0 0 0 22 12a11 11 0 0 0-2.93-7.07zM15.54 8.46a5 5 0 0 1 0 7.07l1.41 1.41a7 7 0 0 0 0-9.9z"></path>
+          </svg>
+          <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <line x1="23" y1="9" x2="17" y2="15"></line>
+            <line x1="17" y1="9" x2="23" y2="15"></line>
+          </svg>
+        </button>
+
+        <!-- Botão de ajuda -->
+        <button 
+          @click="toggleHelpMenu"
+          @keydown.enter="toggleHelpMenu"
+          class="p-2 rounded-full text-white bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-400 transition-colors"
+          aria-label="Abrir ajuda - Pressione Ctrl+H"
+          title="Comandos disponíveis (Ctrl+H)"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="16" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+          </svg>
+        </button>
+
+        <!-- Botão para fechar o controlador -->
+        <button 
+          @click="closeController"
+          @keydown.enter="closeController"
+          class="p-2 rounded-full text-white bg-red-500 hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-400 transition-colors"
+          aria-label="Fechar controlador de voz - Pressione Escape"
+          title="Fechar (Esc)"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
     </div>
 
-    <!-- Modal de ajuda para comandos de voz -->
+    <!-- Modal de ajuda aprimorado -->
     <div 
       v-if="showHelpMenu" 
       class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm"
+      @keydown.escape="toggleHelpMenu"
     >
-      <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[85vh] overflow-hidden flex flex-col">
+      <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
         <!-- Header -->
-        <div class="p-6 bg-gradient-to-r from-[#4A90E2] to-[#2060a9] dark:from-[#2060a9] dark:to-[#233e5c]">
+        <div class="p-6 bg-gradient-to-r from-blue-500 to-blue-700">
           <div class="flex items-center justify-between">
             <div class="flex items-center space-x-3">
               <div class="bg-white bg-opacity-20 p-2 rounded-full">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
                   <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
                   <line x1="12" y1="19" x2="12" y2="23"></line>
                   <line x1="8" y1="23" x2="16" y2="23"></line>
                 </svg>
               </div>
-              <h2 class="text-2xl font-bold text-white">
-                Comandos de Voz Disponíveis
-              </h2>
+              <div>
+                <h2 class="text-2xl font-bold text-white">Comandos de Voz e Atalhos</h2>
+                <p class="text-blue-100 text-sm">Sistema de navegação acessível</p>
+              </div>
             </div>
             <button 
               @click="toggleHelpMenu" 
-              class="text-white hover:text-gray-200 focus:outline-none focus:ring-2 focus:ring-white rounded-full p-1 transition-colors"
+              class="text-white hover:text-gray-200 focus:outline-none focus:ring-2 focus:ring-white rounded-full p-2 transition-colors"
               aria-label="Fechar menu de ajuda"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <line x1="18" y1="6" x2="6" y2="18"></line>
                 <line x1="6" y1="6" x2="18" y2="18"></line>
               </svg>
             </button>
           </div>
-          <p class="text-blue-100 mt-2 max-w-2xl">
-            Utilize estes comandos para navegar pelo sistema usando apenas sua voz. Diga "ajuda" a qualquer momento para ver esta lista.
-          </p>
         </div>
         
         <!-- Content -->
-        <div class="p-6 overflow-auto">
-          <!-- Navegação Geral -->
-          <div class="mb-6">
-            <h3 class="text-lg font-bold text-[#4A90E2] dark:text-[#72aae9] mb-3 border-b border-blue-200 dark:border-blue-700 pb-2">
-              Navegação Geral
+        <div class="flex-1 overflow-auto p-6">
+          <!-- Atalhos de Teclado -->
+          <div class="mb-8">
+            <h3 class="text-xl font-bold text-blue-600 dark:text-blue-400 mb-4 flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                <line x1="8" y1="21" x2="16" y2="21"></line>
+                <line x1="12" y1="17" x2="12" y2="21"></line>
+              </svg>
+              Atalhos de Teclado
             </h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div v-for="(desc, cmd) in generalCommands" :key="cmd" class="flex flex-col md:flex-row bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm border border-blue-200 dark:border-blue-700 hover:shadow-md transition-shadow">
-                <div class="font-mono text-sm bg-blue-50 dark:bg-[#2060a9] text-[#2060a9] dark:text-blue-200 px-3 py-2 rounded-md mb-2 md:mb-0 md:mr-3 flex-shrink-0 md:w-auto w-full">
-                  {{ cmd }}
-                </div>
-                <div class="text-gray-700 dark:text-gray-300 text-sm md:text-base flex items-center">
-                  {{ desc }}
-                </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+              <div v-for="(desc, shortcut) in keyboardShortcuts" :key="shortcut" class="flex items-center bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+                <kbd class="px-3 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded font-mono text-sm font-bold mr-4 min-w-fit">
+                  {{ shortcut }}
+                </kbd>
+                <span class="text-gray-700 dark:text-gray-300 text-sm">{{ desc }}</span>
               </div>
             </div>
           </div>
-          
-          <!-- Comandos do Sistema -->
-          <div class="mb-6">
-            <h3 class="text-lg font-bold text-[#4A90E2] dark:text-[#72aae9]  mb-3 border-b border-blue-200 dark:border-blue-700 pb-2">
-              Módulos do Sistema
-            </h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div v-for="(desc, cmd) in systemCommands" :key="cmd" class="flex flex-col md:flex-row bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm border border-blue-100 dark:border-blue-700 hover:shadow-md transition-shadow">
-                <div class="font-mono text-sm bg-blue-50 dark:bg-blue-700 text-blue-800 dark:text-blue-200 px-3 py-2 rounded-md mb-2 md:mb-0 md:mr-3 flex-shrink-0 md:w-auto w-full">
-                  {{ cmd }}
-                </div>
-                <div class="text-gray-700 dark:text-gray-300 text-sm md:text-base flex items-center">
-                  {{ desc }}
+
+          <!-- Comandos de Voz -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Navegação Geral -->
+            <div>
+              <h3 class="text-lg font-bold text-green-600 dark:text-green-400 mb-3 border-b border-green-200 dark:border-green-700 pb-2">
+                Navegação Geral
+              </h3>
+              <div class="space-y-2">
+                <div v-for="(desc, cmd) in generalCommands" :key="cmd" class="bg-green-50 dark:bg-green-900/20 rounded-lg p-3">
+                  <div class="font-semibold text-green-800 dark:text-green-300 text-sm">"{{ cmd }}"</div>
+                  <div class="text-green-700 dark:text-green-400 text-xs mt-1">{{ desc }}</div>
                 </div>
               </div>
             </div>
-          </div>
-          
-          <!-- Comandos de Acessibilidade -->
-          <div class="mb-6">
-            <h3 class="text-lg font-bold text-[#4A90E2] dark:text-[#72aae9]  mb-3 border-b border-blue-200 dark:border-emerald-700 pb-2">
-              Acessibilidade
-            </h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div v-for="(desc, cmd) in accessibilityCommands" :key="cmd" class="flex flex-col md:flex-row bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm border border-blue-100 dark:border-blue-700 hover:shadow-md transition-shadow">
-                <div class="font-mono text-sm bg-blue-50 dark:bg-blue-700 text-blue-800 dark:text-blue-200 px-3 py-2 rounded-md mb-2 md:mb-0 md:mr-3 flex-shrink-0 md:w-auto w-full">
-                  {{ cmd }}
+
+            <!-- Comandos do Sistema -->
+            <div>
+              <h3 class="text-lg font-bold text-purple-600 dark:text-purple-400 mb-3 border-b border-purple-200 dark:border-purple-700 pb-2">
+                Módulos do Sistema
+              </h3>
+              <div class="space-y-2">
+                <div v-for="(desc, cmd) in systemCommands" :key="cmd" class="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-3">
+                  <div class="font-semibold text-purple-800 dark:text-purple-300 text-sm">"{{ cmd }}"</div>
+                  <div class="text-purple-700 dark:text-purple-400 text-xs mt-1">{{ desc }}</div>
                 </div>
-                <div class="text-gray-700 dark:text-gray-300 text-sm md:text-base flex items-center">
-                  {{ desc }}
+              </div>
+            </div>
+
+            <!-- Comandos de Acessibilidade -->
+            <div>
+              <h3 class="text-lg font-bold text-orange-600 dark:text-orange-400 mb-3 border-b border-orange-200 dark:border-orange-700 pb-2">
+                Acessibilidade
+              </h3>
+              <div class="space-y-2">
+                <div v-for="(desc, cmd) in accessibilityCommands" :key="cmd" class="bg-orange-50 dark:bg-orange-900/20 rounded-lg p-3">
+                  <div class="font-semibold text-orange-800 dark:text-orange-300 text-sm">"{{ cmd }}"</div>
+                  <div class="text-orange-700 dark:text-orange-400 text-xs mt-1">{{ desc }}</div>
                 </div>
               </div>
             </div>
@@ -140,16 +206,17 @@
         </div>
         
         <!-- Footer -->
-        <div class="p-4 border-t border-gray-200 dark:border-gray-700 bg-blue-50 dark:bg-emerald-950">
-          <div class="flex items-center justify-between">
-            <p class="text-sm text-[#5194e0] dark:text-[#72aae9] ">
-              <span class="font-bold">Dica:</span> Você pode dizer "ajuda" a qualquer momento para ver estes comandos novamente.
-            </p>
+        <div class="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+          <div class="flex items-center justify-between flex-wrap gap-4">
+            <div class="text-sm text-gray-600 dark:text-gray-400">
+              <p><strong>Dica:</strong> Diga "ajuda" a qualquer momento para abrir este menu</p>
+              <p><strong>Status:</strong> Microfone {{ isListening ? 'ATIVO' : 'INATIVO' }} | Áudio {{ speakerEnabled ? 'ATIVO' : 'INATIVO' }}</p>
+            </div>
             <button 
               @click="toggleHelpMenu"
-              class="px-4 py-2 bg-[#4A90E2] hover:bg-[#2060a9] text-white rounded-lg shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-[#4A90E2] focus:ring-offset-2"
+              class="px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400"
             >
-              Fechar
+              Fechar (Esc)
             </button>
           </div>
         </div>
@@ -170,50 +237,59 @@ export default {
   data() {
     return {
       recognition: null,
+      synthesis: null,
       isListening: false,
+      speakerEnabled: true,
       showHelpMenu: false,
-      showComponent: false, // Controla se o componente deve ser exibido ou não
+      showComponent: false,
       errorCount: 0,
       lastCommand: '',
       lastTranscript: '',
       recognitionMessage: '',
-      recognitionState: 'silenced', // 'listening', 'silenced', 'thinking', 'error'
-      initDelay: 1500, // Delay para inicializar o reconhecimento após ativação
-      recognitionTimeout: null,
-      stateDisplayTimeout: null,
-      lastErrorTime: 0, // Para evitar spam de erros
+      recognitionState: 'silenced',
+      navigationHistory: [],
+      currentPage: '',
+      
+      // Atalhos de teclado
+      keyboardShortcuts: {
+        'Ctrl + M': 'Ativar/Desativar microfone',
+        'Ctrl + S': 'Ativar/Desativar feedback de áudio',
+        'Ctrl + H': 'Abrir/Fechar menu de ajuda',
+        'Esc': 'Fechar controlador ou menu',
+        'Tab': 'Navegar entre controles',
+        'Enter/Space': 'Ativar controle focado'
+      },
+      
       // Comandos disponíveis
       generalCommands: {
         "ir para início": "Navega para a página inicial",
-        "voltar": "Retorna à página anterior",
+        "voltar": "Retorna à página anterior", 
         "avançar": "Avança para a próxima página",
         "rolar para baixo": "Rola a página para baixo",
         "rolar para cima": "Rola a página para cima",
-        "actualizar página": "Recarrega a página actual",
-        "fechar": "Fecha a janela ou diálogo actual",
-        "maximizar": "Maximiza a janela atual",
-        "minimizar": "Minimiza a janela atual",
-        "ajuda": "Exibe esta lista de comandos disponíveis"
+        "atualizar página": "Recarrega a página atual",
+        "onde estou": "Informa a página atual",
+        "repetir última ação": "Repete o último comando executado",
+        "ajuda": "Exibe lista de comandos"
       },
       systemCommands: {
-        "abrir avaliações": "Navega para o módulo de avaliações",
-        "abrir inscrições": "Navega para o módulo de inscrições",
-        "abrir matrículas": "Navega para o módulo de matrículas",
-        "abrir facturas": "Navega para o módulo de facturas",
-        "abrir mensalidades": "Navega para o módulo de mensalidades",
-        "abrir vula": "Navega para o Vula",
+        "abrir avaliações": "Acede ao módulo de avaliações",
+        "abrir inscrições": "Acede ao módulo de inscrições", 
+        "abrir matrículas": "Acede ao módulo de matrículas",
+        "abrir faturas": "Acede ao módulo de faturas",
+        "abrir mensalidades": "Acede ao módulo de mensalidades",
+        "abrir vula": "Acede à plataforma Vula",
         "abrir perfil": "Acede ao perfil do utilizador",
-        "abrir configurações": "Acede às configurações do sistema",
+        "ir para painel": "Volta ao painel principal"
       },
       accessibilityCommands: {
-        "activar alto contraste": "Activa o modo de alto contraste",
-        "desactivar alto contraste": "Desactiva o modo de alto contraste",
+        "ativar alto contraste": "Ativa o modo de alto contraste",
+        "desativar alto contraste": "Desativa o modo de alto contraste", 
         "aumentar fonte": "Aumenta o tamanho da fonte",
         "diminuir fonte": "Diminui o tamanho da fonte",
-        "tamanho normal": "Retorna a fonte ao tamanho normal",
-        "activar leitor de ecra": "Activa o leitor de ecra",
-        "desactivar leitor de ecra": "Desactiva o leitor de ecra",
-        "modo normal": "Retorna ao modo de visualização padrão",
+        "tamanho normal": "Restaura fonte ao tamanho padrão",
+        "ativar áudio": "Ativa feedback de voz",
+        "desativar áudio": "Desativa feedback de voz"
       }
     }
   },
@@ -221,15 +297,15 @@ export default {
     statusMessage() {
       switch(this.recognitionState) {
         case 'listening':
-          return 'Ouvindo...';
+          return 'Ouvindo comandos...';
         case 'thinking':
           return 'Processando comando...';
         case 'error':
           return `Erro: ${this.recognitionMessage}`;
         case 'silenced':
-          return this.isListening ? 'Clique no microfone para desactivar' : 'Clique no microfone para activar';
+          return this.isListening ? 'Microfone ativo - Diga um comando' : 'Microfone inativo - Pressione Ctrl+M';
         default:
-          return 'Aguardando...';
+          return 'Sistema pronto';
       }
     }
   },
@@ -238,25 +314,165 @@ export default {
       immediate: true,
       handler(newValue) {
         if (newValue) {
-          this.showComponent = true; // Mostra o componente quando ativado no menu
+          this.showComponent = true;
+          this.initializeSystem();
         } else {
+          this.showComponent = false;
           this.stopVoiceRecognition();
-          this.showComponent = false; // Esconde o componente quando desativado no menu
         }
       }
     }
   },
+  mounted() {
+    this.setupKeyboardShortcuts();
+    this.initializeSpeechSynthesis();
+    this.detectCurrentPage();
+    
+    // Foca no botão de microfone quando o componente é montado
+    this.$nextTick(() => {
+      if (this.$refs.micButton) {
+        this.$refs.micButton.focus();
+      }
+    });
+  },
   beforeUnmount() {
-    this.stopVoiceRecognition();
-    clearTimeout(this.recognitionTimeout);
-    clearTimeout(this.stateDisplayTimeout);
+    this.cleanup();
   },
   methods: {
+    // Inicialização do sistema
+    initializeSystem() {
+      this.speak('Sistema de comandos de voz ativado. Pressione Control M para ativar o microfone, ou diga "ajuda" para ver os comandos disponíveis.');
+      this.detectCurrentPage();
+    },
+
+    // Text-to-Speech
+    initializeSpeechSynthesis() {
+      if ('speechSynthesis' in window) {
+        this.synthesis = window.speechSynthesis;
+      }
+    },
+
+    speak(text, priority = 'normal') {
+      if (!this.speakerEnabled || !this.synthesis) return;
+      
+      // Cancela falas anteriores se for alta prioridade
+      if (priority === 'high') {
+        this.synthesis.cancel();
+      }
+      
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'pt-BR';
+      utterance.rate = 0.9;
+      utterance.pitch = 1.0;
+      utterance.volume = 0.8;
+      
+      // Seleciona voz em português se disponível
+      const voices = this.synthesis.getVoices();
+      const portugueseVoice = voices.find(voice => 
+        voice.lang.includes('pt') || voice.lang.includes('PT')
+      );
+      if (portugueseVoice) {
+        utterance.voice = portugueseVoice;
+      }
+      
+      this.synthesis.speak(utterance);
+    },
+
+    // Controles de áudio
+    toggleSpeaker() {
+      this.speakerEnabled = !this.speakerEnabled;
+      const message = this.speakerEnabled ? 
+        'Feedback de voz ativado' : 
+        'Feedback de voz desativado';
+      
+      if (this.speakerEnabled) {
+        this.speak(message);
+      }
+      
+      this.$emit('announce', message);
+    },
+
+    // Atalhos de teclado
+    setupKeyboardShortcuts() {
+      document.addEventListener('keydown', this.handleKeyboardShortcuts);
+    },
+
+    handleKeyboardShortcuts(event) {
+      // Só processa se o componente estiver ativo
+      if (!this.showComponent) return;
+      
+      if (event.ctrlKey) {
+        switch(event.key.toLowerCase()) {
+          case 'm':
+            event.preventDefault();
+            this.toggleRecognition();
+            break;
+          case 's':
+            event.preventDefault();
+            this.toggleSpeaker();
+            break;
+          case 'h':
+            event.preventDefault();
+            this.toggleHelpMenu();
+            break;
+        }
+      } else if (event.key === 'Escape') {
+        event.preventDefault();
+        if (this.showHelpMenu) {
+          this.toggleHelpMenu();
+        } else {
+          this.closeController();
+        }
+      }
+    },
+
+    // Controle do menu de ajuda
     toggleHelpMenu() {
       this.showHelpMenu = !this.showHelpMenu;
+      const message = this.showHelpMenu ? 
+        'Menu de ajuda aberto. Use Tab para navegar e Escape para fechar.' :
+        'Menu de ajuda fechado.';
+      this.speak(message);
     },
-    
-    // Método para alternar o reconhecimento de voz
+
+    // Fechar controlador
+    closeController() {
+      this.speak('Controlador de voz fechado');
+      this.$emit('update:active', false);
+    },
+
+    // Detecção de página atual
+    detectCurrentPage() {
+      const path = window.location.pathname;
+      const pageNames = {
+        '/dashboard/': 'Painel Principal',
+        '/painel_estudante/': 'Painel do Estudante',
+        '/painel_estudante/avaliacoes/': 'Avaliações',
+        '/painel_estudante/inscricoes/': 'Inscrições',
+        '/painel_estudante/matriculas/': 'Matrículas',
+        '/painel_estudante/facturas/': 'Faturas',
+        '/painel_estudante/mensalidades/': 'Mensalidades',
+        '/painel_estudante/vula/': 'Plataforma Vula'
+      };
+      
+      this.currentPage = pageNames[path] || 'Página não identificada';
+    },
+
+    // Obter cor do status
+    getStatusColor() {
+      switch(this.recognitionState) {
+        case 'listening':
+          return 'bg-green-500 dark:bg-green-600';
+        case 'thinking':
+          return 'bg-blue-500 dark:bg-blue-600';
+        case 'error':
+          return 'bg-red-500 dark:bg-red-600';
+        default:
+          return 'bg-gray-500 dark:bg-gray-600';
+      }
+    },
+
+    // Controle de reconhecimento de voz
     toggleRecognition() {
       if (this.isListening) {
         this.stopVoiceRecognition();
@@ -264,22 +480,17 @@ export default {
         this.startVoiceRecognition();
       }
     },
-    
+
     startVoiceRecognition() {
       if (!this.active) {
-        this.$emit('announce', 'Os comandos de voz estão desactivados no sistema');
+        this.speak('Os comandos de voz estão desativados');
         return;
       }
       
       if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
         try {
-          // Para qualquer instância de reconhecimento existente primeiro
           if (this.recognition) {
-            try {
-              this.recognition.stop();
-            } catch (e) {
-              console.error("Erro ao parar instância anterior de reconhecimento:", e);
-            }
+            this.recognition.stop();
           }
           
           const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -287,30 +498,23 @@ export default {
           this.recognition.continuous = true;
           this.recognition.interimResults = false;
           this.recognition.lang = 'pt-BR';
-          
-          // Ajusta configurações para melhorar a precisão
-          this.recognition.maxAlternatives = 3;
+          this.recognition.maxAlternatives = 5;
           
           this.recognition.onstart = () => {
             this.isListening = true;
             this.recognitionState = 'listening';
-            this.$emit('announce', 'Comandos de voz ativados');
+            this.speak('Microfone ativado. Diga seu comando.');
           };
           
           this.recognition.onend = () => {
-            // Se o estado ainda não for 'silenced', significa que o reconhecimento foi encerrado por um erro
-            // ou terminou naturalmente, não por uma ação do usuário
-            if (this.recognitionState !== 'silenced' && this.isListening) {
-              // Tenta reiniciar após um breve delay
-              this.recognitionTimeout = setTimeout(() => {
-                if (this.isListening && this.active) {
+            // Não reinicia automaticamente - mantém controle do usuário
+            if (this.isListening && this.recognitionState !== 'silenced') {
+              setTimeout(() => {
+                if (this.isListening) {
                   try {
                     this.recognition.start();
                   } catch (e) {
-                    console.error("Erro ao reiniciar reconhecimento:", e);
-                    this.isListening = false;
-                    this.recognitionState = 'error';
-                    this.recognitionMessage = 'Falha ao reiniciar o reconhecimento';
+                    console.error('Erro ao reiniciar:', e);
                   }
                 }
               }, 1000);
@@ -318,44 +522,14 @@ export default {
           };
           
           this.recognition.onerror = (event) => {
-            const now = Date.now();
+            console.error('Erro de reconhecimento:', event.error);
             
-            // Trata o erro "aborted" de forma diferente - geralmente não é um erro real
-            if (event.error === 'aborted') {
-              console.log("Reconhecimento abortado, será reiniciado se ainda estiver ativo");
-              return; // Não trata como erro, deixa o manipulador onend reiniciá-lo
-            }
-            
-            // Ignora erros muito frequentes (menos de 2 segundos entre eles)
-            if (now - this.lastErrorTime < 2000) {
-              return;
-            }
-            
-            this.lastErrorTime = now;
-            console.error('Erro de reconhecimento de voz:', event.error);
-            
-            // Não incrementa o contador de erros em caso de "no-speech"
-            if (event.error !== 'no-speech') {
-              this.errorCount++;
-            }
-            
-            if (event.error === 'network') {
-              this.recognitionMessage = 'Verifique sua conexão de internet';
-            } else if (event.error === 'not-allowed') {
-              this.recognitionMessage = 'Permissão de microfone negada';
-            } else if (event.error === 'no-speech') {
-              // Não mostra mensagem para "no-speech"
-              return;
-            } else {
-              this.recognitionMessage = 'Fala não reconhecida';
-            }
-            
-            this.recognitionState = 'error';
-            
-            // Se houver muitos erros consecutivos, notificar o usuário
-            if (this.errorCount > 3) {
-              this.$emit('announce', 'Estamos tendo dificuldades em reconhecer sua voz. Por favor, verifique seu microfone.');
-              this.errorCount = 0;
+            if (event.error === 'not-allowed') {
+              this.speak('Permissão de microfone negada. Por favor, permita o acesso ao microfone.');
+            } else if (event.error === 'network') {
+              this.speak('Erro de conexão. Verifique sua internet.');
+            } else if (event.error !== 'no-speech' && event.error !== 'aborted') {
+              this.speak('Erro no reconhecimento de voz. Tente novamente.');
             }
           };
           
@@ -364,179 +538,129 @@ export default {
             this.lastTranscript = transcript;
             this.recognitionState = 'thinking';
             
-            // Evita processar o mesmo comando várias vezes
             if (transcript !== this.lastCommand) {
               this.lastCommand = transcript;
               this.processVoiceCommand(transcript);
             }
             
-            // Após processar, volta ao estado de escuta
             setTimeout(() => {
               if (this.recognitionState === 'thinking') {
                 this.recognitionState = 'listening';
               }
-            }, 2000);
+            }, 3000);
           };
           
-          // Adiciona um pequeno delay antes de iniciar para evitar ciclos rápidos de início/parada
           setTimeout(() => {
             try {
               this.recognition.start();
             } catch (e) {
-              console.error("Erro ao iniciar reconhecimento:", e);
-              this.isListening = false;
-              this.recognitionState = 'error';
-              this.recognitionMessage = 'Falha ao iniciar o reconhecimento';
+              this.speak('Erro ao iniciar o microfone');
             }
-          }, 500);
+          }, 300);
+          
         } catch (error) {
-          console.error('Erro ao inicializar o reconhecimento de voz:', error);
-          this.$emit('announce', 'Erro ao inicializar o reconhecimento de voz');
-          this.isListening = false;
-          this.recognitionState = 'error';
-          this.recognitionMessage = 'Falha ao inicializar';
+          this.speak('Erro ao inicializar o reconhecimento de voz');
         }
       } else {
-        console.error('Seu navegador não suporta reconhecimento de voz.');
-        this.$emit('announce', 'Seu navegador não suporta reconhecimento de voz.');
-        this.recognitionState = 'error';
-        this.recognitionMessage = 'Navegador incompatível';
+        this.speak('Seu navegador não suporta reconhecimento de voz');
       }
     },
-    
+
     stopVoiceRecognition() {
       if (this.recognition) {
         try {
           this.recognition.stop();
         } catch (e) {
-          console.error('Erro ao parar reconhecimento:', e);
+          console.error('Erro ao parar:', e);
         }
         this.recognition = null;
       }
       
       this.isListening = false;
       this.recognitionState = 'silenced';
-      this.$emit('announce', 'Comandos de voz desativados');
+      this.speak('Microfone desativado');
+    },
+
+    // Processamento de comandos
+    processVoiceCommand(command) {
+      console.log('Comando recebido:', command);
       
-      // Limpa todos os timeouts
-      if (this.recognitionTimeout) {
-        clearTimeout(this.recognitionTimeout);
-        this.recognitionTimeout = null;
+      // Comandos especiais do sistema
+      if (command.includes('ajuda')) {
+        this.showHelpMenu = true;
+        this.speak('Menu de ajuda aberto. Use Tab para navegar entre os comandos.');
+        return;
       }
       
-      if (this.stateDisplayTimeout) {
-        clearTimeout(this.stateDisplayTimeout);
-        this.stateDisplayTimeout = null;
+      if (command.includes('onde estou')) {
+        this.detectCurrentPage();
+        this.speak(`Você está na página: ${this.currentPage}`);
+        return;
+      }
+      
+      if (command.includes('repetir')) {
+        if (this.navigationHistory.length > 0) {
+          const lastAction = this.navigationHistory[this.navigationHistory.length - 1];
+          this.speak(`Repetindo última ação: ${lastAction}`);
+          this.executeVoiceCommand(lastAction);
+        } else {
+          this.speak('Nenhuma ação anterior para repetir');
+        }
+        return;
+      }
+      
+      if (command.includes('ativar áudio')) {
+        this.speakerEnabled = true;
+        this.speak('Feedback de áudio ativado');
+        return;
+      }
+      
+      if (command.includes('desativar áudio')) {
+        this.speakerEnabled = false;
+        // Não fala após desativar
+        return;
+      }
+      
+      if (command.includes('desativar microfone') || command.includes('parar de ouvir')) {
+        this.stopVoiceRecognition();
+        return;
+      }
+      
+      // Procura correspondência nos comandos
+      const allCommands = {
+        ...this.generalCommands,
+        ...this.systemCommands,
+        ...this.accessibilityCommands
+      };
+      
+      let bestMatch = null;
+      let bestScore = 0;
+      
+      Object.keys(allCommands).forEach(cmd => {
+        const score = this.getSimilarityScore(command, cmd);
+        if (score > bestScore && score > 0.6) {
+          bestScore = score;
+          bestMatch = cmd;
+        }
+      });
+      
+      if (bestMatch) {
+        this.executeVoiceCommand(bestMatch);
+      } else {
+        this.speak('Comando não reconhecido. Diga "ajuda" para ver os comandos disponíveis.');
+        this.recognitionMessage = 'Comando não reconhecido';
       }
     },
-    
-    // processVoiceCommand(command) {
-    //   console.log('Comando recebido:', command);
-      
-    //   // Comando de ajuda
-    //   if (command.includes('ajuda')) {
-    //     this.showHelpMenu = true;
-    //     this.$emit('announce', 'Exibindo lista de comandos disponíveis');
-    //     return;
-    //   }
-      
-    //   // Tratamento para comandos específicos de ativação/desativação do reconhecimento
-    //   if (command.includes('desativar microfone') || command.includes('parar de ouvir') || command.includes('desligar microfone')) {
-    //     this.stopVoiceRecognition();
-    //     return;
-    //   }
-      
-    //   // Verifica todos os comandos disponíveis
-    //   const allCommands = {
-    //     ...this.generalCommands,
-    //     ...this.systemCommands,
-    //     ...this.accessibilityCommands
-    //   };
-      
-    //   // Procura por correspondências aproximadas nos comandos
-    //   let bestMatch = null;
-    //   let bestScore = 0;
-      
-    //   Object.keys(allCommands).forEach(cmd => {
-    //     const score = this.getSimilarityScore(command, cmd);
-    //     if (score > bestScore && score > 0.7) { // Threshold de 70% de similaridade
-    //       bestScore = score;
-    //       bestMatch = cmd;
-    //     }
-    //   });
-      
-    //   if (bestMatch) {
-    //     // Se encontrou uma correspondência, executa o comando
-    //     this.recognitionMessage = `Executando: ${bestMatch}`;
-    //     this.$emit('executeCommand', bestMatch);
-    //     this.$emit('announce', `Executando comando: ${bestMatch}`);
-    //   } else {
-    //     // Se não encontrou correspondência, informa o usuário
-    //     this.recognitionMessage = 'Comando não reconhecido';
-    //     this.$emit('announce', 'Comando não reconhecido. Diga "ajuda" para ver os comandos disponíveis.');
-    //   }
-    // },
-    
-    // Função melhorada para calcular similaridade entre strings
-    
-    processVoiceCommand(command) {
-     console.log('Comando recebido:', command);
-  
-    // Comando de ajuda
-    if (command.includes('ajuda')) {
-      this.showHelpMenu = true;
-      this.$emit('announce', 'Exibindo lista de comandos disponíveis');
-      return;
-    }
-    
-    // Tratamento para comandos específicos de ativação/desativação do reconhecimento
-    if (command.includes('desativar microfone') || command.includes('parar de ouvir') || command.includes('desligar microfone')) {
-      this.stopVoiceRecognition();
-      return;
-    }
-    
-    // Verifica todos os comandos disponíveis
-    const allCommands = {
-      ...this.generalCommands,
-      ...this.systemCommands,
-      ...this.accessibilityCommands
-    };
-    
-    // Procura por correspondências aproximadas nos comandos
-    let bestMatch = null;
-    let bestScore = 0;
-    
-    Object.keys(allCommands).forEach(cmd => {
-      const score = this.getSimilarityScore(command, cmd);
-      if (score > bestScore && score > 0.7) { // Threshold de 70% de similaridade
-        bestScore = score;
-        bestMatch = cmd;
-      }
-    });
-    
-    if (bestMatch) {
-      // Executa o comando usando o novo método
-      this.executeVoiceCommand(bestMatch);
-    } else {
-      // Se não encontrou correspondência, informa o usuário
-      this.recognitionMessage = 'Comando não reconhecido';
-      this.$emit('announce', 'Comando não reconhecido. Diga "ajuda" para ver os comandos disponíveis.');
-    }
-  },
+
+    // Cálculo de similaridade
     getSimilarityScore(str1, str2) {
       str1 = str1.toLowerCase().trim();
       str2 = str2.toLowerCase().trim();
       
-      // Verifica se uma string contém a outra
-      if (str1.includes(str2)) {
+      if (str1.includes(str2) || str2.includes(str1)) {
         return 0.9;
       }
       
-      if (str2.includes(str1)) {
-        return 0.8;
-      }
-      
-      // Verifica palavras em comum
       const words1 = str1.split(/\s+/);
       const words2 = str2.split(/\s+/);
       
@@ -544,304 +668,200 @@ export default {
       let significantWords = 0;
       
       words1.forEach(word => {
-        if (word.length > 2) { // Ignora palavras muito curtas
+        if (word.length > 2) {
           significantWords++;
-          if (words2.includes(word)) {
+          if (words2.some(w => w.includes(word) || word.includes(w))) {
             commonWords++;
           }
         }
       });
       
-      if (significantWords === 0) return 0;
-      return commonWords / significantWords;
+      return significantWords > 0 ? commonWords / significantWords : 0;
     },
 
+    // Execução de comandos
     executeVoiceCommand(command) {
       console.log('Executando comando:', command);
       
-      // Mapeia os comandos de voz para as URLs do Django
+      // Adiciona à história de navegação
+      this.navigationHistory.push(command);
+      if (this.navigationHistory.length > 10) {
+        this.navigationHistory.shift();
+      }
+      
       const commandRoutes = {
         // Navegação geral
         "ir para início": "/dashboard/",
         "voltar": "history_back",
-        "avançar": "history_forward", 
-        "rolar para baixo": "scroll_down",
+        "avançar": "history_forward",
+        "rolar para baixo": "scroll_down", 
         "rolar para cima": "scroll_up",
-        "actualizar página": "reload_page",
-        "fechar": "close_modal",
-        "maximizar": "maximize_window",
-        "minimizar": "minimize_window",
+        "atualizar página": "reload_page",
         
-        // Comandos do sistema SIGA - usando suas URLs exatas
+        // Comandos do sistema
         "abrir avaliações": "/painel_estudante/avaliacoes/",
-        "abrir inscrições": "/painel_estudante/inscricoes/", 
+        "abrir inscrições": "/painel_estudante/inscricoes/",
         "abrir matrículas": "/painel_estudante/matriculas/",
-        "abrir facturas": "/painel_estudante/facturas/",
+        "abrir faturas": "/painel_estudante/facturas/",
         "abrir mensalidades": "/painel_estudante/mensalidades/",
         "abrir vula": "/painel_estudante/vula/",
         "abrir perfil": "/painel_estudante/",
         "ir para painel": "/painel_estudante/",
-        "ir para dashboard": "/dashboard/",
         
-        // Comandos de autenticação
-        "fazer logout": "/logout/",
-        "sair do sistema": "/logout/",
-        "deslogar": "/logout/",
-        
-        // Comandos de acessibilidade (ações JavaScript)
-        "activar alto contraste": "toggle_high_contrast",
-        "desactivar alto contraste": "toggle_high_contrast", 
+        // Comandos de acessibilidade
+        "ativar alto contraste": "toggle_high_contrast",
+        "desativar alto contraste": "toggle_high_contrast",
         "aumentar fonte": "increase_font_size",
         "diminuir fonte": "decrease_font_size",
-        "tamanho normal": "reset_font_size",
-        "activar leitor de ecra": "toggle_screen_reader",
-        "desactivar leitor de ecra": "toggle_screen_reader",
-        "modo normal": "reset_accessibility"
+        "tamanho normal": "reset_font_size"
       };
       
       const action = commandRoutes[command];
       
       if (!action) {
-        this.$emit('announce', 'Comando não encontrado');
+        this.speak('Comando não encontrado');
         return;
       }
       
-      // Executa ações especiais (não são URLs)
+      // Executa ações especiais
       if (typeof action === 'string' && !action.startsWith('/')) {
-        this.executeSpecialAction(action);
+        this.executeSpecialAction(action, command);
         return;
       }
       
-      // Navega para a URL do Django
+      // Navega para URLs
       if (action.startsWith('/')) {
-        this.navigateToUrl(action);
+        this.navigateToUrl(action, command);
       }
-   },
+    },
 
-   // Método para executar ações especiais (não navegação)
-  // executeSpecialAction(action) {
-  //   switch(action) {
-  //     case 'history_back':
-  //       window.history.back();
-  //       this.$emit('announce', 'Voltando para página anterior');
-  //       break;
+    // Ações especiais (não navegação)
+    executeSpecialAction(action) {
+      switch(action) {
+        case 'history_back':
+          window.history.back();
+          this.speak('Voltando para página anterior');
+          setTimeout(() => {
+            this.detectCurrentPage();
+            this.speak(`Agora você está em: ${this.currentPage}`);
+          }, 1500);
+          break;
+          
+        case 'history_forward':
+          window.history.forward();
+          this.speak('Avançando para próxima página');
+          setTimeout(() => {
+            this.detectCurrentPage();
+            this.speak(`Agora você está em: ${this.currentPage}`);
+          }, 1500);
+          break;
+          
+        case 'scroll_down':
+          window.scrollBy({ top: 400, behavior: 'smooth' });
+          this.speak('Rolando página para baixo');
+          break;
+          
+        case 'scroll_up':
+          window.scrollBy({ top: -400, behavior: 'smooth' });
+          this.speak('Rolando página para cima');
+          break;
+          
+        case 'reload_page':
+          this.speak('Recarregando página');
+          setTimeout(() => window.location.reload(), 1000);
+          break;
+          
+        case 'toggle_high_contrast': {
+          document.body.classList.toggle('high-contrast');
+          const isActive = document.body.classList.contains('high-contrast');
+          this.speak(isActive ? 'Alto contraste ativado' : 'Alto contraste desativado');
+          break;
+        }
         
-  //     case 'history_forward':
-  //       window.history.forward();
-  //       this.$emit('announce', 'Avançando para próxima página');
-  //       break;
-        
-  //     case 'scroll_down':
-  //       window.scrollBy(0, 300);
-  //       this.$emit('announce', 'Rolando para baixo');
-  //       break;
-        
-  //     case 'scroll_up':
-  //       window.scrollBy(0, -300);
-  //       this.$emit('announce', 'Rolando para cima');
-  //       break;
-        
-  //     case 'reload_page':
-  //       window.location.reload();
-  //       this.$emit('announce', 'Recarregando página');
-  //       break;
-        
-  //     case 'close_modal':
-  //       // Fecha modais ou diálogos abertos
-  //       const modal = document.querySelector('.modal, .dialog, [role="dialog"]');
-  //       if (modal) {
-  //         modal.style.display = 'none';
-  //         this.$emit('announce', 'Fechando diálogo');
-  //       }
-  //       break;
-        
-  //     case 'maximize_window':
-  //       if (document.documentElement.requestFullscreen) {
-  //         document.documentElement.requestFullscreen();
-  //         this.$emit('announce', 'Maximizando janela');
-  //       }
-  //       break;
-        
-  //     case 'minimize_window':
-  //       if (document.exitFullscreen) {
-  //         document.exitFullscreen();
-  //         this.$emit('announce', 'Minimizando janela');
-  //       }
-  //       break;
-        
-  //     case 'toggle_high_contrast':
-  //       document.body.classList.toggle('high-contrast');
-  //       const isActive = document.body.classList.contains('high-contrast');
-  //       this.$emit('announce', isActive ? 'Alto contraste activado' : 'Alto contraste desactivado');
-  //       break;
-        
-  //     case 'increase_font_size':
-  //       this.adjustFontSize(1.1);
-  //       this.$emit('announce', 'Fonte aumentada');
-  //       break;
-        
-  //     case 'decrease_font_size':
-  //       this.adjustFontSize(0.9);
-  //       this.$emit('announce', 'Fonte diminuída');
-  //       break;
-        
-  //     case 'reset_font_size':
-  //       document.documentElement.style.fontSize = '16px';
-  //       this.$emit('announce', 'Fonte restaurada ao tamanho normal');
-  //       break;
-        
-  //     case 'toggle_screen_reader':
-  //       // Implementar funcionalidade de leitor de tela
-  //       this.$emit('announce', 'Função de leitor de tela em desenvolvimento');
-  //       break;
-        
-  //     case 'reset_accessibility':
-  //       document.body.classList.remove('high-contrast');
-  //       document.documentElement.style.fontSize = '16px';
-  //       this.$emit('announce', 'Configurações de acessibilidade restauradas');
-  //       break;
-        
-  //     default:
-  //       this.$emit('announce', 'Ação não reconhecida');
-  //   }
-  // },
-  executeSpecialAction(action) {
-  switch(action) {
-    case 'history_back':
-      window.history.back();
-      this.$emit('announce', 'Voltando para página anterior');
-      break;
-
-    case 'history_forward':
-      window.history.forward();
-      this.$emit('announce', 'Avançando para próxima página');
-      break;
-
-    case 'scroll_down':
-      window.scrollBy(0, 300);
-      this.$emit('announce', 'Rolando para baixo');
-      break;
-
-    case 'scroll_up':
-      window.scrollBy(0, -300);
-      this.$emit('announce', 'Rolando para cima');
-      break;
-
-    case 'reload_page':
-      window.location.reload();
-      this.$emit('announce', 'Recarregando página');
-      break;
-
-    case 'close_modal': {
-      const modal = document.querySelector('.modal, .dialog, [role="dialog"]');
-      if (modal) {
-        modal.style.display = 'none';
-        this.$emit('announce', 'Fechando diálogo');
+        case 'increase_font_size':
+          this.adjustFontSize(1.1);
+          this.speak('Fonte aumentada');
+          break;
+          
+        case 'decrease_font_size':
+          this.adjustFontSize(0.9);
+          this.speak('Fonte diminuída');
+          break;
+          
+        case 'reset_font_size':
+          document.documentElement.style.fontSize = '16px';
+          this.speak('Fonte restaurada ao tamanho normal');
+          break;
+          
+        default:
+          this.speak('Ação não reconhecida');
       }
-      break;
-    }
+    },
 
-    case 'maximize_window':
-      if (document.documentElement.requestFullscreen) {
-        document.documentElement.requestFullscreen();
-        this.$emit('announce', 'Maximizando janela');
-      }
-      break;
-
-    case 'minimize_window':
-      if (document.exitFullscreen) {
-        document.exitFullscreen();
-        this.$emit('announce', 'Minimizando janela');
-      }
-      break;
-
-    case 'toggle_high_contrast': {
-      document.body.classList.toggle('high-contrast');
-      const isActive = document.body.classList.contains('high-contrast');
-      this.$emit('announce', isActive ? 'Alto contraste activado' : 'Alto contraste desactivado');
-      break;
-    }
-
-    case 'increase_font_size':
-      this.adjustFontSize(1.1);
-      this.$emit('announce', 'Fonte aumentada');
-      break;
-
-    case 'decrease_font_size':
-      this.adjustFontSize(0.9);
-      this.$emit('announce', 'Fonte diminuída');
-      break;
-
-    case 'reset_font_size':
-      document.documentElement.style.fontSize = '16px';
-      this.$emit('announce', 'Fonte restaurada ao tamanho normal');
-      break;
-
-    case 'toggle_screen_reader':
-      this.$emit('announce', 'Função de leitor de tela em desenvolvimento');
-      break;
-
-    case 'reset_accessibility':
-      document.body.classList.remove('high-contrast');
-      document.documentElement.style.fontSize = '16px';
-      this.$emit('announce', 'Configurações de acessibilidade restauradas');
-      break;
-
-    default:
-      this.$emit('announce', 'Ação não reconhecida');
-  }
-},
-
-
-  // Método para ajustar tamanho da fonte
-  adjustFontSize(factor) {
-    const currentSize = parseFloat(getComputedStyle(document.documentElement).fontSize);
-    const newSize = Math.max(12, Math.min(24, currentSize * factor));
-    document.documentElement.style.fontSize = newSize + 'px';
-  },
-
-  // Método para navegar para URLs do Django
-  navigateToUrl(url) {
-    try {
-      // Adiciona loading state
-      this.recognitionState = 'thinking';
-      this.recognitionMessage = 'Navegando...';
-      
-      // Navega para a URL
-      window.location.href = url;
-      
-      // Anuncia a navegação
+    // Navegação para URLs
+    navigateToUrl(url) {
       const pageNames = {
-        '/dashboard/': 'painel principal',
-        '/painel_estudante/': 'painel do estudante', 
-        '/painel_estudante/avaliacoes/': 'avaliações',
-        '/painel_estudante/inscricoes/': 'inscrições',
-        '/painel_estudante/matriculas/': 'matrículas', 
-        '/painel_estudante/facturas/': 'facturas',
-        '/painel_estudante/mensalidades/': 'mensalidades',
-        '/painel_estudante/vula/': 'plataforma Vula',
-        '/logout/': 'saindo do sistema'
+        '/dashboard/': 'Painel Principal',
+        '/painel_estudante/': 'Painel do Estudante',
+        '/painel_estudante/avaliacoes/': 'Avaliações',
+        '/painel_estudante/inscricoes/': 'Inscrições', 
+        '/painel_estudante/matriculas/': 'Matrículas',
+        '/painel_estudante/facturas/': 'Faturas',
+        '/painel_estudante/mensalidades/': 'Mensalidades',
+        '/painel_estudante/vula/': 'Plataforma Vula'
       };
       
       const pageName = pageNames[url] || 'página solicitada';
-      this.$emit('announce', `Navegando para ${pageName}`);
       
-    } catch (error) {
-      console.error('Erro na navegação:', error);
-      this.$emit('announce', 'Erro ao navegar para a página');
-      this.recognitionState = 'error';
+      this.speak(`Abrindo ${pageName}. Aguarde...`);
+      
+      // Navega após um pequeno delay para que o áudio seja ouvido
+      setTimeout(() => {
+        window.location.href = url;
+        
+        // Feedback após navegação (será executado na nova página)
+        setTimeout(() => {
+          this.detectCurrentPage();
+          this.speak(`Página ${pageName} carregada com sucesso. Você está agora em: ${this.currentPage}`);
+        }, 2000);
+      }, 1500);
+    },
+
+    // Ajustar tamanho da fonte
+    adjustFontSize(factor) {
+      const currentSize = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+      const newSize = Math.max(12, Math.min(24, currentSize * factor));
+      document.documentElement.style.fontSize = newSize + 'px';
+    },
+
+    // Limpeza
+    cleanup() {
+      this.stopVoiceRecognition();
+      document.removeEventListener('keydown', this.handleKeyboardShortcuts);
+      
+      if (this.synthesis) {
+        this.synthesis.cancel();
+      }
     }
-  },
-
-
-
   }
 }
 </script>
 
 <style scoped>
+/* Animações */
+.animate-ping {
+  animation: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
 .animate-pulse {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes ping {
+  75%, 100% {
+    transform: scale(2);
+    opacity: 0;
+  }
 }
 
 @keyframes pulse {
@@ -857,12 +877,31 @@ export default {
 .transition-colors {
   transition-property: background-color, border-color, color, fill, stroke;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 150ms;
+  transition-duration: 200ms;
 }
 
 .transition-shadow {
   transition-property: box-shadow;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 150ms;
+  transition-duration: 200ms;
+}
+
+/* Melhor contraste para acessibilidade */
+.focus\:ring-4:focus {
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.5);
+}
+
+/* Estilo para teclado */
+kbd {
+  box-shadow: inset 0 -2px 0 #cdcde6, inset 0 0 1px 1px #fff, 0 1px 2px 1px rgba(30,35,90,0.4);
+}
+
+/* Alto contraste */
+.high-contrast {
+  filter: contrast(150%) brightness(120%);
+}
+
+.high-contrast * {
+  text-shadow: 0 0 3px rgba(255,255,255,0.8) !important;
 }
 </style>

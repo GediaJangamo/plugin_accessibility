@@ -25,15 +25,6 @@
       </div>
 
       <div class="p-4">
-        <!-- Informações do elemento atual -->
-        <div class="mb-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-          <div class="text-sm text-gray-600 dark:text-gray-300 mb-1">Elemento actual:</div>
-          <div class="font-medium text-gray-800 dark:text-white">{{ getCurrentElementInfo() }}</div>
-          <div v-if="getCurrentElementDescription()" class="text-sm text-blue-600 dark:text-blue-400 mt-1">
-            {{ getCurrentElementDescription() }}
-          </div>
-        </div>
-
         <!-- Controle de velocidade e modo de leitura -->
         <div class="flex items-center justify-between mb-4 gap-4">
           <!-- Modo de leitura -->
@@ -113,15 +104,23 @@
               </svg>
             </button>
             
-            <!-- Botão de activar elemento -->
+            <!-- Botão de activar elemento ou entrar/sair -->
             <button 
               @click="activateElement"
-              class="flex items-center justify-center bg-green-500 hover:bg-green-600 text-white p-3 rounded-lg shadow-sm transition-colors"
-              :disabled="!canActivateCurrentElement()"
-              aria-label="Activar elemento (Enter)"
+              class="flex items-center justify-center text-white p-3 rounded-lg shadow-sm transition-colors"
+              :class="getActivateButtonClass()"
+              :aria-label="getActivateButtonLabel()"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg v-if="!isInContainer" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+              <!-- Ícone para entrar em container -->
+              <svg v-else-if="canEnterCurrentContainer()" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+              </svg>
+              <!-- Ícone para sair de container -->
+              <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
               </svg>
             </button>
             
@@ -152,11 +151,6 @@
               {{ getProgressText() }}
             </span>
           </div>
-        </div>
-
-        <!-- Instruções de teclado -->
-        <div class="text-xs text-gray-500 dark:text-gray-400 text-center">
-          <div>Espaço/P: Play/Pause | ←→: Navegar | Enter: Activar | R: Reiniciar | W: Modo | Esc: Sair</div>
         </div>
       </div>
     </div>
@@ -191,7 +185,10 @@ export default {
       currentWords: [],
       currentWordIndex: -1,
       wordHighlightSpan: null,
-      processedAccordions: new Set(),
+      // Navegação hierárquica
+      isInContainer: false,
+      containerStack: [],
+      currentContainer: null,
     }
   },
   watch: {
@@ -276,6 +273,23 @@ export default {
             font-size: 10px !important;
             animation: sr-pulse 1s ease-in-out infinite !important;
           }
+
+          .sr-container-indicator::after {
+            content: '📁' !important;
+            position: absolute !important;
+            top: -8px !important;
+            right: -8px !important;
+            background: #8b5cf6 !important;
+            color: white !important;
+            border-radius: 50% !important;
+            width: 20px !important;
+            height: 20px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            font-size: 10px !important;
+            animation: sr-pulse 1s ease-in-out infinite !important;
+          }
           
           @keyframes sr-glow-pulse {
             0% { opacity: 0.3; transform: scale(1); }
@@ -299,63 +313,213 @@ export default {
       }
     },
 
-    // Retorna informações sobre o elemento atual
-    getCurrentElementInfo() {
+    // Verifica se é um container (accordion, tabs, etc.)
+    isContainer(element) {
+      const containerSelectors = [
+        '.accordion-item',
+        '.accordion',
+        '.tab-pane',
+        '.tabs',
+        '.collapse',
+        '.modal-body',
+        '.dropdown-menu',
+        '.card-body',
+        '.sidebar',
+        '.nav-tabs',
+        '.nav-pills'
+      ]
+      
+      return containerSelectors.some(selector => 
+        element.matches && element.matches(selector)
+      )
+    },
+
+    // Verifica se pode entrar no container atual
+    canEnterCurrentContainer() {
       if (this.currentElementIndex < 0 || !this.readableElements[this.currentElementIndex]) {
-        return 'Nenhum elemento selecionado'
+        return false
       }
       
       const element = this.readableElements[this.currentElementIndex]
-      const tag = element.tagName.toLowerCase()
-      
-      if (tag === 'img') {
-        return `Imagem: ${element.alt || 'Sem descrição'}`
-      }
-      
-      const elementTypes = {
-        'h1': 'Título Principal',
-        'h2': 'Título Secundário', 
-        'h3': 'Subtítulo',
-        'h4': 'Subtítulo',
-        'h5': 'Subtítulo',
-        'h6': 'Subtítulo',
-        'p': 'Parágrafo',
-        'button': 'Botão',
-        'a': 'Link',
-        'input': 'Campo de entrada',
-        'textarea': 'Área de texto',
-        'li': 'Item de lista',
-        'td': 'Célula de tabela',
-        'th': 'Cabeçalho de tabela',
-        'label': 'Rótulo'
-      }
-      
-      const type = elementTypes[tag] || tag.toUpperCase()
-      const text = element.textContent.trim()
-      
-      return `${type}: ${text.length > 50 ? text.substring(0, 50) + '...' : text}`
+      return this.isContainer(element) || this.hasExpandableContent(element)
     },
 
-    // Retorna descrição adicional do elemento
-    getCurrentElementDescription() {
-      if (this.currentElementIndex < 0 || !this.readableElements[this.currentElementIndex]) {
-        return ''
+    // Verifica se tem conteúdo expansível
+    hasExpandableContent(element) {
+      // Accordion buttons
+      if (element.classList.contains('accordion-button')) {
+        return true
       }
       
+      // Elementos com data-bs-toggle
+      if (element.getAttribute('data-bs-toggle')) {
+        return true
+      }
+      
+      // Elementos que controlam outros elementos
+      const controls = element.getAttribute('aria-controls')
+      if (controls) {
+        const controlled = document.getElementById(controls)
+        return controlled && controlled.children.length > 0
+      }
+      
+      return false
+    },
+
+    // Entra em um container
+    enterContainer() {
+      if (this.currentElementIndex < 0 || !this.readableElements[this.currentElementIndex]) {
+        return
+      }
+
       const element = this.readableElements[this.currentElementIndex]
       
-      if (this.isInteractiveElement(element)) {
-        return 'Pressione Enter para activar'
+      // Se é um botão de accordion, expande primeiro
+      if (element.classList.contains('accordion-button') && element.getAttribute('aria-expanded') === 'false') {
+        element.click()
+        // Aguarda um tempo para a expansão
+        setTimeout(() => {
+          this.proceedToEnterContainer(element)
+        }, 500)
+      } else {
+        this.proceedToEnterContainer(element)
       }
-      
-      if (element.closest('.accordion-item')) {
-        return 'Elemento dentro de accordion'
-      }
-      
-      return ''
     },
 
-    // Verifica se o elemento atual pode ser activado
+    // Procede para entrar no container
+    proceedToEnterContainer(element) {
+      // Salva o estado atual
+      this.containerStack.push({
+        container: this.currentContainer,
+        elements: [...this.readableElements],
+        index: this.currentElementIndex
+      })
+
+      this.currentContainer = element
+      this.isInContainer = true
+
+      // Encontra os elementos dentro do container
+      let containerContent = null
+      
+      if (element.classList.contains('accordion-button')) {
+        const controls = element.getAttribute('aria-controls')
+        if (controls) {
+          containerContent = document.getElementById(controls)
+        }
+      } else if (this.isContainer(element)) {
+        containerContent = element
+      }
+
+      if (containerContent) {
+        this.gatherElementsInContainer(containerContent)
+        this.currentElementIndex = 0
+        this.announceChange(`Entrando no container com ${this.readableElements.length} elementos`)
+        
+        if (this.readableElements.length > 0) {
+          this.highlightCurrentElement()
+        }
+      } else {
+        this.announceChange("Container vazio")
+      }
+    },
+
+    // Sai do container atual
+    exitContainer() {
+      if (this.containerStack.length === 0) {
+        this.announceChange("Já está no nível principal")
+        return
+      }
+
+      const previousState = this.containerStack.pop()
+      
+      this.currentContainer = previousState.container
+      this.readableElements = previousState.elements
+      this.currentElementIndex = previousState.index
+      this.isInContainer = this.containerStack.length > 0
+
+      this.announceChange("Saindo do container")
+      this.highlightCurrentElement()
+      this.updateReadingStatus()
+    },
+
+    // Coleta elementos dentro de um container específico
+    gatherElementsInContainer(container) {
+      const selector = `
+        h1, h2, h3, h4, h5, h6,
+        p,
+        a:not([aria-hidden="true"]),
+        button,
+        input[type="text"], input[type="email"], input[type="password"], input[type="search"],
+        textarea,
+        select,
+        label,
+        li,
+        span.badge,
+        span.text-muted,
+        .card-title,
+        .card-text
+      `
+      
+      const elements = Array.from(container.querySelectorAll(selector))
+      
+      this.readableElements = elements.filter(el => {
+        // Ignora elementos do próprio leitor
+        if (el.closest('.screen-reader-control') || el.closest('[data-screen-reader-ignore]')) {
+          return false
+        }
+        
+        const text = this.getElementText(el)
+        if (!text || text.trim().length === 0) {
+          return false
+        }
+        
+        // Verifica visibilidade
+        const style = window.getComputedStyle(el)
+        if (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0') {
+          return false
+        }
+        
+        return true
+      }).sort((a, b) => {
+        const rectA = a.getBoundingClientRect()
+        const rectB = b.getBoundingClientRect()
+        
+        if (Math.abs(rectA.top - rectB.top) > 10) {
+          return rectA.top - rectB.top
+        }
+        return rectA.left - rectB.left
+      })
+
+      this.readableElements = this.removeDuplicateElements(this.readableElements)
+    },
+
+    // Retorna classe do botão de ativar baseado no contexto
+    getActivateButtonClass() {
+      if (this.isInContainer) {
+        return 'bg-orange-500 hover:bg-orange-600'  // Sair do container
+      } else if (this.canEnterCurrentContainer()) {
+        return 'bg-purple-500 hover:bg-purple-600'  // Entrar no container
+      } else if (this.canActivateCurrentElement()) {
+        return 'bg-green-500 hover:bg-green-600'    // Ativar elemento
+      } else {
+        return 'bg-gray-400 cursor-not-allowed'     // Desabilitado
+      }
+    },
+
+    // Retorna label do botão de ativar baseado no contexto
+    getActivateButtonLabel() {
+      if (this.isInContainer) {
+        return 'Sair do container (Esc)'
+      } else if (this.canEnterCurrentContainer()) {
+        return 'Entrar no container (Enter)'
+      } else if (this.canActivateCurrentElement()) {
+        return 'Ativar elemento (Enter)'
+      } else {
+        return 'Elemento não interativo'
+      }
+    },
+
+    // Verifica se o elemento atual pode ser ativado
     canActivateCurrentElement() {
       if (this.currentElementIndex < 0 || !this.readableElements[this.currentElementIndex]) {
         return false
@@ -373,13 +537,11 @@ export default {
         return true
       }
       
-      // Verifica elementos com papel interativo
       const role = element.getAttribute('role')
       if (role && ['button', 'link', 'tab', 'menuitem'].includes(role)) {
         return true
       }
       
-      // Verifica elementos clicáveis
       if (element.onclick || element.getAttribute('data-bs-toggle') || element.classList.contains('accordion-button')) {
         return true
       }
@@ -387,34 +549,34 @@ export default {
       return false
     },
 
-    // Activa o elemento atual (simula clique)
+    // Ativa o elemento atual ou entra/sai de containers
     activateElement() {
-      if (!this.canActivateCurrentElement()) {
-        this.announceChange('Elemento não pode ser activado')
-        return
-      }
-      
-      const element = this.readableElements[this.currentElementIndex]
-      
-      this.announceChange('Activando elemento...')
-      
-      // Simula um clique no elemento
-      if (element.click) {
-        element.click()
+      if (this.isInContainer) {
+        this.exitContainer()
+      } else if (this.canEnterCurrentContainer()) {
+        this.enterContainer()
+      } else if (this.canActivateCurrentElement()) {
+        const element = this.readableElements[this.currentElementIndex]
+        
+        this.announceChange('Ativando elemento...')
+        
+        if (element.click) {
+          element.click()
+        } else {
+          const event = new MouseEvent('click', {
+            bubbles: true,
+            cancelable: true
+          })
+          element.dispatchEvent(event)
+        }
+        
+        setTimeout(() => {
+          this.gatherReadableElements()
+          this.announceChange('Elemento ativado')
+        }, 500)
       } else {
-        // Fallback para elementos que não têm método click
-        const event = new MouseEvent('click', {
-          bubbles: true,
-          cancelable: true
-        })
-        element.dispatchEvent(event)
+        this.announceChange('Elemento não pode ser ativado')
       }
-      
-      // Aguarda um pouco e atualiza os elementos
-      setTimeout(() => {
-        this.gatherReadableElements()
-        this.announceChange('Elemento activado')
-      }, 500)
     },
 
     // Define o modo de leitura
@@ -466,6 +628,7 @@ export default {
       this.initializeSpeechSynthesis()
 
       setTimeout(() => {
+        this.resetToMainLevel()
         this.gatherReadableElements()
         this.currentElementIndex = -1
         this.removeAllHighlights()
@@ -474,11 +637,19 @@ export default {
       }, 300)
     },
 
+    // Reseta para o nível principal
+    resetToMainLevel() {
+      this.isInContainer = false
+      this.containerStack = []
+      this.currentContainer = null
+    },
+
     // Limpa todos os recursos do leitor
     cleanupReaderFeatures() {
       this.stopSpeaking()
       this.removeAllHighlights()
       this.disableKeyboardControls()
+      this.resetToMainLevel()
 
       if (this.observer) {
         this.observer.disconnect()
@@ -571,47 +742,71 @@ export default {
           return `Elemento clicável: ${text}`
         }
       }
+
+      // Se é um container, indica isso no texto
+      if (this.isContainer(element) || this.hasExpandableContent(element)) {
+        const text = element.textContent.trim()
+        return `Área expandível: ${text}`
+      }
       
       return element.textContent.trim()
     },
 
-    // Coleta elementos que podem ser lidos - VERSÃO MELHORADA
+    // Coleta elementos que podem ser lidos - VERSÃO MELHORADA PARA IGNORAR CONTEÚDO DE CONTAINERS
     async gatherReadableElements() {
       const mainContent = document.getElementById("main-content") || document.body
       
-      // Selector mais abrangente incluindo imagens
+      // Selector focado em elementos principais, ignorando conteúdo interno de containers
       const selector = `
         img,
         svg[aria-label],
         h1, h2, h3, h4, h5, h6,
-        p,
-        a:not([aria-hidden="true"]),
+        p:not(.accordion-body p):not(.collapse p):not(.tab-pane p),
+        a:not([aria-hidden="true"]):not(.accordion-body a):not(.collapse a):not(.tab-pane a),
         button,
         input[type="text"], input[type="email"], input[type="password"], input[type="search"],
         textarea,
         select,
-        label,
-        li,
-        td, th,
-        span.badge,
-        span.text-muted,
-        div[role="button"],
-        div[onclick],
-        [data-bs-toggle],
+        label:not(.accordion-body label):not(.collapse label):not(.tab-pane label),
+        li:not(.accordion-body li):not(.collapse li):not(.tab-pane li),
+        td:not(.accordion-body td):not(.collapse td):not(.tab-pane td),
+        th:not(.accordion-body th):not(.collapse th):not(.tab-pane th),
+        span.badge:not(.accordion-body span.badge):not(.collapse span.badge):not(.tab-pane span.badge),
         .accordion-button,
-        .btn,
-        .card-title,
-        .card-text
+        .nav-link,
+        .tab-button,
+        .card-title:not(.accordion-body .card-title):not(.collapse .card-title):not(.tab-pane .card-title),
+        .card-text:not(.accordion-body .card-text):not(.collapse .card-text):not(.tab-pane .card-text)
       `
       
       // Coleta todos os elementos
       const allElements = Array.from(mainContent.querySelectorAll(selector))
       
-      // Filtra e ordena os elementos
+      // Filtra elementos, excluindo conteúdo dentro de containers colapsados
       this.readableElements = allElements.filter(el => {
         // Ignora elementos do próprio leitor
         if (el.closest('.screen-reader-control') || el.closest('[data-screen-reader-ignore]')) {
           return false
+        }
+
+        // Ignora conteúdo dentro de containers colapsados/ocultos
+        const hiddenContainers = [
+          '.accordion-body',
+          '.collapse:not(.show)',
+          '.tab-pane:not(.active)',
+          '.dropdown-menu:not(.show)',
+          '[aria-expanded="false"] + .collapse'
+        ]
+
+        for (let containerSelector of hiddenContainers) {
+          if (el.closest(containerSelector)) {
+            // Se está dentro de um container oculto, só inclui se é o próprio elemento de controle
+            if (!el.classList.contains('accordion-button') && 
+                !el.classList.contains('nav-link') &&
+                !el.classList.contains('tab-button')) {
+              return false
+            }
+          }
         }
         
         // Verifica se o elemento tem conteúdo legível
@@ -628,7 +823,7 @@ export default {
         
         return true
       }).sort((a, b) => {
-        // Ordena os elementos por posição na página (top para bottom, left para right)
+        // Ordena os elementos por posição na página
         const rectA = a.getBoundingClientRect()
         const rectB = b.getBoundingClientRect()
         
@@ -642,7 +837,7 @@ export default {
       this.readableElements = this.removeDuplicateElements(this.readableElements)
 
       if (this.readableElements.length > 0) {
-        this.currentReadingStatus = `Leitor activo - ${this.readableElements.length} elementos`
+        this.currentReadingStatus = `Leitor ativo - ${this.readableElements.length} elementos`
       } else {
         this.currentReadingStatus = "Nenhum conteúdo para ler"
       }
@@ -679,7 +874,8 @@ export default {
     debounceGatherElements() {
       if (this.gatherTimeout) clearTimeout(this.gatherTimeout)
       this.gatherTimeout = setTimeout(() => {
-        if (this.active) {
+        if (this.active && !this.isInContainer) {
+          // Só recoleta elementos se não estiver dentro de um container
           this.gatherReadableElements()
         }
       }, 500)
@@ -940,7 +1136,7 @@ export default {
     removeAllHighlights() {
       // Remove destaques de elementos
       document.querySelectorAll(".sr-element-highlight").forEach((el) => {
-        el.classList.remove("sr-element-highlight", "sr-interactive-indicator")
+        el.classList.remove("sr-element-highlight", "sr-interactive-indicator", "sr-container-indicator")
       })
 
       // Remove destaques de palavras
@@ -963,8 +1159,10 @@ export default {
         
         element.classList.add("sr-element-highlight")
         
-        // Adiciona indicador se é um elemento interativo
-        if (this.isInteractiveElement(element)) {
+        // Adiciona indicador baseado no tipo de elemento
+        if (this.isContainer(element) || this.hasExpandableContent(element)) {
+          element.classList.add("sr-container-indicator")
+        } else if (this.isInteractiveElement(element)) {
           element.classList.add("sr-interactive-indicator")
         }
 
@@ -989,7 +1187,9 @@ export default {
         
         // Destaca o elemento pai também
         element.classList.add("sr-element-highlight")
-        if (this.isInteractiveElement(element)) {
+        if (this.isContainer(element) || this.hasExpandableContent(element)) {
+          element.classList.add("sr-container-indicator")
+        } else if (this.isInteractiveElement(element)) {
           element.classList.add("sr-interactive-indicator")
         }
         
@@ -1040,13 +1240,15 @@ export default {
         this.currentReadingStatus = "Nenhum conteúdo para ler"
       } else if (this.currentElementIndex >= 0) {
         const element = this.readableElements[this.currentElementIndex]
-        if (this.isInteractiveElement(element)) {
-          this.currentReadingStatus = "Elemento interativo - pressione Enter"
+        if (this.isContainer(element) || this.hasExpandableContent(element)) {
+          this.currentReadingStatus = "Área expandível - Enter para entrar"
+        } else if (this.isInteractiveElement(element)) {
+          this.currentReadingStatus = "Elemento interativo - Enter para ativar"
         } else {
           this.currentReadingStatus = "A ler..."
         }
       } else {
-        this.currentReadingStatus = "Leitor de ecrã activo"
+        this.currentReadingStatus = this.isInContainer ? "Dentro de container" : "Leitor de ecrã ativo"
       }
     },
 
@@ -1129,7 +1331,7 @@ export default {
       }, 2000)
     },
 
-    // Processa comandos de teclado - VERSÃO MELHORADA
+    // Processa comandos de teclado - VERSÃO ATUALIZADA
     handleKeyboardShortcuts(event) {
       if (!this.active || !this.isInitialized) return
 
@@ -1209,8 +1411,12 @@ export default {
           break
         case "Escape":
         case "Esc":
-          this.stopSpeaking()
-          this.$emit("update:screenReader", false)
+          if (this.isInContainer) {
+            this.exitContainer()
+          } else {
+            this.stopSpeaking()
+            this.$emit("update:screenReader", false)
+          }
           event.preventDefault()
           break
         case "q":

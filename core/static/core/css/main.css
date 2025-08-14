@@ -2176,6 +2176,16 @@ body.high-contrast button:not(.accessibility-button) {
     padding-bottom: 0.5rem;
   }
 
+  .sm\:px-4 {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .sm\:py-6 {
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
+  }
+
   .sm\:pb-4 {
     padding-bottom: 1rem;
   }

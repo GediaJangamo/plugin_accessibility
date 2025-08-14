@@ -1,7 +1,7 @@
 <template>
   <div v-if="showComponent">
     <!-- Controlador de Voz - Versão melhorada -->
-    <div class="fixed inset-x-0 bottom-6 mx-auto z-50 flex items-center justify-between bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 w-full max-w-2xl px-2 py-6">
+    <div class="fixed inset-x-0 bottom-6 mx-auto z-50 flex items-center justify-between bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 w-full max-w-2xl px-2 py-6 sm:px-4 sm:py-6">
       <!-- Área principal -->
       <div class="flex items-center flex-1 gap-3">
         <!-- Botão de microfone -->
@@ -25,17 +25,13 @@
 
         <!-- Status -->
         <div class="flex-1 min-w-0 py-2 px-3 rounded-full text-white" :class="getStatusColor()">
-          <div class="flex items-center justify-between  gap-2">
+          <div class="flex items-center justify-between gap-2">
             <p class="text-sm font-medium truncate">{{ statusMessage }}</p>
           </div>
           
           <p v-if="lastTranscript && isListening" class="text-xs mt-1 truncate opacity-90 bg-black/10 px-2 py-1 rounded-full">
             "{{ lastTranscript }}"
           </p>
-          
-          <!-- <p v-if="recognitionState === 'thinking'" class="text-xs mt-1 animate-pulse opacity-90">
-            Processando...
-          </p> -->
           
           <p v-if="recognitionState === 'navigating'" class="text-xs mt-1 animate-pulse">
             Carregando...
@@ -48,7 +44,7 @@
         <!-- Botão de comandos -->
         <button 
           @click="toggleCommandsList"
-          class=" p-2 rounded-full text-white hover:bg-[#3b82f6] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#3b82f6] transition-colors bg-[#3b82f6]"
+          class="p-2 rounded-full text-white hover:bg-[#3b82f6] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#3b82f6] transition-colors bg-[#3b82f6]"
           :aria-label="showCommandsList ? 'Ocultar lista de comandos' : 'Mostrar lista de comandos'"
           :title="showCommandsList ? 'Ocultar comandos' : 'Ver todos os comandos'"
         >
@@ -92,154 +88,154 @@
     </div>
 
     <!-- Modal de Comandos - Versão melhorada -->
-   <div 
-  v-if="showCommandsList" 
-  class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm"
->
-  <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[85vh] overflow-hidden flex flex-col">
-    <!-- Header -->
-    <div class="p-6 bg-gradient-to-r from-[#3b82f6] to-[#1d4ed8] dark:from-[#1d4ed8] dark:to-[#1e3a8a]">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center space-x-3">
-          <div class="bg-white bg-opacity-20 p-2 rounded-full">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
-              <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
-              <line x1="12" y1="19" x2="12" y2="23"></line>
-              <line x1="8" y1="23" x2="16" y2="23"></line>
-            </svg>
+    <div 
+      v-if="showCommandsList" 
+      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm"
+    >
+      <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[85vh] overflow-hidden flex flex-col">
+        <!-- Header -->
+        <div class="p-6 bg-gradient-to-r from-[#3b82f6] to-[#1d4ed8] dark:from-[#1d4ed8] dark:to-[#1e3a8a]">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+              <div class="bg-white bg-opacity-20 p-2 rounded-full">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                  <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                  <line x1="12" y1="19" x2="12" y2="23"></line>
+                  <line x1="8" y1="23" x2="16" y2="23"></line>
+                </svg>
+              </div>
+              <h2 class="text-2xl font-bold text-white">
+                Comandos de Voz Disponíveis
+              </h2>
+            </div>
+            <button 
+              @click="closeCommandsList" 
+              class="text-white hover:text-gray-200 focus:outline-none focus:ring-2 focus:ring-white rounded-full p-1 transition-colors"
+              aria-label="Fechar menu de ajuda"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
           </div>
-          <h2 class="text-2xl font-bold text-white">
-            Comandos de Voz Disponíveis
-          </h2>
+          <p class="text-blue-100 mt-2 max-w-2xl">
+            Utilize estes comandos para navegar pelo sistema usando apenas sua voz. Diga "ajuda" a qualquer momento para ver esta lista.
+          </p>
         </div>
-        <button 
-          @click="closeCommandsList" 
-          class="text-white hover:text-gray-200 focus:outline-none focus:ring-2 focus:ring-white rounded-full p-1 transition-colors"
-          aria-label="Fechar menu de ajuda"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="18" y1="6" x2="6" y2="18"></line>
-            <line x1="6" y1="6" x2="18" y2="18"></line>
-          </svg>
-        </button>
-      </div>
-      <p class="text-blue-100 mt-2 max-w-2xl">
-        Utilize estes comandos para navegar pelo sistema usando apenas sua voz. Diga "ajuda" a qualquer momento para ver esta lista.
-      </p>
-    </div>
-    
-    <!-- Content -->
-    <div class="p-6 overflow-auto">
-      <!-- Navegação Geral -->
-      <div class="mb-6">
-        <h3 class="text-lg font-bold text-[#3b82f6] dark:text-[#93c5fd] mb-3 border-b border-blue-200 dark:border-blue-700 pb-2">
-          Navegação Geral
-        </h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <div v-for="(command, commandKey) in commandCategories.navegacao.commands" :key="commandKey" class="flex flex-col md:flex-row bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm border border-blue-200 dark:border-blue-700 hover:shadow-md transition-shadow">
-            <div class="font-mono text-sm bg-blue-50 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-3 py-2 rounded-md mb-2 md:mb-0 md:mr-3 flex-shrink-0 md:w-auto w-full">
-              {{ commandKey }}
-            </div>
-            <div class="text-gray-700 dark:text-gray-300 text-sm md:text-base flex items-center">
-              {{ command.description }}
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Comandos do Sistema -->
-      <div class="mb-6">
-        <h3 class="text-lg font-bold text-[#3b82f6] dark:text-[#93c5fd] mb-3 border-b border-blue-200 dark:border-blue-700 pb-2">
-          Módulos do Sistema
-        </h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <div v-for="(command, commandKey) in commandCategories.modulos.commands" :key="commandKey" class="flex flex-col md:flex-row bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm border border-blue-100 dark:border-blue-700 hover:shadow-md transition-shadow">
-            <div class="font-mono text-sm bg-blue-50 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-3 py-2 rounded-md mb-2 md:mb-0 md:mr-3 flex-shrink-0 md:w-auto w-full">
-              {{ commandKey }}
-            </div>
-            <div class="text-gray-700 dark:text-gray-300 text-sm md:text-base flex items-center">
-              {{ command.description }}
+        
+        <!-- Content -->
+        <div class="p-6 overflow-auto">
+          <!-- Navegação Geral -->
+          <div class="mb-6">
+            <h3 class="text-lg font-bold text-[#3b82f6] dark:text-[#93c5fd] mb-3 border-b border-blue-200 dark:border-blue-700 pb-2">
+              Navegação Geral
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div v-for="(command, commandKey) in commandCategories.navegacao.commands" :key="commandKey" class="flex flex-col md:flex-row bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm border border-blue-200 dark:border-blue-700 hover:shadow-md transition-shadow">
+                <div class="font-mono text-sm bg-blue-50 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-3 py-2 rounded-md mb-2 md:mb-0 md:mr-3 flex-shrink-0 md:w-auto w-full">
+                  {{ commandKey }}
+                </div>
+                <div class="text-gray-700 dark:text-gray-300 text-sm md:text-base flex items-center">
+                  {{ command.description }}
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
-      
-      <!-- Comandos de Acessibilidade -->
-      <div class="mb-6">
-        <h3 class="text-lg font-bold text-[#3b82f6] dark:text-[#93c5fd] mb-3 border-b border-blue-200 dark:border-blue-700 pb-2">
-          Acessibilidade
-        </h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <div v-for="(command, commandKey) in commandCategories.acessibilidade.commands" :key="commandKey" class="flex flex-col md:flex-row bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm border border-blue-100 dark:border-blue-700 hover:shadow-md transition-shadow">
-            <div class="font-mono text-sm bg-blue-50 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-3 py-2 rounded-md mb-2 md:mb-0 md:mr-3 flex-shrink-0 md:w-auto w-full">
-              {{ commandKey }}
-            </div>
-            <div class="text-gray-700 dark:text-gray-300 text-sm md:text-base flex items-center">
-              {{ command.description }}
+          
+          <!-- Comandos do Sistema -->
+          <div class="mb-6">
+            <h3 class="text-lg font-bold text-[#3b82f6] dark:text-[#93c5fd] mb-3 border-b border-blue-200 dark:border-blue-700 pb-2">
+              Módulos do Sistema
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div v-for="(command, commandKey) in commandCategories.modulos.commands" :key="commandKey" class="flex flex-col md:flex-row bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm border border-blue-100 dark:border-blue-700 hover:shadow-md transition-shadow">
+                <div class="font-mono text-sm bg-blue-50 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-3 py-2 rounded-md mb-2 md:mb-0 md:mr-3 flex-shrink-0 md:w-auto w-full">
+                  {{ commandKey }}
+                </div>
+                <div class="text-gray-700 dark:text-gray-300 text-sm md:text-base flex items-center">
+                  {{ command.description }}
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
+          
+          <!-- Comandos de Acessibilidade -->
+          <div class="mb-6">
+            <h3 class="text-lg font-bold text-[#3b82f6] dark:text-[#93c5fd] mb-3 border-b border-blue-200 dark:border-blue-700 pb-2">
+              Acessibilidade
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div v-for="(command, commandKey) in commandCategories.acessibilidade.commands" :key="commandKey" class="flex flex-col md:flex-row bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm border border-blue-100 dark:border-blue-700 hover:shadow-md transition-shadow">
+                <div class="font-mono text-sm bg-blue-50 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-3 py-2 rounded-md mb-2 md:mb-0 md:mr-3 flex-shrink-0 md:w-auto w-full">
+                  {{ commandKey }}
+                </div>
+                <div class="text-gray-700 dark:text-gray-300 text-sm md:text-base flex items-center">
+                  {{ command.description }}
+                </div>
+              </div>
+            </div>
+          </div>
 
-      <!-- Atalhos Importantes -->
-      <div class="mb-6">
-        <h3 class="text-lg font-bold text-[#3b82f6] dark:text-[#93c5fd] mb-3 border-b border-blue-200 dark:border-blue-700 pb-2">
-          Atalhos Importantes
-        </h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <div class="flex flex-col md:flex-row bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm border border-blue-100 dark:border-blue-700 hover:shadow-md transition-shadow">
-            <div class="font-mono text-sm bg-blue-50 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-3 py-2 rounded-md mb-2 md:mb-0 md:mr-3 flex-shrink-0 md:w-auto w-full">
-              ler página
-            </div>
-            <div class="text-gray-700 dark:text-gray-300 text-sm md:text-base flex items-center">
-              Lê todo o conteúdo da página atual
+          <!-- Atalhos Importantes -->
+          <div class="mb-6">
+            <h3 class="text-lg font-bold text-[#3b82f6] dark:text-[#93c5fd] mb-3 border-b border-blue-200 dark:border-blue-700 pb-2">
+              Atalhos Importantes
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div class="flex flex-col md:flex-row bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm border border-blue-100 dark:border-blue-700 hover:shadow-md transition-shadow">
+                <div class="font-mono text-sm bg-blue-50 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-3 py-2 rounded-md mb-2 md:mb-0 md:mr-3 flex-shrink-0 md:w-auto w-full">
+                  ler página
+                </div>
+                <div class="text-gray-700 dark:text-gray-300 text-sm md:text-base flex items-center">
+                  Lê todo o conteúdo da página atual
+                </div>
+              </div>
+              <div class="flex flex-col md:flex-row bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm border border-blue-100 dark:border-blue-700 hover:shadow-md transition-shadow">
+                <div class="font-mono text-sm bg-blue-50 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-3 py-2 rounded-md mb-2 md:mb-0 md:mr-3 flex-shrink-0 md:w-auto w-full">
+                  parar leitura
+                </div>
+                <div class="text-gray-700 dark:text-gray-300 text-sm md:text-base flex items-center">
+                  Para a leitura em andamento
+                </div>
+              </div>
+              <div class="flex flex-col md:flex-row bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm border border-blue-100 dark:border-blue-700 hover:shadow-md transition-shadow">
+                <div class="font-mono text-sm bg-blue-50 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-3 py-2 rounded-md mb-2 md:mb-0 md:mr-3 flex-shrink-0 md:w-auto w-full">
+                  tecla M
+                </div>
+                <div class="text-gray-700 dark:text-gray-300 text-sm md:text-base flex items-center">
+                  Ativa ou desativa o microfone
+                </div>
+              </div>
+              <div class="flex flex-col md:flex-row bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm border border-blue-100 dark:border-blue-700 hover:shadow-md transition-shadow">
+                <div class="font-mono text-sm bg-blue-50 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-3 py-2 rounded-md mb-2 md:mb-0 md:mr-3 flex-shrink-0 md:w-auto w-full">
+                  ajuda [categoria]
+                </div>
+                <div class="text-gray-700 dark:text-gray-300 text-sm md:text-base flex items-center">
+                  Mostra comandos de uma categoria específica
+                </div>
+              </div>
             </div>
           </div>
-          <div class="flex flex-col md:flex-row bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm border border-blue-100 dark:border-blue-700 hover:shadow-md transition-shadow">
-            <div class="font-mono text-sm bg-blue-50 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-3 py-2 rounded-md mb-2 md:mb-0 md:mr-3 flex-shrink-0 md:w-auto w-full">
-              parar leitura
-            </div>
-            <div class="text-gray-700 dark:text-gray-300 text-sm md:text-base flex items-center">
-              Para a leitura em andamento
-            </div>
-          </div>
-          <div class="flex flex-col md:flex-row bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm border border-blue-100 dark:border-blue-700 hover:shadow-md transition-shadow">
-            <div class="font-mono text-sm bg-blue-50 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-3 py-2 rounded-md mb-2 md:mb-0 md:mr-3 flex-shrink-0 md:w-auto w-full">
-              tecla M
-            </div>
-            <div class="text-gray-700 dark:text-gray-300 text-sm md:text-base flex items-center">
-              Ativa ou desativa o microfone
-            </div>
-          </div>
-          <div class="flex flex-col md:flex-row bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm border border-blue-100 dark:border-blue-700 hover:shadow-md transition-shadow">
-            <div class="font-mono text-sm bg-blue-50 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-3 py-2 rounded-md mb-2 md:mb-0 md:mr-3 flex-shrink-0 md:w-auto w-full">
-              ajuda [categoria]
-            </div>
-            <div class="text-gray-700 dark:text-gray-300 text-sm md:text-base flex items-center">
-              Mostra comandos de uma categoria específica
-            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="p-4 border-t border-gray-200 dark:border-gray-700 bg-blue-50 dark:bg-gray-800">
+          <div class="flex items-center justify-between">
+            <p class="text-sm text-[#3b82f6] dark:text-[#93c5fd]">
+              <span class="font-bold">Dica:</span> Você pode dizer "ajuda" a qualquer momento para ver estes comandos novamente.
+            </p>
+            <button 
+              @click="closeCommandsList"
+              class="px-4 py-2 bg-[#3b82f6] hover:bg-[#1d4ed8] text-white rounded-lg shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-[#3b82f6] focus:ring-offset-2"
+            >
+              Fechar
+            </button>
           </div>
         </div>
       </div>
     </div>
-    
-    <!-- Footer -->
-    <div class="p-4 border-t border-gray-200 dark:border-gray-700 bg-blue-50 dark:bg-gray-800">
-      <div class="flex items-center justify-between">
-        <p class="text-sm text-[#3b82f6] dark:text-[#93c5fd]">
-          <span class="font-bold">Dica:</span> Você pode dizer "ajuda" a qualquer momento para ver estes comandos novamente.
-        </p>
-        <button 
-          @click="closeCommandsList"
-          class="px-4 py-2 bg-[#3b82f6] hover:bg-[#1d4ed8] text-white rounded-lg shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-[#3b82f6] focus:ring-offset-2"
-        >
-          Fechar
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
   </div>
 </template>
 

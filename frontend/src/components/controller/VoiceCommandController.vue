@@ -1,14 +1,16 @@
+
+
 <template>
   <div v-if="showComponent">
     <!-- Controlador de Voz - Versão melhorada -->
-    <div class="fixed inset-x-0 bottom-6 mx-auto z-50 flex items-center justify-between bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 w-full max-w-2xl px-2 py-6 sm:px-4 sm:py-6">
+    <div class="fixed inset-x-0 bottom-6 mx-auto z-50 flex flex-wrap items-center justify-between bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 w-[95%] max-w-2xl px-3 py-4 gap-2">
       <!-- Área principal -->
-      <div class="flex items-center flex-1 gap-3">
+      <div class="flex items-center flex-1 min-w-[200px] gap-2">
         <!-- Botão de microfone -->
         <button 
           ref="micButton"
           @click="toggleRecognition"
-          class="relative w-10 h-10 rounded-full flex items-center justify-center transition-all focus:outline-none"
+          class="relative w-10 h-10 rounded-full flex items-center justify-center transition-all focus:outline-none flex-shrink-0"
           :class="isListening ? 'bg-green-500 hover:bg-green-600 shadow-lg' : 'bg-red-500 hover:bg-red-600'"
           :aria-label="isListening ? 'Desativar microfone' : 'Ativar microfone'"
         >
@@ -24,7 +26,7 @@
         </button>
 
         <!-- Status -->
-        <div class="flex-1 min-w-0 py-2 px-3 rounded-full text-white" :class="getStatusColor()">
+        <div class="flex-1 min-w-0 py-2 px-3 rounded-full text-white overflow-hidden" :class="getStatusColor()">
           <div class="flex items-center justify-between gap-2">
             <p class="text-sm font-medium truncate">{{ statusMessage }}</p>
           </div>
@@ -40,15 +42,15 @@
       </div>
 
       <!-- Controles - Agrupados e mais compactos -->
-      <div class="flex items-center gap-1 ml-1">
+      <div class="flex items-center gap-1 flex-shrink-0">
         <!-- Botão de comandos -->
         <button 
           @click="toggleCommandsList"
-          class="p-2 rounded-full text-white hover:bg-[#3b82f6] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#3b82f6] transition-colors bg-[#3b82f6]"
+          class="w-10 h-10 rounded-full text-white hover:bg-[#3b82f6] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#3b82f6] transition-colors bg-[#3b82f6] flex items-center justify-center"
           :aria-label="showCommandsList ? 'Ocultar lista de comandos' : 'Mostrar lista de comandos'"
           :title="showCommandsList ? 'Ocultar comandos' : 'Ver todos os comandos'"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="10"></circle>
             <line x1="12" y1="16" x2="12" y2="12"></line>
             <line x1="12" y1="8" x2="12.01" y2="8"></line>
@@ -58,7 +60,7 @@
         <!-- Botão de áudio -->
         <button 
           @click="toggleSpeaker"
-          class="p-2 rounded-full text-white transition-colors"
+          class="w-10 h-10 rounded-full text-white transition-colors flex items-center justify-center"
           :class="speakerEnabled ? 'bg-blue-500 hover:bg-blue-600' : 'bg-gray-500 hover:bg-gray-600'"
           :aria-label="speakerEnabled ? 'Desativar áudio' : 'Ativar áudio'"
         >
@@ -76,7 +78,7 @@
         <!-- Botão de fechar -->
         <button 
           @click="closeController"
-          class="p-2 rounded-full text-white bg-red-500 hover:bg-red-600 transition-colors"
+          class="w-10 h-10 rounded-full text-white bg-red-500 hover:bg-red-600 transition-colors flex items-center justify-center"
           aria-label="Fechar controlador"
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -87,8 +89,8 @@
       </div>
     </div>
 
-    <!-- Modal de Comandos - Versão melhorada -->
-    <div 
+    <!-- Modal de Comandos (mantido igual) -->
+     <div 
       v-if="showCommandsList" 
       class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm"
     >

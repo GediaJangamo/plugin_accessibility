@@ -979,6 +979,9 @@ video {
 .w-12 {
   width: 3rem;
 }
+.w-\[95\%\] {
+  width: 95%;
+}
 .min-w-0 {
   min-width: 0px;
 }
@@ -988,6 +991,9 @@ video {
 .min-w-fit {
   min-width: -moz-fit-content;
   min-width: fit-content;
+}
+.min-w-\[200px\] {
+  min-width: 200px;
 }
 .max-w-2xl {
   max-width: 42rem;

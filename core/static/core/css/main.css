@@ -33,7 +33,17 @@ input:checked + div > div[data-v-16666c50] {
   !*** css ./node_modules/css-loader/dist/cjs.js??clonedRuleSet-12.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-12.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/controller/VoiceCommandController.vue?vue&type=style&index=0&id=3d9a4370&scoped=true&lang=css ***!
   \*************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
 
-/* Animações */
+/* Estilos para alto contraste */
+body.high-contrast {
+  filter: contrast(200%) brightness(150%);
+}
+
+/* Animações suaves */
+.transition-colors[data-v-3d9a4370] {
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Indicadores visuais melhorados */
 .animate-ping[data-v-3d9a4370] {
   animation: ping-3d9a4370 1s cubic-bezier(0, 0, 0.2, 1) infinite;
 }
@@ -51,28 +61,32 @@ input:checked + div > div[data-v-16666c50] {
     opacity: 1;
 }
 50% {
-    opacity: 0.5;
+    opacity: .5;
 }
 }
 
-/* Transições suaves */
-.transition-colors[data-v-3d9a4370] {
-  transition-property: background-color, border-color, color, fill, stroke;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 200ms;
+/* Estilos de foco melhorados */
+button[data-v-3d9a4370]:focus {
+  outline: 2px solid #3B82F6;
+  outline-offset: 2px;
 }
 
-/* Melhor contraste para acessibilidade */
-.focus\:ring-4[data-v-3d9a4370]:focus {
-  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.5);
+/* Responsividade para dispositivos móveis */
+@media (max-width: 640px) {
+.fixed[data-v-3d9a4370] {
+    left: 1rem;
+    right: 1rem;
+    max-width: none;
 }
-
-/* Alto contraste */
-.high-contrast[data-v-3d9a4370] {
-  filter: contrast(150%) brightness(120%);
+.flex-grow[data-v-3d9a4370] {
+    min-width: 0;
 }
-.high-contrast[data-v-3d9a4370] * {
-  text-shadow: 0 0 3px rgba(255,255,255,0.8) !important;
+.text-sm[data-v-3d9a4370] {
+    font-size: 0.875rem;
+}
+.text-xs[data-v-3d9a4370] {
+    font-size: 0.75rem;
+}
 }
 
 /*!**************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
@@ -1614,6 +1628,9 @@ video {
   --tw-shadow-colored: inset 0 2px 4px 0 var(--tw-shadow-color);
   box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
 }
+.outline {
+  outline-style: solid;
+}
 .ring-2 {
   --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);
   --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);
@@ -2137,6 +2154,11 @@ body.high-contrast button:not(.accessibility-button) {
 
   .dark\:bg-blue-800\/40 {
     background-color: rgb(30 64 175 / 0.4);
+  }
+
+  .dark\:bg-orange-600 {
+    --tw-bg-opacity: 1;
+    background-color: rgb(234 88 12 / var(--tw-bg-opacity, 1));
   }
 
   .dark\:from-\[\#2060a9\] {

@@ -1,25 +1,21 @@
 <template>
   <div v-if="showComponent">
-    <div class="fixed inset-x-0 bottom-6 mx-auto z-50 flex items-center bg-white dark:bg-gray-800 rounded-lg p-4 shadow-lg border border-gray-200 dark:border-gray-700 w-full max-w-2xl justify-between">
-      <div class="flex items-center space-x-4 flex-grow">
-        <!-- Botão de microfone simplificado -->
+    <!-- Controlador de Voz - Versão melhorada -->
+    <div class="fixed inset-x-0 bottom-6 mx-auto z-50 flex items-center justify-between bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 w-full max-w-2xl px-2 py-6">
+      <!-- Área principal -->
+      <div class="flex items-center flex-1 gap-3">
+        <!-- Botão de microfone -->
         <button 
           ref="micButton"
           @click="toggleRecognition"
-          @keydown.enter="toggleRecognition"
-          @keydown.space.prevent="toggleRecognition"
-          class="relative w-12 h-12 rounded-full flex items-center justify-center transition-colors focus:outline-none focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-600"
-          :class="isListening ? 'bg-green-500 hover:bg-green-600' : 'bg-red-500 hover:bg-red-600'"
+          class="relative w-10 h-10 rounded-full flex items-center justify-center transition-all focus:outline-none"
+          :class="isListening ? 'bg-green-500 hover:bg-green-600 shadow-lg' : 'bg-red-500 hover:bg-red-600'"
           :aria-label="isListening ? 'Desativar microfone' : 'Ativar microfone'"
-          :title="isListening ? 'Microfone Ativo (M para alternar)' : 'Microfone Inativo (M para alternar)'"
         >
-          <!-- Ícone de microfone cortado quando inativo -->
-          <div v-if="!isListening" class="absolute w-10 h-1 bg-white rotate-45 rounded-full z-10"></div>
+          <div v-if="!isListening" class="absolute w-8 h-1 bg-white rotate-45 rounded-full z-10"></div>
+          <div v-if="recognitionState === 'listening'" class="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-green-300 animate-ping"></div>
           
-          <!-- Indicador de atividade quando ouvindo -->
-          <div v-if="recognitionState === 'listening'" class="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-green-300 animate-ping"></div>
-          
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-white relative z-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white relative z-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
             <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
             <line x1="12" y1="19" x2="12" y2="23"></line>
@@ -27,54 +23,48 @@
           </svg>
         </button>
 
-        <!-- Status do microfone -->
-        <div class="flex-1 p-3 rounded-lg text-white" :class="getStatusColor()">
-          <div class="flex items-center justify-between">
-            <span class="font-medium text-sm">
-              {{ statusMessage }}
-            </span>
+        <!-- Status -->
+        <div class="flex-1 min-w-0 py-2 px-3 rounded-full text-white" :class="getStatusColor()">
+          <div class="flex items-center justify-between  gap-2">
+            <p class="text-sm font-medium truncate">{{ statusMessage }}</p>
           </div>
           
-          <!-- Último comando reconhecido -->
-          <p v-if="lastTranscript && isListening" class="text-xs mt-1 opacity-90 bg-black bg-opacity-20 px-2 py-1 rounded">
+          <p v-if="lastTranscript && isListening" class="text-xs mt-1 truncate opacity-90 bg-black/10 px-2 py-1 rounded-full">
             "{{ lastTranscript }}"
           </p>
           
-          <!-- Indicador de processamento -->
-          <p v-if="recognitionState === 'thinking'" class="text-xs mt-1 animate-pulse">
-            Processando comando...
-          </p>
+          <!-- <p v-if="recognitionState === 'thinking'" class="text-xs mt-1 animate-pulse opacity-90">
+            Processando...
+          </p> -->
           
-          <!-- Indicador de navegação -->
           <p v-if="recognitionState === 'navigating'" class="text-xs mt-1 animate-pulse">
-            Carregando página...
+            Carregando...
           </p>
         </div>
       </div>
 
-      <!-- Controles simplificados -->
-      <div class="flex items-center space-x-2 ml-4">
-        <!-- Botão para listar comandos -->
+      <!-- Controles - Agrupados e mais compactos -->
+      <div class="flex items-center gap-1 ml-1">
+        <!-- Botão de comandos -->
         <button 
           @click="toggleCommandsList"
-          @keydown.enter="toggleCommandsList"
-          class="p-2 rounded-full text-white bg-purple-500 hover:bg-purple-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-400 transition-colors"
+          class=" p-2 rounded-full text-white hover:bg-[#3b82f6] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#3b82f6] transition-colors bg-[#3b82f6]"
           :aria-label="showCommandsList ? 'Ocultar lista de comandos' : 'Mostrar lista de comandos'"
           :title="showCommandsList ? 'Ocultar comandos' : 'Ver todos os comandos'"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="16" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12.01" y2="8"></line>
           </svg>
         </button>
 
-        <!-- Botão de volume/speaker -->
+        <!-- Botão de áudio -->
         <button 
           @click="toggleSpeaker"
-          @keydown.enter="toggleSpeaker"
-          class="p-2 rounded-full text-white transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-400"
+          class="p-2 rounded-full text-white transition-colors"
           :class="speakerEnabled ? 'bg-blue-500 hover:bg-blue-600' : 'bg-gray-500 hover:bg-gray-600'"
-          :aria-label="speakerEnabled ? 'Desativar feedback de voz' : 'Ativar feedback de voz'"
-          :title="speakerEnabled ? 'Áudio ativado' : 'Áudio desativado'"
+          :aria-label="speakerEnabled ? 'Desativar áudio' : 'Ativar áudio'"
         >
           <svg v-if="speakerEnabled" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
@@ -87,13 +77,11 @@
           </svg>
         </button>
 
-        <!-- Botão para fechar o controlador -->
+        <!-- Botão de fechar -->
         <button 
           @click="closeController"
-          @keydown.enter="closeController"
-          class="p-2 rounded-full text-white bg-red-500 hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-400 transition-colors"
-          aria-label="Fechar controlador de voz"
-          title="Fechar"
+          class="p-2 rounded-full text-white bg-red-500 hover:bg-red-600 transition-colors"
+          aria-label="Fechar controlador"
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -103,106 +91,151 @@
       </div>
     </div>
 
-    <!-- Lista de comandos (popup) -->
-   <!-- Lista de comandos (popup) -->
-<div v-if="showCommandsList" class="fixed inset-0 bg-black bg-opacity-50 z-60 flex items-center justify-center p-4" @click="closeCommandsList">
-  <div class="bg-white dark:bg-gray-800 rounded-lg max-w-4xl max-h-[80vh] overflow-hidden shadow-2xl border border-blue-500" @click.stop>
-    <div class="p-4 bg-blue-600 dark:bg-blue-800 flex justify-between items-center">
-      <h3 class="text-lg font-semibold text-white">Comandos de Voz Disponíveis</h3>
-      <button @click="closeCommandsList" class="p-1 text-white hover:text-blue-200">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-        </svg>
-      </button>
+    <!-- Modal de Comandos - Versão melhorada -->
+   <div 
+  v-if="showCommandsList" 
+  class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm"
+>
+  <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[85vh] overflow-hidden flex flex-col">
+    <!-- Header -->
+    <div class="p-6 bg-gradient-to-r from-[#3b82f6] to-[#1d4ed8] dark:from-[#1d4ed8] dark:to-[#1e3a8a]">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+          <div class="bg-white bg-opacity-20 p-2 rounded-full">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+              <line x1="12" y1="19" x2="12" y2="23"></line>
+              <line x1="8" y1="23" x2="16" y2="23"></line>
+            </svg>
+          </div>
+          <h2 class="text-2xl font-bold text-white">
+            Comandos de Voz Disponíveis
+          </h2>
+        </div>
+        <button 
+          @click="closeCommandsList" 
+          class="text-white hover:text-gray-200 focus:outline-none focus:ring-2 focus:ring-white rounded-full p-1 transition-colors"
+          aria-label="Fechar menu de ajuda"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <p class="text-blue-100 mt-2 max-w-2xl">
+        Utilize estes comandos para navegar pelo sistema usando apenas sua voz. Diga "ajuda" a qualquer momento para ver esta lista.
+      </p>
     </div>
     
-    <div class="p-6 overflow-y-auto max-h-[calc(80vh-100px)]">
-      <div class="mb-8">
-        <h4 class="text-md font-bold text-blue-600 dark:text-blue-400 mb-4 pb-2 border-b border-blue-200 dark:border-blue-700">
+    <!-- Content -->
+    <div class="p-6 overflow-auto">
+      <!-- Navegação Geral -->
+      <div class="mb-6">
+        <h3 class="text-lg font-bold text-[#3b82f6] dark:text-[#93c5fd] mb-3 border-b border-blue-200 dark:border-blue-700 pb-2">
           Navegação Geral
-        </h4>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div v-for="(command, commandKey) in commandCategories.navegacao.commands" :key="commandKey" 
-               class="p-4 bg-blue-50 dark:bg-gray-700 rounded-lg border border-blue-100 dark:border-gray-600">
-            <div class="flex items-start">
-              <div class="bg-blue-100 dark:bg-blue-900 p-2 rounded-full mr-3">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600 dark:text-blue-300" viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V13a1 1 0 102 0V9.414l1.293 1.293a1 1 0 001.414-1.414z" clip-rule="evenodd" />
-                </svg>
-              </div>
-              <div>
-                <p class="font-medium text-gray-800 dark:text-gray-200">"{{ commandKey }}"</p>
-                <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">{{ command.description }}</p>
-              </div>
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div v-for="(command, commandKey) in commandCategories.navegacao.commands" :key="commandKey" class="flex flex-col md:flex-row bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm border border-blue-200 dark:border-blue-700 hover:shadow-md transition-shadow">
+            <div class="font-mono text-sm bg-blue-50 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-3 py-2 rounded-md mb-2 md:mb-0 md:mr-3 flex-shrink-0 md:w-auto w-full">
+              {{ commandKey }}
+            </div>
+            <div class="text-gray-700 dark:text-gray-300 text-sm md:text-base flex items-center">
+              {{ command.description }}
             </div>
           </div>
         </div>
       </div>
       
-      <div class="mb-8">
-        <h4 class="text-md font-bold text-blue-600 dark:text-blue-400 mb-4 pb-2 border-b border-blue-200 dark:border-blue-700">
+      <!-- Comandos do Sistema -->
+      <div class="mb-6">
+        <h3 class="text-lg font-bold text-[#3b82f6] dark:text-[#93c5fd] mb-3 border-b border-blue-200 dark:border-blue-700 pb-2">
           Módulos do Sistema
-        </h4>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div v-for="(command, commandKey) in commandCategories.modulos.commands" :key="commandKey" 
-               class="p-4 bg-blue-50 dark:bg-gray-700 rounded-lg border border-blue-100 dark:border-gray-600">
-            <div class="flex items-start">
-              <div class="bg-blue-100 dark:bg-blue-900 p-2 rounded-full mr-3">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600 dark:text-blue-300" viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd" />
-                </svg>
-              </div>
-              <div>
-                <p class="font-medium text-gray-800 dark:text-gray-200">"{{ commandKey }}"</p>
-                <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">{{ command.description }}</p>
-              </div>
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div v-for="(command, commandKey) in commandCategories.modulos.commands" :key="commandKey" class="flex flex-col md:flex-row bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm border border-blue-100 dark:border-blue-700 hover:shadow-md transition-shadow">
+            <div class="font-mono text-sm bg-blue-50 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-3 py-2 rounded-md mb-2 md:mb-0 md:mr-3 flex-shrink-0 md:w-auto w-full">
+              {{ commandKey }}
+            </div>
+            <div class="text-gray-700 dark:text-gray-300 text-sm md:text-base flex items-center">
+              {{ command.description }}
             </div>
           </div>
         </div>
       </div>
       
-      <div class="mb-8">
-        <h4 class="text-md font-bold text-blue-600 dark:text-blue-400 mb-4 pb-2 border-b border-blue-200 dark:border-blue-700">
+      <!-- Comandos de Acessibilidade -->
+      <div class="mb-6">
+        <h3 class="text-lg font-bold text-[#3b82f6] dark:text-[#93c5fd] mb-3 border-b border-blue-200 dark:border-blue-700 pb-2">
           Acessibilidade
-        </h4>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div v-for="(command, commandKey) in commandCategories.acessibilidade.commands" :key="commandKey" 
-               class="p-4 bg-blue-50 dark:bg-gray-700 rounded-lg border border-blue-100 dark:border-gray-600">
-            <div class="flex items-start">
-              <div class="bg-blue-100 dark:bg-blue-900 p-2 rounded-full mr-3">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600 dark:text-blue-300" viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2h-1V9z" clip-rule="evenodd" />
-                </svg>
-              </div>
-              <div>
-                <p class="font-medium text-gray-800 dark:text-gray-200">"{{ commandKey }}"</p>
-                <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">{{ command.description }}</p>
-              </div>
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div v-for="(command, commandKey) in commandCategories.acessibilidade.commands" :key="commandKey" class="flex flex-col md:flex-row bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm border border-blue-100 dark:border-blue-700 hover:shadow-md transition-shadow">
+            <div class="font-mono text-sm bg-blue-50 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-3 py-2 rounded-md mb-2 md:mb-0 md:mr-3 flex-shrink-0 md:w-auto w-full">
+              {{ commandKey }}
+            </div>
+            <div class="text-gray-700 dark:text-gray-300 text-sm md:text-base flex items-center">
+              {{ command.description }}
             </div>
           </div>
         </div>
       </div>
-      
-      <div class="bg-blue-100 dark:bg-blue-900 rounded-lg p-4 border border-blue-200 dark:border-blue-700">
-        <h4 class="text-md font-bold text-blue-600 dark:text-blue-300 mb-3">Atalhos Importantes</h4>
-        <ul class="space-y-2">
-          <li class="flex items-start">
-            <span class="bg-blue-200 dark:bg-blue-800 text-blue-800 dark:text-blue-200 px-2 py-1 rounded text-sm font-medium mr-2">"ler página"</span>
-            <span class="text-sm text-gray-700 dark:text-gray-300">- Lê todo o conteúdo da página atual</span>
-          </li>
-          <li class="flex items-start">
-            <span class="bg-blue-200 dark:bg-blue-800 text-blue-800 dark:text-blue-200 px-2 py-1 rounded text-sm font-medium mr-2">"parar leitura"</span>
-            <span class="text-sm text-gray-700 dark:text-gray-300">- Para a leitura em andamento</span>
-          </li>
-          <li class="flex items-start">
-            <span class="bg-blue-200 dark:bg-blue-800 text-blue-800 dark:text-blue-200 px-2 py-1 rounded text-sm font-medium mr-2">Tecla M</span>
-            <span class="text-sm text-gray-700 dark:text-gray-300">- Ativa ou desativa o microfone</span>
-          </li>
-          <li class="flex items-start">
-            <span class="bg-blue-200 dark:bg-blue-800 text-blue-800 dark:text-blue-200 px-2 py-1 rounded text-sm font-medium mr-2">"ajuda [categoria]"</span>
-            <span class="text-sm text-gray-700 dark:text-gray-300">- Mostra comandos de uma categoria específica</span>
-          </li>
-        </ul>
+
+      <!-- Atalhos Importantes -->
+      <div class="mb-6">
+        <h3 class="text-lg font-bold text-[#3b82f6] dark:text-[#93c5fd] mb-3 border-b border-blue-200 dark:border-blue-700 pb-2">
+          Atalhos Importantes
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div class="flex flex-col md:flex-row bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm border border-blue-100 dark:border-blue-700 hover:shadow-md transition-shadow">
+            <div class="font-mono text-sm bg-blue-50 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-3 py-2 rounded-md mb-2 md:mb-0 md:mr-3 flex-shrink-0 md:w-auto w-full">
+              ler página
+            </div>
+            <div class="text-gray-700 dark:text-gray-300 text-sm md:text-base flex items-center">
+              Lê todo o conteúdo da página atual
+            </div>
+          </div>
+          <div class="flex flex-col md:flex-row bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm border border-blue-100 dark:border-blue-700 hover:shadow-md transition-shadow">
+            <div class="font-mono text-sm bg-blue-50 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-3 py-2 rounded-md mb-2 md:mb-0 md:mr-3 flex-shrink-0 md:w-auto w-full">
+              parar leitura
+            </div>
+            <div class="text-gray-700 dark:text-gray-300 text-sm md:text-base flex items-center">
+              Para a leitura em andamento
+            </div>
+          </div>
+          <div class="flex flex-col md:flex-row bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm border border-blue-100 dark:border-blue-700 hover:shadow-md transition-shadow">
+            <div class="font-mono text-sm bg-blue-50 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-3 py-2 rounded-md mb-2 md:mb-0 md:mr-3 flex-shrink-0 md:w-auto w-full">
+              tecla M
+            </div>
+            <div class="text-gray-700 dark:text-gray-300 text-sm md:text-base flex items-center">
+              Ativa ou desativa o microfone
+            </div>
+          </div>
+          <div class="flex flex-col md:flex-row bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm border border-blue-100 dark:border-blue-700 hover:shadow-md transition-shadow">
+            <div class="font-mono text-sm bg-blue-50 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-3 py-2 rounded-md mb-2 md:mb-0 md:mr-3 flex-shrink-0 md:w-auto w-full">
+              ajuda [categoria]
+            </div>
+            <div class="text-gray-700 dark:text-gray-300 text-sm md:text-base flex items-center">
+              Mostra comandos de uma categoria específica
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Footer -->
+    <div class="p-4 border-t border-gray-200 dark:border-gray-700 bg-blue-50 dark:bg-gray-800">
+      <div class="flex items-center justify-between">
+        <p class="text-sm text-[#3b82f6] dark:text-[#93c5fd]">
+          <span class="font-bold">Dica:</span> Você pode dizer "ajuda" a qualquer momento para ver estes comandos novamente.
+        </p>
+        <button 
+          @click="closeCommandsList"
+          class="px-4 py-2 bg-[#3b82f6] hover:bg-[#1d4ed8] text-white rounded-lg shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-[#3b82f6] focus:ring-offset-2"
+        >
+          Fechar
+        </button>
       </div>
     </div>
   </div>
@@ -460,6 +493,7 @@ export default {
      closeController() {
       this.showComponent = false;
       this.speak('Controlador de voz fechado');
+      this.$emit('close'); 
       this.$emit('update:active', false);
     },
 
@@ -572,7 +606,7 @@ export default {
     // Obter cor do status
     getStatusColor() {
       if (this.helpMode) {
-        return 'bg-purple-500 dark:bg-purple-600';
+        return 'bg-green-500 dark:bg-green-600';
       }
       
       switch(this.recognitionState) {
@@ -1189,7 +1223,7 @@ button:focus {
 
 /* Efeitos hover melhorados */
 .hover\:bg-purple-600:hover {
-  background-color: rgb(147 51 234);
+  background-color: rgb(194, 144, 240);
 }
 
 .hover\:bg-blue-600:hover {

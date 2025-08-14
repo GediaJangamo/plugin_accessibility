@@ -46,6 +46,7 @@
           :active="voiceCommands" 
           @announce="announceMessage"
           @executeCommand="handleCommand"
+          @update:active="handleActiveChange"
         />
       </teleport>
     </div>
@@ -77,6 +78,15 @@
       
       handleCommand(command) {
         this.$emit('executeCommand', command);
+      },
+      handleControllerClose() {
+      // Quando o controlador é fechado pelo botão interno
+      this.$emit('update:voiceCommands', false);
+      },
+  
+      handleActiveChange(newValue) {
+        // Sincroniza o estado quando muda pelo componente interno
+        this.$emit('update:voiceCommands', newValue);
       }
     }
   }

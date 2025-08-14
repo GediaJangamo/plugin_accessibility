@@ -797,6 +797,9 @@ video {
 .mb-8 {
   margin-bottom: 2rem;
 }
+.mt-8 {
+  margin-top: 2rem;
+}
 .block {
   display: block;
 }
@@ -2130,6 +2133,10 @@ body.high-contrast button:not(.accessibility-button) {
   .dark\:bg-purple-600 {
     --tw-bg-opacity: 1;
     background-color: rgb(147 51 234 / var(--tw-bg-opacity, 1));
+  }
+
+  .dark\:bg-blue-800\/40 {
+    background-color: rgb(30 64 175 / 0.4);
   }
 
   .dark\:from-\[\#2060a9\] {

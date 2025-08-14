@@ -104,54 +104,109 @@
     </div>
 
     <!-- Lista de comandos (popup) -->
-    <div v-if="showCommandsList" class="fixed inset-0 bg-black bg-opacity-50 z-60 flex items-center justify-center p-4" @click="closeCommandsList">
-      <div class="bg-white dark:bg-gray-800 rounded-lg max-w-4xl max-h-[80vh] overflow-hidden shadow-2xl" @click.stop>
-        <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-          <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Lista de Comandos de Voz</h3>
-          <button @click="closeCommandsList" class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-            </svg>
-          </button>
-        </div>
-        
-        <div class="p-4 overflow-y-auto max-h-[calc(80vh-100px)]">
-          <div v-for="(category, categoryKey) in commandCategories" :key="categoryKey" class="mb-6">
-            <h4 class="text-md font-medium text-gray-800 dark:text-gray-200 mb-3 border-l-4 border-blue-500 pl-3">
-              {{ category.name }}
-            </h4>
-            <div class="space-y-2">
-              <div v-for="(command, commandKey) in category.commands" :key="commandKey" 
-                   class="flex justify-between items-start p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                <div class="flex-1">
-                  <code class="text-sm font-mono bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded">
-                    "{{ commandKey }}"
-                  </code>
-                  <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">{{ command.description }}</p>
-                </div>
+   <!-- Lista de comandos (popup) -->
+<div v-if="showCommandsList" class="fixed inset-0 bg-black bg-opacity-50 z-60 flex items-center justify-center p-4" @click="closeCommandsList">
+  <div class="bg-white dark:bg-gray-800 rounded-lg max-w-4xl max-h-[80vh] overflow-hidden shadow-2xl border border-blue-500" @click.stop>
+    <div class="p-4 bg-blue-600 dark:bg-blue-800 flex justify-between items-center">
+      <h3 class="text-lg font-semibold text-white">Comandos de Voz Disponíveis</h3>
+      <button @click="closeCommandsList" class="p-1 text-white hover:text-blue-200">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+    
+    <div class="p-6 overflow-y-auto max-h-[calc(80vh-100px)]">
+      <div class="mb-8">
+        <h4 class="text-md font-bold text-blue-600 dark:text-blue-400 mb-4 pb-2 border-b border-blue-200 dark:border-blue-700">
+          Navegação Geral
+        </h4>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div v-for="(command, commandKey) in commandCategories.navegacao.commands" :key="commandKey" 
+               class="p-4 bg-blue-50 dark:bg-gray-700 rounded-lg border border-blue-100 dark:border-gray-600">
+            <div class="flex items-start">
+              <div class="bg-blue-100 dark:bg-blue-900 p-2 rounded-full mr-3">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600 dark:text-blue-300" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V13a1 1 0 102 0V9.414l1.293 1.293a1 1 0 001.414-1.414z" clip-rule="evenodd" />
+                </svg>
               </div>
-            </div>
-          </div>
-          
-          <!-- Comandos especiais -->
-          <div class="mb-6">
-            <h4 class="text-md font-medium text-gray-800 dark:text-gray-200 mb-3 border-l-4 border-green-500 pl-3">
-              Comandos Especiais
-            </h4>
-            <div class="space-y-2">
-              <div class="flex justify-between items-start p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                <div class="flex-1">
-                  <code class="text-sm font-mono bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded">
-                    "ajuda [categoria]"
-                  </code>
-                  <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">Mostra comandos de uma categoria específica (ex: "ajuda navegação")</p>
-                </div>
+              <div>
+                <p class="font-medium text-gray-800 dark:text-gray-200">"{{ commandKey }}"</p>
+                <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">{{ command.description }}</p>
               </div>
             </div>
           </div>
         </div>
       </div>
+      
+      <div class="mb-8">
+        <h4 class="text-md font-bold text-blue-600 dark:text-blue-400 mb-4 pb-2 border-b border-blue-200 dark:border-blue-700">
+          Módulos do Sistema
+        </h4>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div v-for="(command, commandKey) in commandCategories.modulos.commands" :key="commandKey" 
+               class="p-4 bg-blue-50 dark:bg-gray-700 rounded-lg border border-blue-100 dark:border-gray-600">
+            <div class="flex items-start">
+              <div class="bg-blue-100 dark:bg-blue-900 p-2 rounded-full mr-3">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600 dark:text-blue-300" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd" />
+                </svg>
+              </div>
+              <div>
+                <p class="font-medium text-gray-800 dark:text-gray-200">"{{ commandKey }}"</p>
+                <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">{{ command.description }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="mb-8">
+        <h4 class="text-md font-bold text-blue-600 dark:text-blue-400 mb-4 pb-2 border-b border-blue-200 dark:border-blue-700">
+          Acessibilidade
+        </h4>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div v-for="(command, commandKey) in commandCategories.acessibilidade.commands" :key="commandKey" 
+               class="p-4 bg-blue-50 dark:bg-gray-700 rounded-lg border border-blue-100 dark:border-gray-600">
+            <div class="flex items-start">
+              <div class="bg-blue-100 dark:bg-blue-900 p-2 rounded-full mr-3">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600 dark:text-blue-300" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2h-1V9z" clip-rule="evenodd" />
+                </svg>
+              </div>
+              <div>
+                <p class="font-medium text-gray-800 dark:text-gray-200">"{{ commandKey }}"</p>
+                <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">{{ command.description }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="bg-blue-100 dark:bg-blue-900 rounded-lg p-4 border border-blue-200 dark:border-blue-700">
+        <h4 class="text-md font-bold text-blue-600 dark:text-blue-300 mb-3">Atalhos Importantes</h4>
+        <ul class="space-y-2">
+          <li class="flex items-start">
+            <span class="bg-blue-200 dark:bg-blue-800 text-blue-800 dark:text-blue-200 px-2 py-1 rounded text-sm font-medium mr-2">"ler página"</span>
+            <span class="text-sm text-gray-700 dark:text-gray-300">- Lê todo o conteúdo da página atual</span>
+          </li>
+          <li class="flex items-start">
+            <span class="bg-blue-200 dark:bg-blue-800 text-blue-800 dark:text-blue-200 px-2 py-1 rounded text-sm font-medium mr-2">"parar leitura"</span>
+            <span class="text-sm text-gray-700 dark:text-gray-300">- Para a leitura em andamento</span>
+          </li>
+          <li class="flex items-start">
+            <span class="bg-blue-200 dark:bg-blue-800 text-blue-800 dark:text-blue-200 px-2 py-1 rounded text-sm font-medium mr-2">Tecla M</span>
+            <span class="text-sm text-gray-700 dark:text-gray-300">- Ativa ou desativa o microfone</span>
+          </li>
+          <li class="flex items-start">
+            <span class="bg-blue-200 dark:bg-blue-800 text-blue-800 dark:text-blue-200 px-2 py-1 rounded text-sm font-medium mr-2">"ajuda [categoria]"</span>
+            <span class="text-sm text-gray-700 dark:text-gray-300">- Mostra comandos de uma categoria específica</span>
+          </li>
+        </ul>
+      </div>
     </div>
+  </div>
+</div>
   </div>
 </template>
 
@@ -402,12 +457,10 @@ export default {
     },
 
     // Fechar controlador
-    closeController() {
-      this.speak('Controlador de voz fechado', 'high');
-      // Aguarda a fala terminar antes de fechar
-      setTimeout(() => {
-        this.$emit('update:active', false);
-      }, 1500);
+     closeController() {
+      this.showComponent = false;
+      this.speak('Controlador de voz fechado');
+      this.$emit('update:active', false);
     },
 
     // Detecção de página atual

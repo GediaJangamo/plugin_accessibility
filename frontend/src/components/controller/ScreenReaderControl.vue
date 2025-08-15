@@ -314,26 +314,48 @@ export default {
     },
 
     // Verifica se é um container (accordion, tabs, etc.)
-    isContainer(element) {
-      const containerSelectors = [
-        '.accordion-item',
-        '.accordion',
-        '.tab-pane',
-        '.tabs',
-        '.collapse',
-        '.modal-body',
-        '.dropdown-menu',
-        '.card-body',
-        '.sidebar',
-        '.nav-tabs',
-        '.nav-pills'
-      ]
+    // isContainer(element) {
+    //   const containerSelectors = [
+    //     '.accordion-item',
+    //     '.accordion',
+    //     '.tab-pane',
+    //     '.tabs',
+    //     '.collapse',
+    //     '.modal-body',
+    //     '.dropdown-menu',
+    //     '.card-body',
+    //     '.sidebar',
+    //     '.nav-tabs',
+    //     '.nav-pills'
+    //   ]
       
-      return containerSelectors.some(selector => 
-        element.matches && element.matches(selector)
-      )
-    },
-
+    //   return containerSelectors.some(selector => 
+    //     element.matches && element.matches(selector)
+    //   )
+    // },
+isContainer(element) {
+  const containerSelectors = [
+    '.accordion-item',
+    '.accordion',
+    '.accordion-body',
+    '.accordion-collapse',
+    '.tab-pane',
+    '.tabs',
+    '.collapse',
+    '.modal-body',
+    '.dropdown-menu',
+    '.card-body',
+    '.sidebar',
+    '.nav-tabs',
+    '.nav-pills',
+    '[data-bs-toggle="collapse"]',
+    '[aria-expanded]'
+  ]
+  
+  return containerSelectors.some(selector => 
+    element.matches && element.matches(selector)
+  )
+},
     // Verifica se pode entrar no container atual
     canEnterCurrentContainer() {
       if (this.currentElementIndex < 0 || !this.readableElements[this.currentElementIndex]) {
@@ -367,25 +389,65 @@ export default {
     },
 
     // Entra em um container
-    enterContainer() {
-      if (this.currentElementIndex < 0 || !this.readableElements[this.currentElementIndex]) {
-        return
-      }
+    // enterContainer() {
+    //   if (this.currentElementIndex < 0 || !this.readableElements[this.currentElementIndex]) {
+    //     return
+    //   }
+ 
 
-      const element = this.readableElements[this.currentElementIndex]
+    //   const element = this.readableElements[this.currentElementIndex]
       
-      // Se é um botão de accordion, expande primeiro
-      if (element.classList.contains('accordion-button') && element.getAttribute('aria-expanded') === 'false') {
-        element.click()
-        // Aguarda um tempo para a expansão
-        setTimeout(() => {
-          this.proceedToEnterContainer(element)
-        }, 500)
-      } else {
-        this.proceedToEnterContainer(element)
-      }
-    },
+    //   // Se é um botão de accordion, expande primeiro
+    //   if (element.classList.contains('accordion-button') && element.getAttribute('aria-expanded') === 'false') {
+    //     element.click()
+    //     // Aguarda um tempo para a expansão
+    //     setTimeout(() => {
+    //       this.proceedToEnterContainer(element)
+    //     }, 500)
+    //   } else {
+    //     this.proceedToEnterContainer(element)
+    //   }
+    // },
 
+    enterContainer() {
+  if (this.currentElementIndex < 0 || !this.readableElements[this.currentElementIndex]) {
+    return
+  }
+
+  const element = this.readableElements[this.currentElementIndex]
+  
+  // Se é um botão de accordion, expande primeiro
+  if (element.classList.contains('accordion-button') || 
+      (element.getAttribute('data-bs-toggle') === 'collapse')) {
+    
+    // Verifica se já está expandido
+    const isExpanded = element.getAttribute('aria-expanded') === 'true'
+    const targetId = element.getAttribute('data-bs-target') || 
+                    element.getAttribute('href')
+    let targetElement = targetId ? document.querySelector(targetId) : null
+    
+    if (!isExpanded) {
+      // Simula clique para expandir
+      element.click()
+      
+      // Aguarda a animação do accordion
+      setTimeout(() => {
+        if (targetElement) {
+          this.proceedToEnterContainer(targetElement)
+        } else {
+          this.announceChange("Não foi possível encontrar o conteúdo do accordion")
+        }
+      }, 500)
+    } else {
+      // Já está expandido, apenas entra
+      if (targetElement) {
+        this.proceedToEnterContainer(targetElement)
+      }
+    }
+  } else if (this.isContainer(element)) {
+    this.proceedToEnterContainer(element)
+  }
+},
     // Procede para entrar no container
     proceedToEnterContainer(element) {
       // Salva o estado atual
@@ -550,35 +612,70 @@ export default {
     },
 
     // Ativa o elemento atual ou entra/sai de containers
-    activateElement() {
-      if (this.isInContainer) {
-        this.exitContainer()
-      } else if (this.canEnterCurrentContainer()) {
-        this.enterContainer()
-      } else if (this.canActivateCurrentElement()) {
-        const element = this.readableElements[this.currentElementIndex]
+    // activateElement() {
+    //   if (this.isInContainer) {
+    //     this.exitContainer()
+    //   } else if (this.canEnterCurrentContainer()) {
+    //     this.enterContainer()
+    //   } else if (this.canActivateCurrentElement()) {
+    //     const element = this.readableElements[this.currentElementIndex]
         
-        this.announceChange('Ativando elemento...')
+    //     this.announceChange('Ativando elemento...')
         
-        if (element.click) {
-          element.click()
-        } else {
-          const event = new MouseEvent('click', {
-            bubbles: true,
-            cancelable: true
-          })
-          element.dispatchEvent(event)
-        }
+    //     if (element.click) {
+    //       element.click()
+    //     } else {
+    //       const event = new MouseEvent('click', {
+    //         bubbles: true,
+    //         cancelable: true
+    //       })
+    //       element.dispatchEvent(event)
+    //     }
         
-        setTimeout(() => {
-          this.gatherReadableElements()
-          this.announceChange('Elemento ativado')
-        }, 500)
-      } else {
-        this.announceChange('Elemento não pode ser ativado')
-      }
-    },
+    //     setTimeout(() => {
+    //       this.gatherReadableElements()
+    //       this.announceChange('Elemento ativado')
+    //     }, 500)
+    //   } else {
+    //     this.announceChange('Elemento não pode ser ativado')
+    //   }
+    // },
 
+    activateElement() {
+  if (this.isInContainer) {
+    this.exitContainer()
+  } else if (this.canEnterCurrentContainer()) {
+    this.enterContainer()
+  } else if (this.canActivateCurrentElement()) {
+    const element = this.readableElements[this.currentElementIndex]
+    
+    // Tratamento especial para accordions
+    if (element.classList.contains('accordion-button') || 
+        element.getAttribute('data-bs-toggle') === 'collapse') {
+      this.enterContainer()
+      return
+    }
+    
+    this.announceChange('Ativando elemento...')
+    
+    if (element.click) {
+      element.click()
+    } else {
+      const event = new MouseEvent('click', {
+        bubbles: true,
+        cancelable: true
+      })
+      element.dispatchEvent(event)
+    }
+    
+    setTimeout(() => {
+      this.gatherReadableElements()
+      this.announceChange('Elemento ativado')
+    }, 500)
+  } else {
+    this.announceChange('Elemento não pode ser ativado')
+  }
+},
     // Define o modo de leitura
     setReadingMode(mode) {
       this.stopSpeaking()
@@ -753,95 +850,163 @@ export default {
     },
 
     // Coleta elementos que podem ser lidos - VERSÃO MELHORADA PARA IGNORAR CONTEÚDO DE CONTAINERS
+    // async gatherReadableElements() {
+    //   const mainContent = document.getElementById("main-content") || document.body
+      
+    //   // Selector focado em elementos principais, ignorando conteúdo interno de containers
+    //   const selector = `
+    //     img,
+    //     svg[aria-label],
+    //     h1, h2, h3, h4, h5, h6,
+    //     p:not(.accordion-body p):not(.collapse p):not(.tab-pane p),
+    //     a:not([aria-hidden="true"]):not(.accordion-body a):not(.collapse a):not(.tab-pane a),
+    //     button,
+    //     input[type="text"], input[type="email"], input[type="password"], input[type="search"],
+    //     textarea,
+    //     select,
+    //     label:not(.accordion-body label):not(.collapse label):not(.tab-pane label),
+    //     li:not(.accordion-body li):not(.collapse li):not(.tab-pane li),
+    //     td:not(.accordion-body td):not(.collapse td):not(.tab-pane td),
+    //     th:not(.accordion-body th):not(.collapse th):not(.tab-pane th),
+    //     span.badge:not(.accordion-body span.badge):not(.collapse span.badge):not(.tab-pane span.badge),
+    //     .accordion-button,
+    //     .nav-link,
+    //     .tab-button,
+    //     .card-title:not(.accordion-body .card-title):not(.collapse .card-title):not(.tab-pane .card-title),
+    //     .card-text:not(.accordion-body .card-text):not(.collapse .card-text):not(.tab-pane .card-text)
+    //   `
+      
+    //   // Coleta todos os elementos
+    //   const allElements = Array.from(mainContent.querySelectorAll(selector))
+      
+    //   // Filtra elementos, excluindo conteúdo dentro de containers colapsados
+    //   this.readableElements = allElements.filter(el => {
+    //     // Ignora elementos do próprio leitor
+    //     if (el.closest('.screen-reader-control') || el.closest('[data-screen-reader-ignore]')) {
+    //       return false
+    //     }
+
+    //     // Ignora conteúdo dentro de containers colapsados/ocultos
+    //     const hiddenContainers = [
+    //       '.accordion-body',
+    //       '.collapse:not(.show)',
+    //       '.tab-pane:not(.active)',
+    //       '.dropdown-menu:not(.show)',
+    //       '[aria-expanded="false"] + .collapse'
+    //     ]
+
+    //     for (let containerSelector of hiddenContainers) {
+    //       if (el.closest(containerSelector)) {
+    //         // Se está dentro de um container oculto, só inclui se é o próprio elemento de controle
+    //         if (!el.classList.contains('accordion-button') && 
+    //             !el.classList.contains('nav-link') &&
+    //             !el.classList.contains('tab-button')) {
+    //           return false
+    //         }
+    //       }
+    //     }
+        
+    //     // Verifica se o elemento tem conteúdo legível
+    //     const text = this.getElementText(el)
+    //     if (!text || text.trim().length === 0) {
+    //       return false
+    //     }
+        
+    //     // Ignora elementos ocultos
+    //     const style = window.getComputedStyle(el)
+    //     if (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0') {
+    //       return false
+    //     }
+        
+    //     return true
+    //   }).sort((a, b) => {
+    //     // Ordena os elementos por posição na página
+    //     const rectA = a.getBoundingClientRect()
+    //     const rectB = b.getBoundingClientRect()
+        
+    //     if (Math.abs(rectA.top - rectB.top) > 10) {
+    //       return rectA.top - rectB.top
+    //     }
+    //     return rectA.left - rectB.left
+    //   })
+
+    //   // Remove duplicatas baseado no conteúdo
+    //   this.readableElements = this.removeDuplicateElements(this.readableElements)
+
+    //   if (this.readableElements.length > 0) {
+    //     this.currentReadingStatus = `Leitor ativo - ${this.readableElements.length} elementos`
+    //   } else {
+    //     this.currentReadingStatus = "Nenhum conteúdo para ler"
+    //   }
+    // },
     async gatherReadableElements() {
-      const mainContent = document.getElementById("main-content") || document.body
-      
-      // Selector focado em elementos principais, ignorando conteúdo interno de containers
-      const selector = `
-        img,
-        svg[aria-label],
-        h1, h2, h3, h4, h5, h6,
-        p:not(.accordion-body p):not(.collapse p):not(.tab-pane p),
-        a:not([aria-hidden="true"]):not(.accordion-body a):not(.collapse a):not(.tab-pane a),
-        button,
-        input[type="text"], input[type="email"], input[type="password"], input[type="search"],
-        textarea,
-        select,
-        label:not(.accordion-body label):not(.collapse label):not(.tab-pane label),
-        li:not(.accordion-body li):not(.collapse li):not(.tab-pane li),
-        td:not(.accordion-body td):not(.collapse td):not(.tab-pane td),
-        th:not(.accordion-body th):not(.collapse th):not(.tab-pane th),
-        span.badge:not(.accordion-body span.badge):not(.collapse span.badge):not(.tab-pane span.badge),
-        .accordion-button,
-        .nav-link,
-        .tab-button,
-        .card-title:not(.accordion-body .card-title):not(.collapse .card-title):not(.tab-pane .card-title),
-        .card-text:not(.accordion-body .card-text):not(.collapse .card-text):not(.tab-pane .card-text)
-      `
-      
-      // Coleta todos os elementos
-      const allElements = Array.from(mainContent.querySelectorAll(selector))
-      
-      // Filtra elementos, excluindo conteúdo dentro de containers colapsados
-      this.readableElements = allElements.filter(el => {
-        // Ignora elementos do próprio leitor
-        if (el.closest('.screen-reader-control') || el.closest('[data-screen-reader-ignore]')) {
-          return false
-        }
+    const mainContent = document.getElementById("main-content") || document.body
+  
+  // Selector que inclui botões de accordion mesmo quando colapsados
+  const selector = `
+    img,
+    svg[aria-label],
+    h1, h2, h3, h4, h5, h6,
+    p,
+    a:not([aria-hidden="true"]),
+    button,
+    input[type="text"], input[type="email"], input[type="password"], input[type="search"],
+    textarea,
+    select,
+    label,
+    li,
+    td,
+    th,
+    span.badge,
+    .accordion-button,
+    .nav-link,
+    .tab-button,
+    .card-title,
+    .card-text
+  `
+  
+  // Coleta todos os elementos
+  const allElements = Array.from(mainContent.querySelectorAll(selector))
+  
+  // Filtra elementos
+  this.readableElements = allElements.filter(el => {
+    // Ignora elementos do próprio leitor
+    if (el.closest('.screen-reader-control') || el.closest('[data-screen-reader-ignore]')) {
+      return false
+    }
 
-        // Ignora conteúdo dentro de containers colapsados/ocultos
-        const hiddenContainers = [
-          '.accordion-body',
-          '.collapse:not(.show)',
-          '.tab-pane:not(.active)',
-          '.dropdown-menu:not(.show)',
-          '[aria-expanded="false"] + .collapse'
-        ]
+    // Sempre inclui botões de accordion
+    if (el.classList.contains('accordion-button') || 
+        el.getAttribute('data-bs-toggle') === 'collapse') {
+      return true
+    }
+    
+    // Verifica se o elemento tem conteúdo legível
+    const text = this.getElementText(el)
+    if (!text || text.trim().length === 0) {
+      return false
+    }
+    
+    // Ignora elementos ocultos (exceto controles de accordion)
+    const style = window.getComputedStyle(el)
+    if (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0') {
+      return false
+    }
+    
+    return true
+  }).sort((a, b) => {
+    // Ordena os elementos por posição na página
+    const rectA = a.getBoundingClientRect()
+    const rectB = b.getBoundingClientRect()
+    
+    if (Math.abs(rectA.top - rectB.top) > 10) {
+      return rectA.top - rectB.top
+    }
+    return rectA.left - rectB.left
+  })
 
-        for (let containerSelector of hiddenContainers) {
-          if (el.closest(containerSelector)) {
-            // Se está dentro de um container oculto, só inclui se é o próprio elemento de controle
-            if (!el.classList.contains('accordion-button') && 
-                !el.classList.contains('nav-link') &&
-                !el.classList.contains('tab-button')) {
-              return false
-            }
-          }
-        }
-        
-        // Verifica se o elemento tem conteúdo legível
-        const text = this.getElementText(el)
-        if (!text || text.trim().length === 0) {
-          return false
-        }
-        
-        // Ignora elementos ocultos
-        const style = window.getComputedStyle(el)
-        if (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0') {
-          return false
-        }
-        
-        return true
-      }).sort((a, b) => {
-        // Ordena os elementos por posição na página
-        const rectA = a.getBoundingClientRect()
-        const rectB = b.getBoundingClientRect()
-        
-        if (Math.abs(rectA.top - rectB.top) > 10) {
-          return rectA.top - rectB.top
-        }
-        return rectA.left - rectB.left
-      })
-
-      // Remove duplicatas baseado no conteúdo
-      this.readableElements = this.removeDuplicateElements(this.readableElements)
-
-      if (this.readableElements.length > 0) {
-        this.currentReadingStatus = `Leitor ativo - ${this.readableElements.length} elementos`
-      } else {
-        this.currentReadingStatus = "Nenhum conteúdo para ler"
-      }
-    },
+  this.readableElements = this.removeDuplicateElements(this.readableElements)
+  },
 
     // Remove elementos duplicados
     removeDuplicateElements(elements) {
@@ -1133,22 +1298,51 @@ export default {
     },
 
     // Remove todos os destaques visuais
-    removeAllHighlights() {
-      // Remove destaques de elementos
-      document.querySelectorAll(".sr-element-highlight").forEach((el) => {
-        el.classList.remove("sr-element-highlight", "sr-interactive-indicator", "sr-container-indicator")
-      })
+    // removeAllHighlights() {
+    //   // Remove destaques de elementos
+    //   document.querySelectorAll(".sr-element-highlight").forEach((el) => {
+    //     el.classList.remove("sr-element-highlight", "sr-interactive-indicator", "sr-container-indicator")
+    //   })
 
-      // Remove destaques de palavras
-      if (this.wordHighlightSpan) {
-        const parent = this.wordHighlightSpan.parentNode
-        if (parent) {
-          parent.replaceChild(document.createTextNode(this.wordHighlightSpan.textContent), this.wordHighlightSpan)
-          parent.normalize()
-        }
-        this.wordHighlightSpan = null
-      }
-    },
+    //   // Remove destaques de palavras
+    //   if (this.wordHighlightSpan) {
+    //     const parent = this.wordHighlightSpan.parentNode
+    //     if (parent) {
+    //       parent.replaceChild(document.createTextNode(this.wordHighlightSpan.textContent), this.wordHighlightSpan)
+    //       parent.normalize()
+    //     }
+    //     this.wordHighlightSpan = null
+    //   }
+    // },
+
+    removeAllHighlights() {
+  // Remove destaques de elementos
+  document.querySelectorAll(".sr-element-highlight").forEach((el) => {
+    el.classList.remove(
+      "sr-element-highlight", 
+      "sr-interactive-indicator", 
+      "sr-container-indicator"
+    )
+    
+    // Restaura transformações originais
+    el.style.transform = ''
+    el.style.boxShadow = ''
+    el.style.zIndex = ''
+  })
+
+  // Remove destaques de palavras
+  if (this.wordHighlightSpan) {
+    const parent = this.wordHighlightSpan.parentNode
+    if (parent) {
+      parent.replaceChild(
+        document.createTextNode(this.wordHighlightSpan.textContent), 
+        this.wordHighlightSpan
+      )
+      parent.normalize()
+    }
+    this.wordHighlightSpan = null
+  }
+},
 
     // Destaca visualmente o elemento atual
     async highlightCurrentElement() {

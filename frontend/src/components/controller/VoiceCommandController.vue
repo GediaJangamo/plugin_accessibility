@@ -1,5 +1,3 @@
-
-
 <template>
   <div v-if="showComponent">
     <!-- Controlador de Voz - Versão melhorada -->
@@ -270,11 +268,17 @@ export default {
       isNavigating: false,
       isReading: false,
       keyboardListener: null,
+      // Variáveis para controle de falas desnecessárias
+      lastMicrophoneToggle: 0,
+      microphoneToggleDelay: 3000, // 3 segundos entre notificações
+      waitingForCategory: false, // Estado para aguardar categoria após "ajuda"
+      categoryListingTimeout: null,
       
       // Comandos organizados por categoria
       commandCategories: {
         navegacao: {
-          name: 'Navegação Geral',
+          name: 'Navegação',
+          keywords: ['navegação', 'navegacao', 'navegar', 'página', 'pagina'],
           commands: {
             "ir para início": { action: "/dashboard/", description: "Navega para a página inicial" },
             "voltar": { action: "history_back", description: "Retorna à página anterior" },
@@ -289,7 +293,8 @@ export default {
           }
         },
         modulos: {
-          name: 'Módulos do Sistema',
+          name: 'Módulos',
+          keywords: ['módulos', 'modulos', 'sistema', 'aplicação', 'aplicacao'],
           commands: {
             "abrir avaliações": { action: "/painel_estudante/avaliacoes/", description: "Acede ao módulo de avaliações" },
             "abrir inscrições": { action: "/painel_estudante/inscricoes/", description: "Acede ao módulo de inscrições" },
@@ -303,6 +308,7 @@ export default {
         },
         acessibilidade: {
           name: 'Acessibilidade',
+          keywords: ['acessibilidade', 'acesso', 'visual', 'contraste', 'fonte'],
           commands: {
             "ativar alto contraste": { action: "toggle_high_contrast", description: "Ativa o modo de alto contraste" },
             "desativar alto contraste": { action: "toggle_high_contrast", description: "Desativa o modo de alto contraste" },
@@ -324,6 +330,9 @@ export default {
   computed: {
     statusMessage() {
       if (this.helpMode) {
+        if (this.waitingForCategory) {
+          return 'Aguardando categoria...';
+        }
         return this.currentHelpCategory ? 
           `Ajuda: ${this.commandCategories[this.currentHelpCategory].name}` : 
           'Modo ajuda ativo';
@@ -340,9 +349,9 @@ export default {
           return `Erro: ${this.recognitionMessage}`;
         case 'silenced':
           if (this.isListening) {
-            return 'Microfone ativo - Diga um comando ou pressione M';
+            return 'Sistema ativo - Diga um comando';
           } else {
-            return 'Sistema ativo - Pressione M para ativar microfone ou clique no botão';
+            return 'Sistema ativo - Pressione M para microfone';
           }
         default:
           return 'Sistema pronto';
@@ -390,7 +399,7 @@ export default {
 
     closeCommandsList() {
       this.showCommandsList = false;
-      this.speak('Lista de comandos fechada');
+      this.speak('Lista fechada');
     },
 
     // Listener de teclado
@@ -425,9 +434,9 @@ export default {
       }
     },
 
-    // Inicialização do sistema
+    // Inicialização do sistema - MENSAGEM REDUZIDA
     initializeSystem() {
-      this.speak('Sistema de comandos de voz ativado. Pressione M para ativar o microfone ou diga "ajuda" seguido de uma categoria para conhecer os comandos.');
+      this.speak('Sistema ativo. Pressione M ou diga ajuda.');
       this.detectCurrentPage();
     },
 
@@ -449,7 +458,7 @@ export default {
       
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'pt-BR';
-      utterance.rate = 0.7; // Velocidade mais lenta
+      utterance.rate = 0.8; // Velocidade ligeiramente mais rápida
       utterance.pitch = 1.0;
       utterance.volume = 0.8;
       
@@ -477,8 +486,8 @@ export default {
     toggleSpeaker() {
       this.speakerEnabled = !this.speakerEnabled;
       const message = this.speakerEnabled ? 
-        'Feedback de voz ativado' : 
-        'Feedback de voz desativado';
+        'Áudio ativo' : 
+        'Áudio desativo';
       
       if (this.speakerEnabled) {
         this.speak(message);
@@ -488,9 +497,9 @@ export default {
     },
 
     // Fechar controlador
-     closeController() {
+    closeController() {
       this.showComponent = false;
-      this.speak('Controlador de voz fechado');
+      this.speak('Controlador fechado');
       this.$emit('close'); 
       this.$emit('update:active', false);
     },
@@ -515,11 +524,11 @@ export default {
     // Leitura do conteúdo da página
     readPageContent() {
       if (this.isReading) {
-        this.speak('Já está a ler conteúdo. Diga "parar leitura" para interromper.');
+        this.speak('Já está lendo. Diga parar leitura para interromper.');
         return;
       }
 
-      this.speak('A iniciar leitura da página', 'high');
+      this.speak('Iniciando leitura', 'high');
       this.isReading = true;
       
       // Para a leitura atual se houver
@@ -531,7 +540,7 @@ export default {
         if (content.trim()) {
           this.speak(content);
         } else {
-          this.speak('Não foi possível encontrar conteúdo de texto nesta página');
+          this.speak('Nenhum conteúdo encontrado');
           this.isReading = false;
         }
       }, 1000);
@@ -598,7 +607,7 @@ export default {
     stopReading() {
       this.synthesis.cancel();
       this.isReading = false;
-      this.speak('Leitura interrompida');
+      this.speak('Leitura parada');
     },
 
     // Obter cor do status
@@ -621,7 +630,7 @@ export default {
       }
     },
 
-    // Controle de reconhecimento de voz
+    // Controle de reconhecimento de voz - REDUZIDO FEEDBACK
     toggleRecognition() {
       if (this.isListening) {
         this.stopVoiceRecognition();
@@ -632,7 +641,7 @@ export default {
 
     startVoiceRecognition() {
       if (!this.active) {
-        this.speak('Os comandos de voz estão desativados');
+        this.speak('Comandos desativados');
         return;
       }
       
@@ -673,11 +682,11 @@ export default {
             console.error('Erro de reconhecimento:', event.error);
             
             if (event.error === 'not-allowed') {
-              this.speak('Permissão de microfone negada. Por favor, permita o acesso ao microfone.');
+              this.speak('Permissão negada. Permita acesso ao microfone.');
             } else if (event.error === 'network') {
-              this.speak('Erro de conexão. Verifique sua internet.');
+              this.speak('Erro de conexão.');
             } else if (event.error !== 'no-speech' && event.error !== 'aborted') {
-              this.speak('Erro no reconhecimento de voz. Pressione M para tentar novamente.');
+              this.speak('Erro no reconhecimento. Pressione M novamente.');
             }
           };
           
@@ -701,17 +710,22 @@ export default {
           setTimeout(() => {
             try {
               this.recognition.start();
-              this.speak('Microfone ativado');
+              // REDUZIDO: Só fala se passou tempo suficiente desde a última vez
+              const now = Date.now();
+              if (now - this.lastMicrophoneToggle > this.microphoneToggleDelay) {
+                this.speak('Microfone ativo');
+                this.lastMicrophoneToggle = now;
+              }
             } catch (e) {
-              this.speak('Erro ao iniciar o microfone');
+              this.speak('Erro ao iniciar microfone');
             }
           }, 300);
           
         } catch (error) {
-          this.speak('Erro ao inicializar o reconhecimento de voz');
+          this.speak('Erro ao inicializar reconhecimento');
         }
       } else {
-        this.speak('Seu navegador não suporta reconhecimento de voz');
+        this.speak('Navegador não suporta reconhecimento de voz');
       }
     },
 
@@ -727,10 +741,16 @@ export default {
       
       this.isListening = false;
       this.recognitionState = 'silenced';
-      this.speak('Microfone desativado. Pressione M para reativar.');
+      
+      // REDUZIDO: Só fala sobre desativar microfone em situações específicas
+      const now = Date.now();
+      if (now - this.lastMicrophoneToggle > this.microphoneToggleDelay) {
+        // Não fala sobre pressionar M novamente - reduz ruído
+        this.lastMicrophoneToggle = now;
+      }
     },
 
-    // Sistema de ajuda simplificado
+    // Sistema de ajuda MELHORADO - sem necessidade de "ajuda + categoria"
     showHelpForCategory(categoryKey) {
       const category = this.commandCategories[categoryKey];
       if (!category) {
@@ -740,28 +760,53 @@ export default {
       
       this.helpMode = true;
       this.currentHelpCategory = categoryKey;
+      this.waitingForCategory = false;
+      
+      // Limpa timeout anterior se houver
+      if (this.categoryListingTimeout) {
+        clearTimeout(this.categoryListingTimeout);
+      }
       
       const commands = Object.keys(category.commands);
       
-      this.speak(`Comandos da categoria ${category.name}:`);
+      this.speak(`Comandos de ${category.name}:`);
       
-      // Lê cada comando com uma pausa menor
+      // Lê cada comando com pausa reduzida
       commands.forEach((command, index) => {
         setTimeout(() => {
           const description = category.commands[command].description;
           this.speak(`${command}: ${description}`, 'normal');
-        }, (index + 1) * 2500); // Reduzido de 3000 para 2500
+        }, (index + 1) * 2000); // Reduzido para 2 segundos
       });
       
       // Sai do modo ajuda automaticamente após terminar
       setTimeout(() => {
         this.helpMode = false;
         this.currentHelpCategory = null;
-        this.speak('Pode agora usar qualquer comando normalmente.');
-      }, (commands.length + 1) * 2500);
+        this.speak('Pode usar qualquer comando.');
+      }, (commands.length + 1) * 2000);
     },
 
-    // Processamento de comandos melhorado
+    // NOVO: Sistema de ajuda inteligente
+    initializeHelpMode() {
+      this.helpMode = true;
+      this.waitingForCategory = true;
+      
+      // Lista as categorias disponíveis
+      const categoryNames = Object.values(this.commandCategories).map(cat => cat.name);
+      this.speak(`Categorias disponíveis: ${categoryNames.join(', ')}. Diga o nome de uma categoria.`);
+      
+      // Timeout para sair do modo ajuda se nenhuma categoria for escolhida
+      this.categoryListingTimeout = setTimeout(() => {
+        if (this.waitingForCategory) {
+          this.helpMode = false;
+          this.waitingForCategory = false;
+          this.speak('Modo ajuda encerrado. Use comandos normalmente.');
+        }
+      }, 15000); // 15 segundos para escolher categoria
+    },
+
+    // Processamento de comandos MELHORADO
     processVoiceCommand(command) {
       console.log('Comando recebido:', command);
       
@@ -772,37 +817,48 @@ export default {
           return;
         }
         // Ignora outros comandos durante a leitura
-        this.speak('Diga "parar leitura" para interromper e usar outros comandos');
+        this.speak('Diga parar leitura para usar outros comandos');
         return;
       }
       
-      // Comando de ajuda com categoria
+      // MELHORADO: Comando de ajuda sem necessidade de categoria
       if (command.includes('ajuda')) {
-        const words = command.split(/\s+/);
-        const helpIndex = words.findIndex(word => word.includes('ajuda'));
-        
-        if (helpIndex !== -1 && helpIndex < words.length - 1) {
-          // Há uma categoria após "ajuda"
-          const categoryName = words.slice(helpIndex + 1).join(' ');
-          const categoryKey = this.findCategoryByName(categoryName);
-          
+        // Se já está em modo ajuda e aguardando categoria, processa como categoria
+        if (this.waitingForCategory) {
+          const categoryKey = this.findCategoryByName(command.replace('ajuda', '').trim());
           if (categoryKey) {
+            if (this.categoryListingTimeout) {
+              clearTimeout(this.categoryListingTimeout);
+            }
             this.showHelpForCategory(categoryKey);
             return;
           }
         }
         
-        // Ajuda geral - lista categorias
-        const categories = Object.keys(this.commandCategories);
-        const categoryNames = categories.map(key => this.commandCategories[key].name);
-        this.speak(`Categorias disponíveis: ${categoryNames.join(', ')}. Diga "ajuda" seguido do nome da categoria para ouvir seus comandos.`);
+        // Inicia modo ajuda inteligente
+        this.initializeHelpMode();
         return;
+      }
+      
+      // NOVO: Se está aguardando categoria e não disse "ajuda", trata como nome de categoria
+      if (this.waitingForCategory) {
+        const categoryKey = this.findCategoryByName(command);
+        if (categoryKey) {
+          if (this.categoryListingTimeout) {
+            clearTimeout(this.categoryListingTimeout);
+          }
+          this.showHelpForCategory(categoryKey);
+          return;
+        } else {
+          this.speak('Categoria não encontrada. Repita o nome de uma categoria válida.');
+          return;
+        }
       }
       
       // Comandos especiais
       if (command.includes('onde estou')) {
         this.detectCurrentPage();
-        this.speak(`Você está na página: ${this.currentPage}`);
+        this.speak(`Você está em: ${this.currentPage}`);
         return;
       }
 
@@ -822,7 +878,7 @@ export default {
           this.speak(`Repetindo: ${lastAction}`);
           this.executeVoiceCommand(lastAction);
         } else {
-          this.speak('Nenhuma ação anterior para repetir');
+          this.speak('Nenhuma ação para repetir');
         }
         return;
       }
@@ -831,6 +887,10 @@ export default {
       if (this.helpMode) {
         this.helpMode = false;
         this.currentHelpCategory = null;
+        this.waitingForCategory = false;
+        if (this.categoryListingTimeout) {
+          clearTimeout(this.categoryListingTimeout);
+        }
       }
       
       // Procura comando em todas as categorias
@@ -839,42 +899,22 @@ export default {
       if (foundCommand) {
         this.executeVoiceCommand(foundCommand.command, foundCommand.action);
       } else {
-        this.speak('Comando não reconhecido. Clique no ícone de lista para ver todos os comandos ou diga "ajuda" seguido de uma categoria.');
+        this.speak('Comando não reconhecido. Diga ajuda para ver comandos.');
       }
     },
 
-    // Busca categoria por nome melhorada
+    // Busca categoria por nome MELHORADA
     findCategoryByName(name) {
       name = name.toLowerCase();
       
-      // Mapeamento direto de palavras-chave
-      const keywordMap = {
-        'navegação': 'navegacao',
-        'navegacao': 'navegacao',
-        'navegar': 'navegacao',
-        'página': 'navegacao',
-        'pagina': 'navegacao',
-        'módulos': 'modulos',
-        'modulos': 'modulos',
-        'sistema': 'modulos',
-        'aplicação': 'modulos',
-        'aplicacao': 'modulos',
-        'acessibilidade': 'acessibilidade',
-        'acesso': 'acessibilidade',
-        'visual': 'acessibilidade',
-        'contraste': 'acessibilidade',
-        'fonte': 'acessibilidade'
-      };
-      
-      // Procura por palavras-chave
-      for (const [keyword, categoryKey] of Object.entries(keywordMap)) {
-        if (name.includes(keyword)) {
-          return categoryKey;
-        }
-      }
-      
-      // Busca por similaridade com nomes das categorias
+      // Busca por palavras-chave específicas de cada categoria
       for (const [key, category] of Object.entries(this.commandCategories)) {
+        // Verifica se o nome inclui alguma palavra-chave da categoria
+        if (category.keywords.some(keyword => name.includes(keyword))) {
+          return key;
+        }
+        
+        // Verifica similaridade com o nome da categoria
         const categoryName = category.name.toLowerCase();
         if (categoryName.includes(name) || name.includes(categoryName)) {
           return key;
@@ -957,7 +997,7 @@ export default {
       switch(action) {
         case 'history_back':
           window.history.back();
-          this.speak('Voltando para página anterior');
+          this.speak('Voltando');
           setTimeout(() => {
             this.detectCurrentPage();
           }, 1500);
@@ -965,7 +1005,7 @@ export default {
           
         case 'history_forward':
           window.history.forward();
-          this.speak('Avançando para próxima página');
+          this.speak('Avançando');
           setTimeout(() => {
             this.detectCurrentPage();
           }, 1500);
@@ -982,7 +1022,7 @@ export default {
           break;
           
         case 'reload_page':
-          this.speak('Recarregando página');
+          this.speak('Recarregando');
           setTimeout(() => window.location.reload(), 1000);
           break;
           
@@ -1002,7 +1042,7 @@ export default {
         case 'toggle_high_contrast': {
           document.body.classList.toggle('high-contrast');
           const isActive = document.body.classList.contains('high-contrast');
-          this.speak(isActive ? 'Alto contraste ativado' : 'Alto contraste desativado');
+          this.speak(isActive ? 'Alto contraste ativo' : 'Alto contraste desativo');
           break;
         }
         
@@ -1018,12 +1058,12 @@ export default {
           
         case 'reset_font_size':
           document.documentElement.style.fontSize = '16px';
-          this.speak('Fonte restaurada');
+          this.speak('Fonte normal');
           break;
           
         case 'enable_audio':
           this.speakerEnabled = true;
-          this.speak('Áudio ativado');
+          this.speak('Áudio ativo');
           break;
           
         case 'disable_audio':
@@ -1043,17 +1083,17 @@ export default {
       document.documentElement.style.fontSize = newSize + 'px';
     },
 
-    // Navegação para URLs
+    // Navegação para URLs REDUZIDA
     navigateToUrl(url) {
       const pageNames = {
-        '/dashboard/': 'Painel Principal',
-        '/painel_estudante/': 'Painel do Estudante',
+        '/dashboard/': 'Início',
+        '/painel_estudante/': 'Painel',
         '/painel_estudante/avaliacoes/': 'Avaliações',
         '/painel_estudante/inscricoes/': 'Inscrições', 
         '/painel_estudante/matriculas/': 'Matrículas',
         '/painel_estudante/facturas/': 'Faturas',
         '/painel_estudante/mensalidades/': 'Mensalidades',
-        '/painel_estudante/vula/': 'Plataforma Vula'
+        '/painel_estudante/vula/': 'Vula'
       };
       
       const pageName = pageNames[url] || 'página solicitada';
@@ -1071,6 +1111,7 @@ export default {
         }
       }
       
+      // REDUZIDO: Fala menos durante navegação
       this.speak(`Abrindo ${pageName}`);
       
       // Navega para a URL
@@ -1085,8 +1126,8 @@ export default {
               this.recognitionState = 'silenced';
               this.isNavigating = false;
               
-              // Confirma que chegou na página e reativa o microfone se estava ativo
-              this.speak(`Você está agora no módulo de ${pageName}. Pressione M para ativar comandos de voz.`, 'high');
+              // REDUZIDO: Confirmação mais breve
+              this.speak(`${pageName} carregado`, 'high');
               
               if (wasListening) {
                 setTimeout(() => {
@@ -1114,6 +1155,10 @@ export default {
       
       if (this.synthesis) {
         this.synthesis.cancel();
+      }
+      
+      if (this.categoryListingTimeout) {
+        clearTimeout(this.categoryListingTimeout);
       }
       
       this.removeKeyboardListener();

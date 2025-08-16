@@ -1,3 +1,5 @@
+// VERSÃO DE DEBUGGING - Substitua TODO o componente por esta versão simplificada:
+
 <template>
   <div 
     v-if="active"
@@ -123,7 +125,7 @@
 
         <!-- Informações sobre navegação -->
         <div class="text-xs text-gray-500 dark:text-gray-400 text-center">
-          <p>Navegação: ← → ou B/N • Ativar: Enter • Play/Pause: Espaço/P • Sair: Esc/Q</p>
+          <p>DEBUG: {{ debugInfo }}</p>
         </div>
       </div>
     </div>
@@ -146,98 +148,40 @@ export default {
       currentElementIndex: -1,
       speechSynth: null,
       utterance: null,
-      currentReadingStatus: "",
+      currentReadingStatus: "Leitor inativo",
       speechRate: 1.0,
-      gatherTimeout: null,
-      observer: null,
-      pauseTimer: null,
       isInitialized: false,
       keysEnabled: false,
-      navigationDebounce: null,
+      debugInfo: "Componente carregado - accordions devem funcionar",
     }
   },
   watch: {
-  active: {
-    immediate: true,
-    handler(newValue) {
-      if (newValue) {
-        this.$nextTick(() => {
-          this.initReaderFeatures()
-        })
-      } else {
-        this.cleanupReaderFeatures()
-        // CRÍTICO: Remove estilos quando desativado
-        this.removeCustomStyles()
-      }
+    active: {
+      immediate: true,
+      handler(newValue) {
+        console.log('Screen Reader active changed:', newValue)
+        if (newValue) {
+          this.debugInfo = "Leitor ativado"
+          this.$nextTick(() => {
+            this.initReaderFeatures()
+          })
+        } else {
+          this.debugInfo = "Leitor desativado - accordions devem funcionar"
+          this.cleanupReaderFeatures()
+        }
+      },
     },
   },
-},
-
   mounted() {
-    this.initMutationObserver()
-    // this.addCustomStyles()
+    console.log('Screen Reader component mounted')
+    this.debugInfo = "Componente montado - sem interferência"
+    // REMOVIDO TUDO que poderia interferir
   },
   beforeUnmount() {
+    console.log('Screen Reader component beforeUnmount')
     this.cleanupReaderFeatures()
-    this.removeCustomStyles()
   },
   methods: {
-    // addCustomStyles() {
-    //   if (!document.getElementById('screen-reader-highlight-styles')) {
-    //     const style = document.createElement('style')
-    //     style.id = 'screen-reader-highlight-styles'
-    //     style.textContent = `
-    //       .sr-element-highlight {
-    //         outline: 2px solid rgba(59, 130, 246, 0.8) !important;
-    //         outline-offset: 2px !important;
-    //         background-color: rgba(59, 130, 246, 0.1) !important;
-    //       }
-          
-    //       @keyframes sr-notification-slide {
-    //         from { transform: translateX(-50%) translateY(20px); opacity: 0; }
-    //         to { transform: translateX(-50%) translateY(0); opacity: 1; }
-    //       }
-    //     `
-    //     document.head.appendChild(style)
-    //   }
-    // },
-    addCustomStyles() {
-  if (!document.getElementById('screen-reader-highlight-styles')) {
-    const style = document.createElement('style')
-    style.id = 'screen-reader-highlight-styles'
-    style.textContent = `
-      /* Apenas estilos para highlight - SEM interferir com accordions */
-      .sr-element-highlight {
-        outline: 2px solid rgba(59, 130, 246, 0.8) !important;
-        outline-offset: 2px !important;
-        background-color: rgba(59, 130, 246, 0.1) !important;
-        /* REMOVIDO: background-color que estava interferindo */
-      }
-      
-      @keyframes sr-notification-slide {
-        from { transform: translateX(-50%) translateY(20px); opacity: 0; }
-        to { transform: translateX(-50%) translateY(0); opacity: 1; }
-      }
-      
-      /* Garantir que o screen reader não interfira com accordions */
-      .accordion-collapse.collapse:not(.show) {
-        display: none !important;
-      }
-      
-      .accordion-collapse.collapse.show {
-        display: block !important;
-      }
-    `
-    document.head.appendChild(style)
-  }
-},
-    removeCustomStyles() {
-      const style = document.getElementById('screen-reader-highlight-styles')
-      if (style) {
-        style.remove()
-      }
-    },
-
     getProgressText() {
       if (this.readableElements.length > 0) {
         return this.currentElementIndex >= 0 ? `${this.currentElementIndex + 1}/${this.readableElements.length}` : '0/0'
@@ -251,92 +195,52 @@ export default {
       this.$emit('update:screenReader', false)
     },
     
-    // initReaderFeatures() {
-    //   this.initializeSpeechSynthesis()
-
-    //   setTimeout(() => {
-    //     this.gatherReadableElements()
-    //     this.currentElementIndex = -1
-    //     this.removeAllHighlights()
-    //     this.enableKeyboardControls()
-    //     this.isInitialized = true
-    //   }, 300)
-    // },
-
     initReaderFeatures() {
-  // ADICIONE os estilos apenas quando inicializar
-  this.addCustomStyles()
-  
-  this.initializeSpeechSynthesis()
-
-  setTimeout(() => {
-    this.gatherReadableElements()
-    this.currentElementIndex = -1
-    this.removeAllHighlights()
-    this.enableKeyboardControls()
-    this.isInitialized = true
-  }, 300)
-},
-
-
-   cleanupReaderFeatures() {
-  this.stopSpeaking()
-  this.removeAllHighlights()
-  this.disableKeyboardControls()
-
-  if (this.observer) {
-    this.observer.disconnect()
-  }
-
-  // ADICIONE: Remove estilos na limpeza
-  this.removeCustomStyles()
-  this.isInitialized = false
-},
-
-    // initMutationObserver() {
-    //   if (window.MutationObserver) {
-    //     this.observer = new MutationObserver(this.debounceGatherElements)
-    //     this.observer.observe(document.body, {
-    //       childList: true,
-    //       subtree: true,
-    //       attributes: true,
-    //       attributeFilter: ['class', 'style', 'aria-expanded', 'hidden']
-    //     })
-    //   }
-    // },
-    initMutationObserver() {
-  if (window.MutationObserver) {
-    this.observer = new MutationObserver((mutations) => {
-      let shouldUpdate = false
+      console.log('Initializing reader features')
+      this.debugInfo = "Inicializando leitor..."
       
-      mutations.forEach((mutation) => {
-        // Detecta mudanças em classes (como 'show' sendo adicionada/removida)
-        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-          const target = mutation.target
-          if (target.classList.contains('accordion-collapse') || target.classList.contains('collapse')) {
-            shouldUpdate = true
+      this.initializeSpeechSynthesis()
+      this.addCustomStyles()
+
+      setTimeout(() => {
+        this.gatherReadableElements()
+        this.currentElementIndex = -1
+        this.enableKeyboardControls()
+        this.isInitialized = true
+        this.debugInfo = `Leitor ativo - ${this.readableElements.length} elementos`
+      }, 300)
+    },
+
+    cleanupReaderFeatures() {
+      console.log('Cleaning up reader features')
+      this.stopSpeaking()
+      this.removeAllHighlights()
+      this.disableKeyboardControls()
+      this.removeCustomStyles()
+      this.isInitialized = false
+    },
+
+    addCustomStyles() {
+      if (!document.getElementById('screen-reader-highlight-styles')) {
+        const style = document.createElement('style')
+        style.id = 'screen-reader-highlight-styles'
+        style.textContent = `
+          .sr-element-highlight {
+            outline: 2px solid rgba(59, 130, 246, 0.8) !important;
+            outline-offset: 2px !important;
           }
-        }
-        
-        // Detecta mudanças na estrutura DOM
-        if (mutation.type === 'childList') {
-          shouldUpdate = true
-        }
-      })
-      
-      if (shouldUpdate) {
-        this.debounceGatherElements()
+        `
+        document.head.appendChild(style)
       }
-    })
+    },
     
-    this.observer.observe(document.body, {
-      childList: true,
-      subtree: true,
-      attributes: true,
-      attributeFilter: ['class', 'style', 'aria-expanded', 'hidden']
-    })
-  }
-},
+    removeCustomStyles() {
+      const style = document.getElementById('screen-reader-highlight-styles')
+      if (style) {
+        style.remove()
+      }
+    },
+
     enableKeyboardControls() {
       if (!this.keysEnabled) {
         document.addEventListener("keydown", this.handleKeyboardShortcuts)
@@ -352,14 +256,8 @@ export default {
     initializeSpeechSynthesis() {
       if ("speechSynthesis" in window) {
         this.speechSynth = window.speechSynthesis
-
-        if (this.speechSynth.onvoiceschanged !== undefined) {
-          this.speechSynth.onvoiceschanged = this.loadVoices
-        }
-
         this.loadVoices()
       } else {
-        console.error("API de Síntese de Fala não suportada no navegador")
         this.currentReadingStatus = "Leitor não suportado"
       }
     },
@@ -370,285 +268,20 @@ export default {
       }
     },
 
-    getElementText(element) {
-      const tag = element.tagName.toLowerCase()
+    gatherReadableElements() {
+      // VERSÃO SUPER SIMPLES - sem interferir com accordions
+      const mainContent = document.getElementById("main-content") || document.body
       
-      // Para accordion buttons
-      if (this.isAccordionButton(element)) {
-        const isExpanded = element.getAttribute('aria-expanded') === 'true'
-        const text = element.textContent.trim()
-        return `Botão de accordion ${isExpanded ? 'expandido' : 'recolhido'}: ${text}. Pressione Enter para ${isExpanded ? 'recolher' : 'expandir'}`
-      }
+      const selector = 'h1, h2, h3, h4, h5, h6, p, a, button'
+      const allElements = Array.from(mainContent.querySelectorAll(selector))
       
-      // Para imagens
-      if (tag === 'img') {
-        const alt = element.alt?.trim()
-        const title = element.title?.trim()
-        const src = element.src
-        
-        if (alt) {
-          return `Imagem: ${alt}`
-        } else if (title) {
-          return `Imagem: ${title}`
-        } else if (src) {
-          const filename = src.split('/').pop().split('?')[0]
-          return `Imagem: ${filename}`
-        } else {
-          return 'Imagem sem descrição'
-        }
-      }
-      
-      // Para SVGs
-      if (tag === 'svg') {
-        return element.getAttribute('aria-label') || 'Gráfico sem descrição'
-      }
-      
-      // Para elementos interativos, adiciona contexto
-      if (this.isInteractiveElement(element)) {
-        const text = element.textContent.trim()
-        if (tag === 'button') {
-          return `Botão: ${text}`
-        } else if (tag === 'a') {
-          return `Link: ${text}`
-        } else {
-          return `Elemento clicável: ${text}`
-        }
-      }
-
-      // Para cabeçalhos, adiciona o nível
-      if (['h1', 'h2', 'h3', 'h4', 'h5', 'h6'].includes(tag)) {
-        const level = tag.charAt(1)
-        return `Cabeçalho nível ${level}: ${element.textContent.trim()}`
-      }
-      
-      return element.textContent.trim()
-    },
-
-    isAccordionButton(element) {
-      return element.classList.contains('accordion-button') || 
-             (element.hasAttribute('data-bs-toggle') && element.getAttribute('data-bs-toggle') === 'collapse')
-    },
-
-    // async gatherReadableElements() {
-    //   const mainContent = document.getElementById("main-content") || document.body
-      
-    //   const selector = `
-    //     h1, h2, h3, h4, h5, h6,
-    //     p,
-    //     a:not([aria-hidden="true"]),
-    //     button,
-    //     input[type="text"], input[type="email"], input[type="password"], input[type="search"],
-    //     textarea,
-    //     select,
-    //     label,
-    //     li,
-    //     td,
-    //     th,
-    //     img,
-    //     svg[aria-label],
-    //     .accordion-button,
-    //     [data-bs-toggle="collapse"]
-    //   `
-      
-    //   const allElements = Array.from(mainContent.querySelectorAll(selector))
-      
-    //   this.readableElements = allElements.filter(el => {
-    //     if (el.closest('.screen-reader-control') || el.closest('[data-screen-reader-ignore]')) {
-    //       return false
-    //     }
-        
-    //     if (!this.isElementVisible(el)) {
-    //       return false
-    //     }
-        
-    //     const text = this.getElementText(el)
-    //     return text && text.trim().length > 0
-    //   }).sort((a, b) => {
-    //     const rectA = a.getBoundingClientRect()
-    //     const rectB = b.getBoundingClientRect()
-        
-    //     if (Math.abs(rectA.top - rectB.top) > 10) {
-    //       return rectA.top - rectB.top
-    //     }
-    //     return rectA.left - rectB.left
-    //   })
-
-    //   this.readableElements = this.removeDuplicateElements(this.readableElements)
-
-    //   if (this.readableElements.length > 0) {
-    //     this.currentReadingStatus = `${this.readableElements.length} elementos encontrados`
-    //   } else {
-    //     this.currentReadingStatus = "Nenhum conteúdo para ler"
-    //   }
-    // },
-
-    // isElementVisible(element) {
-    //   const style = window.getComputedStyle(element)
-    //   if (style.display === 'none' || style.visibility === 'hidden' || element.hasAttribute('hidden')) {
-    //     return false
-    //   }
-      
-    //   let parent = element.parentElement
-    //   while (parent && parent !== document.body) {
-    //     if (parent.classList.contains('accordion-collapse') && 
-    //         !parent.classList.contains('show')) {
-    //       return false
-    //     }
-    //     parent = parent.parentElement
-    //   }
-      
-    //   return true
-    // },
-
-    async gatherReadableElements() {
-  const mainContent = document.getElementById("main-content") || document.body
-  
-  const selector = `
-    h1, h2, h3, h4, h5, h6,
-    p,
-    a:not([aria-hidden="true"]),
-    button,
-    input[type="text"], input[type="email"], input[type="password"], input[type="search"],
-    textarea,
-    select,
-    label,
-    li,
-    td,
-    th,
-    img,
-    svg[aria-label],
-    .accordion-button,
-    [data-bs-toggle="collapse"]
-  `
-  
-  const allElements = Array.from(mainContent.querySelectorAll(selector))
-  
-  this.readableElements = allElements.filter(el => {
-    // Ignora elementos do próprio leitor
-    if (el.closest('.screen-reader-control') || el.closest('[data-screen-reader-ignore]')) {
-      return false
-    }
-    
-    // Verifica visibilidade com o novo método mais preciso
-    if (!this.isElementVisible(el)) {
-      return false
-    }
-    
-    // Verifica se o elemento tem conteúdo legível
-    const text = this.getElementText(el)
-    return text && text.trim().length > 0
-  }).sort((a, b) => {
-    // Ordena os elementos por posição na página
-    const rectA = a.getBoundingClientRect()
-    const rectB = b.getBoundingClientRect()
-    
-    if (Math.abs(rectA.top - rectB.top) > 10) {
-      return rectA.top - rectB.top
-    }
-    return rectA.left - rectB.left
-  })
-
-  this.readableElements = this.removeDuplicateElements(this.readableElements)
-
-  if (this.readableElements.length > 0) {
-    this.currentReadingStatus = `${this.readableElements.length} elementos encontrados`
-  } else {
-    this.currentReadingStatus = "Nenhum conteúdo para ler"
-  }
-},
-isElementVisible(element) {
-  // Verificações básicas APENAS
-  const style = window.getComputedStyle(element)
-  if (style.display === 'none' || style.visibility === 'hidden' || element.hasAttribute('hidden')) {
-    return false
-  }
-  
-  // Verificação MUITO simples para accordions - sem interferir
-  const accordionParent = element.closest('.accordion-collapse')
-  if (accordionParent) {
-    // Se está dentro de accordion, verifica se está visível
-    return accordionParent.classList.contains('show')
-  }
-  
-  return true
-},
-
-handleAccordionInteraction(element) {
-  const isExpanded = element.getAttribute('aria-expanded') === 'true'
-  
-  this.announceChange(isExpanded ? 'Recolhendo accordion...' : 'Expandindo accordion...')
-  
-  element.click()
-  
-  // Aumentamos o timeout para dar tempo ao Bootstrap processar a animação
-  setTimeout(() => {
-    // Força uma re-detecção completa
-    this.gatherReadableElements()
-    
-    if (!isExpanded) {
-      // Se expandiu, tenta encontrar o primeiro elemento dentro do accordion
-      const targetId = element.getAttribute('data-bs-target') || 
-                      element.getAttribute('aria-controls')
-      if (targetId) {
-        const targetElement = document.querySelector(targetId)
-        if (targetElement) {
-          // Aguarda um pouco mais para a animação terminar
-          setTimeout(() => {
-            const firstChildElement = this.findFirstReadableChild(targetElement)
-            if (firstChildElement) {
-              const newIndex = this.readableElements.indexOf(firstChildElement)
-              if (newIndex !== -1) {
-                this.currentElementIndex = newIndex
-                this.highlightCurrentElement()
-              }
-            }
-          }, 200) // Timeout adicional para animação
-        }
-      }
-    }
-    
-    this.announceChange(`Accordion ${isExpanded ? 'recolhido' : 'expandido'}`)
-  }, 800) // Aumentado de 500ms para 800ms
-},
-
-    removeDuplicateElements(elements) {
-      const seen = new Map()
-      
-      return elements.filter(el => {
-        const text = this.getElementText(el).toLowerCase().trim()
-        const tag = el.tagName.toLowerCase()
-        
-        if (tag === 'img') {
-          const key = `${tag}:${text}:${el.src}`
-          if (seen.has(key)) return false
-          seen.set(key, true)
-          return true
-        }
-        
-        const key = `${tag}:${text}`
-        
-        if (seen.has(key)) {
-          const rect = el.getBoundingClientRect()
-          const seenData = seen.get(key)
-          
-          if (seenData && Math.abs(seenData.top - rect.top) < 5 && Math.abs(seenData.left - rect.left) < 5) {
-            return false
-          }
-        }
-        
-        const rect = el.getBoundingClientRect()
-        seen.set(key, { top: rect.top, left: rect.left })
-        return true
+      this.readableElements = allElements.filter(el => {
+        // Filtro MÍNIMO - só remove se realmente invisível
+        const style = window.getComputedStyle(el)
+        return style.display !== 'none' && style.visibility !== 'hidden'
       })
-    },
 
-    debounceGatherElements() {
-      if (this.gatherTimeout) clearTimeout(this.gatherTimeout)
-      this.gatherTimeout = setTimeout(() => {
-        if (this.active) {
-          this.gatherReadableElements()
-        }
-      }, 500)
+      this.currentReadingStatus = `${this.readableElements.length} elementos encontrados`
     },
 
     playPause() {
@@ -659,147 +292,68 @@ handleAccordionInteraction(element) {
           this.currentElementIndex = 0
           this.highlightCurrentElement()
         }
-
-        if (this.speechSynth && this.speechSynth.paused) {
-          this.resumeSpeaking()
-        } else {
-          this.speakCurrentElement()
-        }
+        this.speakCurrentElement()
       }
     },
 
     previousElement() {
-      if (this.navigationDebounce) return
-      this.navigationDebounce = setTimeout(() => {
-        this.navigationDebounce = null
-      }, 200)
-
       this.stopSpeaking()
-
       if (this.currentElementIndex > 0) {
         this.currentElementIndex--
       } else {
         this.currentElementIndex = this.readableElements.length - 1
       }
-
       this.highlightCurrentElement()
-      this.updateReadingStatus()
-
-      if (this.isPlaying) {
-        setTimeout(() => {
-          if (this.isPlaying) {
-            this.speakCurrentElement()
-          }
-        }, 100)
-      }
     },
 
     nextElement() {
-      if (this.navigationDebounce) return
-      this.navigationDebounce = setTimeout(() => {
-        this.navigationDebounce = null
-      }, 200)
-
       this.stopSpeaking()
-
       if (this.currentElementIndex < this.readableElements.length - 1) {
         this.currentElementIndex++
       } else {
         this.currentElementIndex = 0
       }
-
       this.highlightCurrentElement()
-      this.updateReadingStatus()
-
-      if (this.isPlaying) {
-        setTimeout(() => {
-          if (this.isPlaying) {
-            this.speakCurrentElement()
-          }
-        }, 100)
-      }
     },
 
     restart() {
       this.stopSpeaking()
-
       if (this.readableElements.length > 0) {
         this.currentElementIndex = 0
         this.highlightCurrentElement()
-        this.updateReadingStatus()
-
-        if (this.isPlaying) {
-          this.speakCurrentElement()
-        }
       }
     },
 
-    async speakCurrentElement() {
-      if (
-        !this.speechSynth ||
-        this.currentElementIndex < 0 ||
-        this.currentElementIndex >= this.readableElements.length
-      ) {
-        return
-      }
-
-      this.stopSpeaking()
-
+    speakCurrentElement() {
+      if (!this.speechSynth || this.currentElementIndex < 0) return
+      
       const currentElement = this.readableElements[this.currentElementIndex]
-      const textToSpeak = this.getElementText(currentElement)
+      const textToSpeak = currentElement.textContent.trim()
 
       this.utterance = new SpeechSynthesisUtterance(textToSpeak)
-
-      const voices = this.speechSynth.getVoices()
-      const portugueseVoice = voices.find((voice) => voice.lang.includes("pt-BR") || voice.lang.includes("pt"))
-
-      if (portugueseVoice) {
-        this.utterance.voice = portugueseVoice
-      }
-
       this.utterance.rate = this.speechRate
-      this.utterance.pitch = 1.0
       this.utterance.lang = "pt-BR"
 
-      this.utterance.onend = async () => {
-        if (this.active && this.currentElementIndex < this.readableElements.length - 1) {
+      this.utterance.onend = () => {
+        if (this.currentElementIndex < this.readableElements.length - 1) {
           this.currentElementIndex++
           this.highlightCurrentElement()
-          this.updateReadingStatus()
-          setTimeout(() => {
-            this.speakCurrentElement()
-          }, 200)
+          setTimeout(() => this.speakCurrentElement(), 200)
         } else {
           this.isPlaying = false
           this.currentReadingStatus = "Leitura concluída"
         }
       }
 
-      this.utterance.onerror = (event) => {
-        console.error("Erro na síntese de fala:", event)
-        this.isPlaying = false
-        this.currentReadingStatus = "Erro na leitura"
-      }
-
       this.highlightCurrentElement()
       this.speechSynth.speak(this.utterance)
       this.isPlaying = true
-      this.updateReadingStatus()
     },
 
     pauseSpeaking() {
-      if (this.speechSynth && this.isPlaying) {
+      if (this.speechSynth) {
         this.speechSynth.pause()
         this.isPlaying = false
-      }
-    },
-
-    resumeSpeaking() {
-      if (this.speechSynth && this.speechSynth.paused) {
-        clearTimeout(this.pauseTimer)
-        this.speechSynth.resume()
-        this.isPlaying = true
-        this.updateReadingStatus()
       }
     },
 
@@ -816,340 +370,56 @@ handleAccordionInteraction(element) {
       })
     },
 
-    async highlightCurrentElement() {
+    highlightCurrentElement() {
       this.removeAllHighlights()
-
       if (this.currentElementIndex >= 0 && this.readableElements[this.currentElementIndex]) {
         const element = this.readableElements[this.currentElementIndex]
-        
         element.classList.add("sr-element-highlight")
-
-        element.scrollIntoView({
-          behavior: "smooth",
-          block: "center",
-          inline: "nearest",
-        })
+        element.scrollIntoView({ behavior: "smooth", block: "center" })
       }
-    },
-
-    updateReadingStatus() {
-      if (this.readableElements.length === 0) {
-        this.currentReadingStatus = "Nenhum conteúdo para ler"
-      } else if (this.currentElementIndex >= 0) {
-        const element = this.readableElements[this.currentElementIndex]
-        const elementType = this.getElementType(element)
-        this.currentReadingStatus = `${elementType} (${this.currentElementIndex + 1}/${this.readableElements.length})`
-      } else {
-        this.currentReadingStatus = "Leitor de tela ativo"
-      }
-    },
-
-    getElementType(element) {
-      const tag = element.tagName.toLowerCase()
-      
-      if (this.isAccordionButton(element)) return 'Accordion'
-      if (tag === 'button') return 'Botão'
-      if (tag === 'a') return 'Link'
-      if (tag.startsWith('h')) return 'Cabeçalho'
-      if (tag === 'img') return 'Imagem'
-      if (tag === 'p') return 'Parágrafo'
-      if (tag === 'li') return 'Item de lista'
-      
-      return 'Elemento'
     },
 
     activateElement() {
       if (this.currentElementIndex >= 0 && this.readableElements[this.currentElementIndex]) {
         const element = this.readableElements[this.currentElementIndex]
-        
-        if (this.isAccordionButton(element)) {
-          this.handleAccordionInteraction(element)
-          return
-        }
-        
-        if (this.isInteractiveElement(element)) {
-          this.announceChange('Ativando elemento...')
-          
-          if (element.click) {
-            element.click()
-          } else {
-            const event = new MouseEvent('click', {
-              bubbles: true,
-              cancelable: true
-            })
-            element.dispatchEvent(event)
-          }
-          
-          setTimeout(() => {
-            this.gatherReadableElements()
-            this.announceChange('Elemento ativado')
-          }, 500)
-        } else {
-          this.announceChange('Elemento não é interativo')
+        if (element.click) {
+          element.click()
         }
       }
-    },
-
-    // handleAccordionInteraction(element) {
-    //   const isExpanded = element.getAttribute('aria-expanded') === 'true'
-      
-    //   this.announceChange(isExpanded ? 'Recolhendo accordion...' : 'Expandindo accordion...')
-      
-    //   element.click()
-      
-    //   setTimeout(() => {
-    //     this.gatherReadableElements()
-        
-    //     if (!isExpanded) {
-    //       const targetId = element.getAttribute('data-bs-target') || 
-    //                       element.getAttribute('aria-controls')
-    //       if (targetId) {
-    //         const targetElement = document.querySelector(targetId)
-    //         if (targetElement) {
-    //           const firstChildElement = this.findFirstReadableChild(targetElement)
-    //           if (firstChildElement) {
-    //             const newIndex = this.readableElements.indexOf(firstChildElement)
-    //             if (newIndex !== -1) {
-    //               this.currentElementIndex = newIndex
-    //               this.highlightCurrentElement()
-    //             }
-    //           }
-    //         }
-    //       }
-    //     }
-        
-    //     this.announceChange(`Accordion ${isExpanded ? 'recolhido' : 'expandido'}`)
-    //   }, 500)
-    // },
-
-    findFirstReadableChild(container) {
-      const selector = `
-        h1, h2, h3, h4, h5, h6,
-        p,
-        a:not([aria-hidden="true"]),
-        button,
-        input,
-        textarea,
-        select,
-        label,
-        li,
-        td,
-        th,
-        img,
-        svg[aria-label]
-      `
-      
-      const elements = container.querySelectorAll(selector)
-      for (let el of elements) {
-        if (this.isElementVisible(el) && !el.closest('[data-screen-reader-ignore]')) {
-          return el
-        }
-      }
-      return null
-    },
-
-    exitAccordion() {
-      const currentElement = this.readableElements[this.currentElementIndex]
-      if (!currentElement) return
-      
-      const accordionItem = currentElement.closest('.accordion-item')
-      if (!accordionItem) return
-      
-      const accordionButton = accordionItem.querySelector('.accordion-button')
-      if (!accordionButton) return
-      
-      const buttonIndex = this.readableElements.indexOf(accordionButton)
-      if (buttonIndex === -1) return
-      
-      this.currentElementIndex = buttonIndex
-      this.highlightCurrentElement()
-      this.announceChange('Saiu do conteúdo do accordion')
-    },
-
-    isInteractiveElement(element) {
-      const tag = element.tagName.toLowerCase()
-      const interactiveTags = ['button', 'a', 'input', 'textarea', 'select']
-      
-      if (interactiveTags.includes(tag)) {
-        return true
-      }
-      
-      const role = element.getAttribute('role')
-      if (role && ['button', 'link', 'tab', 'menuitem'].includes(role)) {
-        return true
-      }
-      
-      if (element.onclick || element.getAttribute('data-bs-toggle')) {
-        return true
-      }
-      
-      return false
     },
 
     increaseRate() {
-      if (!this.speechSynth) return
-
-      const currentRate = this.utterance ? this.utterance.rate : this.speechRate
-      const newRate = Math.min(currentRate + 0.1, 2.0)
-
-      if (this.utterance) {
-        this.utterance.rate = newRate
-      }
-
-      this.speechRate = newRate
-      this.announceChange(`Velocidade: ${Math.round(newRate * 10) / 10}x`)
+      this.speechRate = Math.min(this.speechRate + 0.1, 2.0)
     },
 
     decreaseRate() {
-      if (!this.speechSynth) return
-
-      const currentRate = this.utterance ? this.utterance.rate : this.speechRate
-      const newRate = Math.max(currentRate - 0.1, 0.5)
-
-      if (this.utterance) {
-        this.utterance.rate = newRate
-      }
-
-      this.speechRate = newRate
-      this.announceChange(`Velocidade: ${Math.round(newRate * 10) / 10}x`)
-    },
-
-    announceChange(message) {
-      this.currentReadingStatus = message
-
-      const notification = document.createElement("div")
-      notification.style.cssText = `
-        position: fixed;
-        bottom: 80px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-        color: white;
-        padding: 12px 24px;
-        border-radius: 25px;
-        z-index: 9999;
-        font-size: 14px;
-        font-weight: 500;
-        box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        animation: sr-notification-slide 0.3s ease-out;
-      `
-      
-      notification.textContent = message
-      document.body.appendChild(notification)
-
-      setTimeout(() => {
-        if (document.body.contains(notification)) {
-          notification.style.animation = 'sr-notification-slide 0.3s ease-out reverse'
-          setTimeout(() => {
-            if (document.body.contains(notification)) {
-              document.body.removeChild(notification)
-            }
-          }, 300)
-        }
-        if (this.currentReadingStatus === message) {
-          this.updateReadingStatus()
-        }
-      }, 2000)
+      this.speechRate = Math.max(this.speechRate - 0.1, 0.5)
     },
 
     handleKeyboardShortcuts(event) {
       if (!this.active || !this.isInitialized) return
-
-      if (event.target.tagName === "INPUT" || event.target.tagName === "TEXTAREA" || event.target.isContentEditable) {
-        return
-      }
+      if (event.target.tagName === "INPUT" || event.target.tagName === "TEXTAREA") return
 
       switch (event.key) {
         case " ":
         case "Spacebar":
-          if (!event.ctrlKey && !event.altKey && !event.metaKey) {
-            this.playPause()
-            event.preventDefault()
-          }
-          break
-        case "p":
-        case "P":
-          if (!event.ctrlKey && !event.altKey && !event.metaKey) {
-            this.playPause()
-            event.preventDefault()
-          }
+          this.playPause()
+          event.preventDefault()
           break
         case "ArrowRight":
-        case "Right":
-          if (!event.ctrlKey && !event.altKey && !event.metaKey) {
-            this.nextElement()
-            event.preventDefault()
-          }
-          break
-        case "n":
-        case "N":
-          if (!event.ctrlKey && !event.altKey && !event.metaKey) {
-            this.nextElement()
-            event.preventDefault()
-          }
+          this.nextElement()
+          event.preventDefault()
           break
         case "ArrowLeft":
-        case "Left":
-          if (!event.ctrlKey && !event.altKey && !event.metaKey) {
-            this.previousElement()
-            event.preventDefault()
-          }
-          break
-        case "b":
-        case "B":
-          if (!event.ctrlKey && !event.altKey && !event.metaKey) {
-            this.previousElement()
-            event.preventDefault()
-          }
+          this.previousElement()
+          event.preventDefault()
           break
         case "Enter":
-          if (!event.ctrlKey && !event.altKey && !event.metaKey) {
-            this.activateElement()
-            event.preventDefault()
-          }
-          break
-        case "Backspace":
-          if (!event.ctrlKey && !event.altKey && !event.metaKey) {
-            this.exitAccordion()
-            event.preventDefault()
-          }
-          break
-        case "Home":
-          if (!event.ctrlKey && !event.altKey && !event.metaKey) {
-            this.restart()
-            event.preventDefault()
-          }
-          break
-        case "r":
-        case "R":
-          if (!event.ctrlKey && !event.altKey && !event.metaKey) {
-            this.restart()
-            event.preventDefault()
-          }
+          this.activateElement()
+          event.preventDefault()
           break
         case "Escape":
-        case "Esc":
-          this.stopSpeaking()
           this.$emit("update:screenReader", false)
-          event.preventDefault()
-          break
-        case "q":
-        case "Q":
-          if (!event.ctrlKey && !event.altKey && !event.metaKey) {
-            this.stopSpeaking()
-            this.$emit("update:screenReader", false)
-            event.preventDefault()
-          }
-          break
-        case "+":
-        case "=":
-          this.increaseRate()
-          event.preventDefault()
-          break
-        case "-":
-          this.decreaseRate()
           event.preventDefault()
           break
       }

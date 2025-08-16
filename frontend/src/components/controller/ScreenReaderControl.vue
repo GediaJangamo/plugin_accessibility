@@ -290,6 +290,10 @@ export default {
             font-size: 10px !important;
             animation: sr-pulse 1s ease-in-out infinite !important;
           }
+            [data-screen-reader-ignore] {
+            display: none !important;
+            visibility: hidden !important;
+          }
           
           @keyframes sr-glow-pulse {
             0% { opacity: 0.3; transform: scale(1); }
@@ -444,20 +448,41 @@ export default {
 
     // Coleta elementos dentro de um container específico
     gatherElementsInContainer(container) {
+      // const selector = `
+      //   h1, h2, h3, h4, h5, h6,
+      //   p,
+      //   a:not([aria-hidden="true"]),
+      //   button,
+      //   input[type="text"], input[type="email"], input[type="password"], input[type="search"],
+      //   textarea,
+      //   select,
+      //   label,
+      //   li,
+      //   span.badge,
+      //   span.text-muted,
+      //   .card-title,
+      //   .card-text
+      // `
       const selector = `
+        img,
+        svg[aria-label],
         h1, h2, h3, h4, h5, h6,
-        p,
-        a:not([aria-hidden="true"]),
+        p:not(.accordion-body p, .collapse:not(.show) p, .tab-pane:not(.active) p),
+        a:not([aria-hidden="true"]):not(.accordion-body a, .collapse:not(.show) a, .tab-pane:not(.active) a),
         button,
         input[type="text"], input[type="email"], input[type="password"], input[type="search"],
         textarea,
         select,
-        label,
-        li,
-        span.badge,
-        span.text-muted,
-        .card-title,
-        .card-text
+        label:not(.accordion-body label, .collapse:not(.show) label, .tab-pane:not(.active) label),
+        li:not(.accordion-body li, .collapse:not(.show) li, .tab-pane:not(.active) li),
+        td:not(.accordion-body td, .collapse:not(.show) td, .tab-pane:not(.active) td),
+        th:not(.accordion-body th, .collapse:not(.show) th, .tab-pane:not(.active) th),
+        span.badge:not(.accordion-body span.badge, .collapse:not(.show) span.badge, .tab-pane:not(.active) span.badge),
+        .accordion-button,
+        .nav-link,
+        .tab-button,
+        .card-title:not(.accordion-body .card-title, .collapse:not(.show) .card-title, .tab-pane:not(.active) .card-title),
+        .card-text:not(.accordion-body .card-text, .collapse:not(.show) .card-text, .tab-pane:not(.active) .card-text)
       `
       
       const elements = Array.from(container.querySelectorAll(selector))
@@ -753,96 +778,166 @@ export default {
     },
 
     // Coleta elementos que podem ser lidos - VERSÃO MELHORADA PARA IGNORAR CONTEÚDO DE CONTAINERS
-    async gatherReadableElements() {
-      const mainContent = document.getElementById("main-content") || document.body
+    // async gatherReadableElements() {
+    //   const mainContent = document.getElementById("main-content") || document.body
       
-      // Selector focado em elementos principais, ignorando conteúdo interno de containers
-      const selector = `
-        img,
-        svg[aria-label],
-        h1, h2, h3, h4, h5, h6,
-        p:not(.accordion-body p):not(.collapse p):not(.tab-pane p),
-        a:not([aria-hidden="true"]):not(.accordion-body a):not(.collapse a):not(.tab-pane a),
-        button,
-        input[type="text"], input[type="email"], input[type="password"], input[type="search"],
-        textarea,
-        select,
-        label:not(.accordion-body label):not(.collapse label):not(.tab-pane label),
-        li:not(.accordion-body li):not(.collapse li):not(.tab-pane li),
-        td:not(.accordion-body td):not(.collapse td):not(.tab-pane td),
-        th:not(.accordion-body th):not(.collapse th):not(.tab-pane th),
-        span.badge:not(.accordion-body span.badge):not(.collapse span.badge):not(.tab-pane span.badge),
-        .accordion-button,
-        .nav-link,
-        .tab-button,
-        .card-title:not(.accordion-body .card-title):not(.collapse .card-title):not(.tab-pane .card-title),
-        .card-text:not(.accordion-body .card-text):not(.collapse .card-text):not(.tab-pane .card-text)
-      `
+    //   // Selector focado em elementos principais, ignorando conteúdo interno de containers
+    //   const selector = `
+    //     img,
+    //     svg[aria-label],
+    //     h1, h2, h3, h4, h5, h6,
+    //     p:not(.accordion-body p):not(.collapse p):not(.tab-pane p),
+    //     a:not([aria-hidden="true"]):not(.accordion-body a):not(.collapse a):not(.tab-pane a),
+    //     button,
+    //     input[type="text"], input[type="email"], input[type="password"], input[type="search"],
+    //     textarea,
+    //     select,
+    //     label:not(.accordion-body label):not(.collapse label):not(.tab-pane label),
+    //     li:not(.accordion-body li):not(.collapse li):not(.tab-pane li),
+    //     td:not(.accordion-body td):not(.collapse td):not(.tab-pane td),
+    //     th:not(.accordion-body th):not(.collapse th):not(.tab-pane th),
+    //     span.badge:not(.accordion-body span.badge):not(.collapse span.badge):not(.tab-pane span.badge),
+    //     .accordion-button,
+    //     .nav-link,
+    //     .tab-button,
+    //     .card-title:not(.accordion-body .card-title):not(.collapse .card-title):not(.tab-pane .card-title),
+    //     .card-text:not(.accordion-body .card-text):not(.collapse .card-text):not(.tab-pane .card-text)
+    //   `
       
-      // Coleta todos os elementos
-      const allElements = Array.from(mainContent.querySelectorAll(selector))
+    //   // Coleta todos os elementos
+    //   const allElements = Array.from(mainContent.querySelectorAll(selector))
       
-      // Filtra elementos, excluindo conteúdo dentro de containers colapsados
-      this.readableElements = allElements.filter(el => {
-        // Ignora elementos do próprio leitor
-        if (el.closest('.screen-reader-control') || el.closest('[data-screen-reader-ignore]')) {
-          return false
-        }
+    //   // Filtra elementos, excluindo conteúdo dentro de containers colapsados
+    //   this.readableElements = allElements.filter(el => {
+    //     // Ignora elementos do próprio leitor
+    //     if (el.closest('.screen-reader-control') || el.closest('[data-screen-reader-ignore]')) {
+    //       return false
+    //     }
 
-        // Ignora conteúdo dentro de containers colapsados/ocultos
-        const hiddenContainers = [
-          '.accordion-body',
-          '.collapse:not(.show)',
-          '.tab-pane:not(.active)',
-          '.dropdown-menu:not(.show)',
-          '[aria-expanded="false"] + .collapse'
-        ]
+    //     // Ignora conteúdo dentro de containers colapsados/ocultos
+    //     const hiddenContainers = [
+    //       '.accordion-body',
+    //       '.collapse:not(.show)',
+    //       '.tab-pane:not(.active)',
+    //       '.dropdown-menu:not(.show)',
+    //       '[aria-expanded="false"] + .collapse'
+    //     ]
 
-        for (let containerSelector of hiddenContainers) {
-          if (el.closest(containerSelector)) {
-            // Se está dentro de um container oculto, só inclui se é o próprio elemento de controle
-            if (!el.classList.contains('accordion-button') && 
-                !el.classList.contains('nav-link') &&
-                !el.classList.contains('tab-button')) {
-              return false
-            }
-          }
-        }
+    //     for (let containerSelector of hiddenContainers) {
+    //       if (el.closest(containerSelector)) {
+    //         // Se está dentro de um container oculto, só inclui se é o próprio elemento de controle
+    //         if (!el.classList.contains('accordion-button') && 
+    //             !el.classList.contains('nav-link') &&
+    //             !el.classList.contains('tab-button')) {
+    //           return false
+    //         }
+    //       }
+    //     }
         
-        // Verifica se o elemento tem conteúdo legível
-        const text = this.getElementText(el)
-        if (!text || text.trim().length === 0) {
-          return false
-        }
+    //     // Verifica se o elemento tem conteúdo legível
+    //     const text = this.getElementText(el)
+    //     if (!text || text.trim().length === 0) {
+    //       return false
+    //     }
         
-        // Ignora elementos ocultos
-        const style = window.getComputedStyle(el)
-        if (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0') {
-          return false
-        }
+    //     // Ignora elementos ocultos
+    //     const style = window.getComputedStyle(el)
+    //     if (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0') {
+    //       return false
+    //     }
         
-        return true
-      }).sort((a, b) => {
-        // Ordena os elementos por posição na página
-        const rectA = a.getBoundingClientRect()
-        const rectB = b.getBoundingClientRect()
+    //     return true
+    //   }).sort((a, b) => {
+    //     // Ordena os elementos por posição na página
+    //     const rectA = a.getBoundingClientRect()
+    //     const rectB = b.getBoundingClientRect()
         
-        if (Math.abs(rectA.top - rectB.top) > 10) {
-          return rectA.top - rectB.top
-        }
-        return rectA.left - rectB.left
-      })
+    //     if (Math.abs(rectA.top - rectB.top) > 10) {
+    //       return rectA.top - rectB.top
+    //     }
+    //     return rectA.left - rectB.left
+    //   })
 
-      // Remove duplicatas baseado no conteúdo
-      this.readableElements = this.removeDuplicateElements(this.readableElements)
+    //   // Remove duplicatas baseado no conteúdo
+    //   this.readableElements = this.removeDuplicateElements(this.readableElements)
 
-      if (this.readableElements.length > 0) {
-        this.currentReadingStatus = `Leitor ativo - ${this.readableElements.length} elementos`
-      } else {
-        this.currentReadingStatus = "Nenhum conteúdo para ler"
+    //   if (this.readableElements.length > 0) {
+    //     this.currentReadingStatus = `Leitor ativo - ${this.readableElements.length} elementos`
+    //   } else {
+    //     this.currentReadingStatus = "Nenhum conteúdo para ler"
+    //   }
+    // },
+
+    gatherReadableElements() {
+    // Primeiro, remova todos os atributos de ignorar temporariamente
+    document.querySelectorAll('[data-screen-reader-ignore]').forEach(el => {
+      el.removeAttribute('data-screen-reader-ignore')
+    })
+
+    // Depois adicione apenas nos accordions colapsados
+    document.querySelectorAll('.collapse:not(.show), .tab-pane:not(.active)').forEach(el => {
+      el.setAttribute('data-screen-reader-ignore', 'true')
+    })
+
+    // Seletor atualizado para elementos legíveis
+    const selector = `
+      img,
+      svg[aria-label],
+      h1, h2, h3, h4, h5, h6,
+      p:not([data-screen-reader-ignore] p),
+      a:not([aria-hidden="true"]):not([data-screen-reader-ignore] a),
+      button,
+      input[type="text"], input[type="email"], input[type="password"], input[type="search"],
+      textarea,
+      select,
+      label:not([data-screen-reader-ignore] label),
+      li:not([data-screen-reader-ignore] li),
+      td:not([data-screen-reader-ignore] td),
+      th:not([data-screen-reader-ignore] th),
+      span.badge:not([data-screen-reader-ignore] span.badge),
+      .accordion-button,
+      .nav-link,
+      .tab-button,
+      .card-title:not([data-screen-reader-ignore] .card-title),
+      .card-text:not([data-screen-reader-ignore] .card-text)
+    `
+    
+    // Restante da lógica de coleta de elementos...
+    const mainContent = document.getElementById("main-content") || document.body
+    const allElements = Array.from(mainContent.querySelectorAll(selector))
+    
+    this.readableElements = allElements.filter(el => {
+      // Ignora elementos marcados para ignorar
+      if (el.closest('[data-screen-reader-ignore]')) {
+        return false
       }
-    },
+      
+      // Verifica se o elemento tem conteúdo legível
+      const text = this.getElementText(el)
+      if (!text || text.trim().length === 0) {
+        return false
+      }
+      
+      // Verifica visibilidade
+      const style = window.getComputedStyle(el)
+      if (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0') {
+        return false
+      }
+      
+      return true
+    }).sort((a, b) => {
+      // Ordenação por posição na página
+      const rectA = a.getBoundingClientRect()
+      const rectB = b.getBoundingClientRect()
+      
+      if (Math.abs(rectA.top - rectB.top) > 10) {
+        return rectA.top - rectB.top
+      }
+      return rectA.left - rectB.left
+    })
 
+    this.readableElements = this.removeDuplicateElements(this.readableElements)
+  },
     // Remove elementos duplicados
     removeDuplicateElements(elements) {
       const seen = new Map()

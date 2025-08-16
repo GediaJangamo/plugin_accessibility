@@ -243,18 +243,50 @@ export default {
       this.isInitialized = false
     },
 
+    // initMutationObserver() {
+    //   if (window.MutationObserver) {
+    //     this.observer = new MutationObserver(this.debounceGatherElements)
+    //     this.observer.observe(document.body, {
+    //       childList: true,
+    //       subtree: true,
+    //       attributes: true,
+    //       attributeFilter: ['class', 'style', 'aria-expanded', 'hidden']
+    //     })
+    //   }
+    // },
     initMutationObserver() {
-      if (window.MutationObserver) {
-        this.observer = new MutationObserver(this.debounceGatherElements)
-        this.observer.observe(document.body, {
-          childList: true,
-          subtree: true,
-          attributes: true,
-          attributeFilter: ['class', 'style', 'aria-expanded', 'hidden']
-        })
+  if (window.MutationObserver) {
+    this.observer = new MutationObserver((mutations) => {
+      let shouldUpdate = false
+      
+      mutations.forEach((mutation) => {
+        // Detecta mudanças em classes (como 'show' sendo adicionada/removida)
+        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+          const target = mutation.target
+          if (target.classList.contains('accordion-collapse') || target.classList.contains('collapse')) {
+            shouldUpdate = true
+          }
+        }
+        
+        // Detecta mudanças na estrutura DOM
+        if (mutation.type === 'childList') {
+          shouldUpdate = true
+        }
+      })
+      
+      if (shouldUpdate) {
+        this.debounceGatherElements()
       }
-    },
-
+    })
+    
+    this.observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['class', 'style', 'aria-expanded', 'hidden']
+    })
+  }
+},
     enableKeyboardControls() {
       if (!this.keysEnabled) {
         document.addEventListener("keydown", this.handleKeyboardShortcuts)
@@ -400,23 +432,96 @@ export default {
       }
     },
 
+    // isElementVisible(element) {
+    //   const style = window.getComputedStyle(element)
+    //   if (style.display === 'none' || style.visibility === 'hidden' || element.hasAttribute('hidden')) {
+    //     return false
+    //   }
+      
+    //   let parent = element.parentElement
+    //   while (parent && parent !== document.body) {
+    //     if (parent.classList.contains('accordion-collapse') && 
+    //         !parent.classList.contains('show')) {
+    //       return false
+    //     }
+    //     parent = parent.parentElement
+    //   }
+      
+    //   return true
+    // },
+
     isElementVisible(element) {
-      const style = window.getComputedStyle(element)
-      if (style.display === 'none' || style.visibility === 'hidden' || element.hasAttribute('hidden')) {
-        return false
-      }
-      
-      let parent = element.parentElement
-      while (parent && parent !== document.body) {
-        if (parent.classList.contains('accordion-collapse') && 
-            !parent.classList.contains('show')) {
-          return false
+  // Verificações básicas de CSS
+  const style = window.getComputedStyle(element)
+  if (style.display === 'none' || style.visibility === 'hidden' || element.hasAttribute('hidden')) {
+    return false
+  }
+  
+  // Para accordions Bootstrap, verificamos se o elemento está dentro de um collapse
+  let currentElement = element
+  while (currentElement && currentElement !== document.body) {
+    // Se o elemento está dentro de um accordion-collapse
+    if (currentElement.classList.contains('accordion-collapse')) {
+      // Verifica se tem a classe 'show' (expandido) ou 'collapse' (recolhido)
+      const isExpanded = currentElement.classList.contains('show')
+      return isExpanded
+    }
+    
+    // Para outros tipos de collapse do Bootstrap
+    if (currentElement.classList.contains('collapse') && !currentElement.classList.contains('accordion-collapse')) {
+      const isExpanded = currentElement.classList.contains('show')
+      return isExpanded
+    }
+    
+    currentElement = currentElement.parentElement
+  }
+  
+  // Verificação de visibilidade no viewport (opcional, mas útil)
+  const rect = element.getBoundingClientRect()
+  if (rect.width === 0 && rect.height === 0) {
+    return false
+  }
+  
+  return true
+},
+
+handleAccordionInteraction(element) {
+  const isExpanded = element.getAttribute('aria-expanded') === 'true'
+  
+  this.announceChange(isExpanded ? 'Recolhendo accordion...' : 'Expandindo accordion...')
+  
+  element.click()
+  
+  // Aumentamos o timeout para dar tempo ao Bootstrap processar a animação
+  setTimeout(() => {
+    // Força uma re-detecção completa
+    this.gatherReadableElements()
+    
+    if (!isExpanded) {
+      // Se expandiu, tenta encontrar o primeiro elemento dentro do accordion
+      const targetId = element.getAttribute('data-bs-target') || 
+                      element.getAttribute('aria-controls')
+      if (targetId) {
+        const targetElement = document.querySelector(targetId)
+        if (targetElement) {
+          // Aguarda um pouco mais para a animação terminar
+          setTimeout(() => {
+            const firstChildElement = this.findFirstReadableChild(targetElement)
+            if (firstChildElement) {
+              const newIndex = this.readableElements.indexOf(firstChildElement)
+              if (newIndex !== -1) {
+                this.currentElementIndex = newIndex
+                this.highlightCurrentElement()
+              }
+            }
+          }, 200) // Timeout adicional para animação
         }
-        parent = parent.parentElement
       }
-      
-      return true
-    },
+    }
+    
+    this.announceChange(`Accordion ${isExpanded ? 'recolhido' : 'expandido'}`)
+  }, 800) // Aumentado de 500ms para 800ms
+},
 
     removeDuplicateElements(elements) {
       const seen = new Map()

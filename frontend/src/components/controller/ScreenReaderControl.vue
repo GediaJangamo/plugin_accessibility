@@ -1,5 +1,3 @@
-// VERSÃO DE DEBUGGING - Substitua TODO o componente por esta versão simplificada:
-
 <template>
   <div 
     v-if="active"
@@ -27,8 +25,30 @@
       </div>
 
       <div class="p-4">
-        <!-- Controle de velocidade -->
-        <div class="flex items-center justify-center mb-4 gap-4">
+        <!-- Controle de velocidade e modo de leitura -->
+        <div class="flex items-center justify-between mb-4 gap-4">
+          <!-- Modo de leitura -->
+          <div class="flex items-center gap-2">
+            <span class="text-sm text-gray-500 dark:text-gray-400">Modo</span>
+            <div class="flex items-center rounded-full bg-gray-100 dark:bg-gray-700 overflow-hidden">
+              <button 
+                @click="setReadingMode('element')"
+                :class="readingMode === 'element' ? 'bg-[#3b82f6] text-white' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'"
+                class="px-3 py-1 text-xs font-medium transition-colors"
+              >
+                Elemento
+              </button>
+              <button 
+                @click="setReadingMode('word')"
+                :class="readingMode === 'word' ? 'bg-[#3b82f6] text-white' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'"
+                class="px-3 py-1 text-xs font-medium transition-colors"
+              >
+                Palavra
+              </button>
+            </div>
+          </div>
+
+          <!-- Controle de velocidade -->
           <div class="flex items-center gap-2">
             <span class="text-sm text-gray-500 dark:text-gray-400">Velocidade</span>
             <div class="flex items-center rounded-full bg-gray-100 dark:bg-gray-700 overflow-hidden">
@@ -77,20 +97,30 @@
             <button 
               @click="previousElement"
               class="flex items-center justify-center bg-white dark:bg-gray-600 hover:bg-gray-100 dark:hover:bg-gray-500 text-[#3b82f6] dark:text-[#3b82f6] p-3 rounded-lg shadow-sm transition-colors"
-              aria-label="Elemento anterior"
+              :aria-label="readingMode === 'word' ? 'Palavra anterior' : 'Elemento anterior'"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
               </svg>
             </button>
             
+            <!-- Botão de activar elemento ou entrar/sair -->
             <button 
               @click="activateElement"
-              class="flex items-center justify-center bg-green-500 hover:bg-green-600 text-white p-3 rounded-lg shadow-sm transition-colors"
-              aria-label="Ativar elemento atual (Enter)"
+              class="flex items-center justify-center text-white p-3 rounded-lg shadow-sm transition-colors"
+              :class="getActivateButtonClass()"
+              :aria-label="getActivateButtonLabel()"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7" />
+              <svg v-if="!isInContainer" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+              <!-- Ícone para entrar em container -->
+              <svg v-else-if="canEnterCurrentContainer()" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+              </svg>
+              <!-- Ícone para sair de container -->
+              <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
               </svg>
             </button>
             
@@ -107,7 +137,7 @@
             <button 
               @click="nextElement"
               class="flex items-center justify-center bg-white dark:bg-gray-600 hover:bg-gray-100 dark:hover:bg-gray-500 text-[#3b82f6] dark:text-[#3b82f6] p-3 rounded-lg shadow-sm transition-colors"
-              aria-label="Próximo elemento"
+              :aria-label="readingMode === 'word' ? 'Próxima palavra' : 'Próximo elemento'"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -121,11 +151,6 @@
               {{ getProgressText() }}
             </span>
           </div>
-        </div>
-
-        <!-- Informações sobre navegação -->
-        <div class="text-xs text-gray-500 dark:text-gray-400 text-center">
-          <p>DEBUG: {{ debugInfo }}</p>
         </div>
       </div>
     </div>
@@ -148,92 +173,139 @@ export default {
       currentElementIndex: -1,
       speechSynth: null,
       utterance: null,
-      currentReadingStatus: "Leitor inativo",
+      currentReadingStatus: "",
       speechRate: 1.0,
+      gatherTimeout: null,
+      observer: null,
+      pauseTimer: null,
       isInitialized: false,
       keysEnabled: false,
-      debugInfo: "Componente carregado - accordions devem funcionar",
+      navigationDebounce: null,
+      readingMode: 'element',
+      currentWords: [],
+      currentWordIndex: -1,
+      wordHighlightSpan: null,
+      // Navegação hierárquica
+      isInContainer: false,
+      containerStack: [],
+      currentContainer: null,
     }
   },
   watch: {
     active: {
       immediate: true,
       handler(newValue) {
-        console.log('Screen Reader active changed:', newValue)
         if (newValue) {
-          this.debugInfo = "Leitor ativado"
           this.$nextTick(() => {
             this.initReaderFeatures()
           })
         } else {
-          this.debugInfo = "Leitor desativado - accordions devem funcionar"
           this.cleanupReaderFeatures()
         }
       },
     },
   },
   mounted() {
-    console.log('Screen Reader component mounted')
-    this.debugInfo = "Componente montado - sem interferência"
-    // REMOVIDO TUDO que poderia interferir
+    this.initMutationObserver()
+    this.addCustomStyles()
   },
   beforeUnmount() {
-    console.log('Screen Reader component beforeUnmount')
     this.cleanupReaderFeatures()
+    this.removeCustomStyles()
   },
   methods: {
-    getProgressText() {
-      if (this.readableElements.length > 0) {
-        return this.currentElementIndex >= 0 ? `${this.currentElementIndex + 1}/${this.readableElements.length}` : '0/0'
-      }
-      return '0/0'
-    },
-
-    closeReader() {
-      this.stopSpeaking()
-      this.removeAllHighlights()
-      this.$emit('update:screenReader', false)
-    },
-    
-    initReaderFeatures() {
-      console.log('Initializing reader features')
-      this.debugInfo = "Inicializando leitor..."
-      
-      this.initializeSpeechSynthesis()
-      this.addCustomStyles()
-
-      setTimeout(() => {
-        this.gatherReadableElements()
-        this.currentElementIndex = -1
-        this.enableKeyboardControls()
-        this.isInitialized = true
-        this.debugInfo = `Leitor ativo - ${this.readableElements.length} elementos`
-      }, 300)
-    },
-
-    cleanupReaderFeatures() {
-      console.log('Cleaning up reader features')
-      this.stopSpeaking()
-      this.removeAllHighlights()
-      this.disableKeyboardControls()
-      this.removeCustomStyles()
-      this.isInitialized = false
-    },
-
+    // Adiciona estilos customizados para os destaques
     addCustomStyles() {
       if (!document.getElementById('screen-reader-highlight-styles')) {
         const style = document.createElement('style')
         style.id = 'screen-reader-highlight-styles'
         style.textContent = `
           .sr-element-highlight {
-            outline: 2px solid rgba(59, 130, 246, 0.8) !important;
-            outline-offset: 2px !important;
+            position: relative !important;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(147, 197, 253, 0.2)) !important;
+            border-radius: 8px !important;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5), 0 0 25px rgba(59, 130, 246, 0.3) !important;
+            transform: scale(1.02) !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            z-index: 10 !important;
+          }
+          
+          .sr-element-highlight::before {
+            content: '' !important;
+            position: absolute !important;
+            top: -6px !important;
+            left: -6px !important;
+            right: -6px !important;
+            bottom: -6px !important;
+            background: linear-gradient(45deg, #3b82f6, #06b6d4) !important;
+            border-radius: 14px !important;
+            z-index: -1 !important;
+            opacity: 0.4 !important;
+            filter: blur(10px) !important;
+            animation: sr-glow-pulse 2s ease-in-out infinite alternate !important;
+          }
+          
+          .sr-word-highlight {
+            background: linear-gradient(135deg, #3b82f6, #06b6d4) !important;
+            color: white !important;
+            padding: 2px 6px !important;
+            border-radius: 4px !important;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4) !important;
+            transform: scale(1.05) !important;
+            transition: all 0.2s ease !important;
+            font-weight: 600 !important;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+          }
+          
+          .sr-interactive-indicator::after {
+            content: '⚡' !important;
+            position: absolute !important;
+            top: -8px !important;
+            right: -8px !important;
+            background: #10b981 !important;
+            color: white !important;
+            border-radius: 50% !important;
+            width: 20px !important;
+            height: 20px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            font-size: 10px !important;
+            animation: sr-pulse 1s ease-in-out infinite !important;
+          }
+
+          .sr-container-indicator::after {
+            content: '📁' !important;
+            position: absolute !important;
+            top: -8px !important;
+            right: -8px !important;
+            background: #8b5cf6 !important;
+            color: white !important;
+            border-radius: 50% !important;
+            width: 20px !important;
+            height: 20px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            font-size: 10px !important;
+            animation: sr-pulse 1s ease-in-out infinite !important;
+          }
+          
+          @keyframes sr-glow-pulse {
+            0% { opacity: 0.3; transform: scale(1); }
+            100% { opacity: 0.6; transform: scale(1.01); }
+          }
+          
+          @keyframes sr-pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
           }
         `
         document.head.appendChild(style)
       }
     },
     
+    // Remove estilos customizados
     removeCustomStyles() {
       const style = document.getElementById('screen-reader-highlight-styles')
       if (style) {
@@ -241,6 +313,365 @@ export default {
       }
     },
 
+    // Verifica se é um container (accordion, tabs, etc.)
+    isContainer(element) {
+      const containerSelectors = [
+        '.accordion-item',
+        '.accordion',
+        '.tab-pane',
+        '.tabs',
+        '.collapse',
+        '.modal-body',
+        '.dropdown-menu',
+        '.card-body',
+        '.sidebar',
+        '.nav-tabs',
+        '.nav-pills'
+      ]
+      
+      return containerSelectors.some(selector => 
+        element.matches && element.matches(selector)
+      )
+    },
+
+    // Verifica se pode entrar no container atual
+    canEnterCurrentContainer() {
+      if (this.currentElementIndex < 0 || !this.readableElements[this.currentElementIndex]) {
+        return false
+      }
+      
+      const element = this.readableElements[this.currentElementIndex]
+      return this.isContainer(element) || this.hasExpandableContent(element)
+    },
+
+    // Verifica se tem conteúdo expansível
+    hasExpandableContent(element) {
+      // Accordion buttons
+      if (element.classList.contains('accordion-button')) {
+        return true
+      }
+      
+      // Elementos com data-bs-toggle
+      if (element.getAttribute('data-bs-toggle')) {
+        return true
+      }
+      
+      // Elementos que controlam outros elementos
+      const controls = element.getAttribute('aria-controls')
+      if (controls) {
+        const controlled = document.getElementById(controls)
+        return controlled && controlled.children.length > 0
+      }
+      
+      return false
+    },
+
+    // Entra em um container
+    enterContainer() {
+      if (this.currentElementIndex < 0 || !this.readableElements[this.currentElementIndex]) {
+        return
+      }
+
+      const element = this.readableElements[this.currentElementIndex]
+      
+      // Se é um botão de accordion, expande primeiro
+      if (element.classList.contains('accordion-button') && element.getAttribute('aria-expanded') === 'false') {
+        element.click()
+        // Aguarda um tempo para a expansão
+        setTimeout(() => {
+          this.proceedToEnterContainer(element)
+        }, 500)
+      } else {
+        this.proceedToEnterContainer(element)
+      }
+    },
+
+    // Procede para entrar no container
+    proceedToEnterContainer(element) {
+      // Salva o estado atual
+      this.containerStack.push({
+        container: this.currentContainer,
+        elements: [...this.readableElements],
+        index: this.currentElementIndex
+      })
+
+      this.currentContainer = element
+      this.isInContainer = true
+
+      // Encontra os elementos dentro do container
+      let containerContent = null
+      
+      if (element.classList.contains('accordion-button')) {
+        const controls = element.getAttribute('aria-controls')
+        if (controls) {
+          containerContent = document.getElementById(controls)
+        }
+      } else if (this.isContainer(element)) {
+        containerContent = element
+      }
+
+      if (containerContent) {
+        this.gatherElementsInContainer(containerContent)
+        this.currentElementIndex = 0
+        this.announceChange(`Entrando no container com ${this.readableElements.length} elementos`)
+        
+        if (this.readableElements.length > 0) {
+          this.highlightCurrentElement()
+        }
+      } else {
+        this.announceChange("Container vazio")
+      }
+    },
+
+    // Sai do container atual
+    exitContainer() {
+      if (this.containerStack.length === 0) {
+        this.announceChange("Já está no nível principal")
+        return
+      }
+
+      const previousState = this.containerStack.pop()
+      
+      this.currentContainer = previousState.container
+      this.readableElements = previousState.elements
+      this.currentElementIndex = previousState.index
+      this.isInContainer = this.containerStack.length > 0
+
+      this.announceChange("Saindo do container")
+      this.highlightCurrentElement()
+      this.updateReadingStatus()
+    },
+
+    // Coleta elementos dentro de um container específico
+    gatherElementsInContainer(container) {
+      const selector = `
+        h1, h2, h3, h4, h5, h6,
+        p,
+        a:not([aria-hidden="true"]),
+        button,
+        input[type="text"], input[type="email"], input[type="password"], input[type="search"],
+        textarea,
+        select,
+        label,
+        li,
+        span.badge,
+        span.text-muted,
+        .card-title,
+        .card-text
+      `
+      
+      const elements = Array.from(container.querySelectorAll(selector))
+      
+      this.readableElements = elements.filter(el => {
+        // Ignora elementos do próprio leitor
+        if (el.closest('.screen-reader-control') || el.closest('[data-screen-reader-ignore]')) {
+          return false
+        }
+        
+        const text = this.getElementText(el)
+        if (!text || text.trim().length === 0) {
+          return false
+        }
+        
+        // Verifica visibilidade
+        const style = window.getComputedStyle(el)
+        if (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0') {
+          return false
+        }
+        
+        return true
+      }).sort((a, b) => {
+        const rectA = a.getBoundingClientRect()
+        const rectB = b.getBoundingClientRect()
+        
+        if (Math.abs(rectA.top - rectB.top) > 10) {
+          return rectA.top - rectB.top
+        }
+        return rectA.left - rectB.left
+      })
+
+      this.readableElements = this.removeDuplicateElements(this.readableElements)
+    },
+
+    // Retorna classe do botão de ativar baseado no contexto
+    getActivateButtonClass() {
+      if (this.isInContainer) {
+        return 'bg-orange-500 hover:bg-orange-600'  // Sair do container
+      } else if (this.canEnterCurrentContainer()) {
+        return 'bg-purple-500 hover:bg-purple-600'  // Entrar no container
+      } else if (this.canActivateCurrentElement()) {
+        return 'bg-green-500 hover:bg-green-600'    // Ativar elemento
+      } else {
+        return 'bg-gray-400 cursor-not-allowed'     // Desabilitado
+      }
+    },
+
+    // Retorna label do botão de ativar baseado no contexto
+    getActivateButtonLabel() {
+      if (this.isInContainer) {
+        return 'Sair do container (Esc)'
+      } else if (this.canEnterCurrentContainer()) {
+        return 'Entrar no container (Enter)'
+      } else if (this.canActivateCurrentElement()) {
+        return 'Ativar elemento (Enter)'
+      } else {
+        return 'Elemento não interativo'
+      }
+    },
+
+    // Verifica se o elemento atual pode ser ativado
+    canActivateCurrentElement() {
+      if (this.currentElementIndex < 0 || !this.readableElements[this.currentElementIndex]) {
+        return false
+      }
+      
+      return this.isInteractiveElement(this.readableElements[this.currentElementIndex])
+    },
+
+    // Verifica se um elemento é interativo
+    isInteractiveElement(element) {
+      const tag = element.tagName.toLowerCase()
+      const interactiveTags = ['button', 'a', 'input', 'textarea', 'select']
+      
+      if (interactiveTags.includes(tag)) {
+        return true
+      }
+      
+      const role = element.getAttribute('role')
+      if (role && ['button', 'link', 'tab', 'menuitem'].includes(role)) {
+        return true
+      }
+      
+      if (element.onclick || element.getAttribute('data-bs-toggle') || element.classList.contains('accordion-button')) {
+        return true
+      }
+      
+      return false
+    },
+
+    // Ativa o elemento atual ou entra/sai de containers
+    activateElement() {
+      if (this.isInContainer) {
+        this.exitContainer()
+      } else if (this.canEnterCurrentContainer()) {
+        this.enterContainer()
+      } else if (this.canActivateCurrentElement()) {
+        const element = this.readableElements[this.currentElementIndex]
+        
+        this.announceChange('Ativando elemento...')
+        
+        if (element.click) {
+          element.click()
+        } else {
+          const event = new MouseEvent('click', {
+            bubbles: true,
+            cancelable: true
+          })
+          element.dispatchEvent(event)
+        }
+        
+        setTimeout(() => {
+          this.gatherReadableElements()
+          this.announceChange('Elemento ativado')
+        }, 500)
+      } else {
+        this.announceChange('Elemento não pode ser ativado')
+      }
+    },
+
+    // Define o modo de leitura
+    setReadingMode(mode) {
+      this.stopSpeaking()
+      this.removeAllHighlights()
+      this.readingMode = mode
+      
+      if (mode === 'word' && this.currentElementIndex >= 0) {
+        this.setupWordReading()
+      } else {
+        this.currentWords = []
+        this.currentWordIndex = -1
+      }
+      
+      this.updateReadingStatus()
+    },
+
+    // Configura a leitura palavra por palavra
+    setupWordReading() {
+      if (this.currentElementIndex >= 0 && this.readableElements[this.currentElementIndex]) {
+        const element = this.readableElements[this.currentElementIndex]
+        const text = this.getElementText(element)
+        this.currentWords = text.split(/\s+/).filter(word => word.length > 0)
+        this.currentWordIndex = 0
+        this.highlightCurrentWord()
+      }
+    },
+
+    // Retorna o texto de progresso baseado no modo
+    getProgressText() {
+      if (this.readingMode === 'word' && this.currentWords.length > 0) {
+        return `${this.currentWordIndex + 1}/${this.currentWords.length}`
+      } else if (this.readableElements.length > 0) {
+        return this.currentElementIndex >= 0 ? `${this.currentElementIndex + 1}/${this.readableElements.length}` : '0/0'
+      }
+      return '0/0'
+    },
+
+    // Método para fechar o leitor de tela
+    closeReader() {
+      this.stopSpeaking()
+      this.removeAllHighlights()
+      this.$emit('update:screenReader', false)
+    },
+    
+    // Inicializa todos os recursos do leitor
+    initReaderFeatures() {
+      this.initializeSpeechSynthesis()
+
+      setTimeout(() => {
+        this.resetToMainLevel()
+        this.gatherReadableElements()
+        this.currentElementIndex = -1
+        this.removeAllHighlights()
+        this.enableKeyboardControls()
+        this.isInitialized = true
+      }, 300)
+    },
+
+    // Reseta para o nível principal
+    resetToMainLevel() {
+      this.isInContainer = false
+      this.containerStack = []
+      this.currentContainer = null
+    },
+
+    // Limpa todos os recursos do leitor
+    cleanupReaderFeatures() {
+      this.stopSpeaking()
+      this.removeAllHighlights()
+      this.disableKeyboardControls()
+      this.resetToMainLevel()
+
+      if (this.observer) {
+        this.observer.disconnect()
+      }
+
+      this.isInitialized = false
+    },
+
+    // Inicializa o observador de mudanças no DOM
+    initMutationObserver() {
+      if (window.MutationObserver) {
+        this.observer = new MutationObserver(this.debounceGatherElements)
+        this.observer.observe(document.body, {
+          childList: true,
+          subtree: true,
+          attributes: true,
+          attributeFilter: ['class', 'style', 'aria-expanded']
+        })
+      }
+    },
+
+    // Ativa os comandos de teclado
     enableKeyboardControls() {
       if (!this.keysEnabled) {
         document.addEventListener("keydown", this.handleKeyboardShortcuts)
@@ -248,16 +679,24 @@ export default {
       }
     },
 
+    // Desativa os comandos de teclado
     disableKeyboardControls() {
       document.removeEventListener("keydown", this.handleKeyboardShortcuts)
       this.keysEnabled = false
     },
 
+    // Inicializa a API de síntese de fala
     initializeSpeechSynthesis() {
       if ("speechSynthesis" in window) {
         this.speechSynth = window.speechSynthesis
+
+        if (this.speechSynth.onvoiceschanged !== undefined) {
+          this.speechSynth.onvoiceschanged = this.loadVoices
+        }
+
         this.loadVoices()
       } else {
+        console.error("API de Síntese de Fala não suportada no navegador")
         this.currentReadingStatus = "Leitor não suportado"
       }
     },
@@ -268,95 +707,424 @@ export default {
       }
     },
 
-    gatherReadableElements() {
-      // VERSÃO SUPER SIMPLES - sem interferir com accordions
-      const mainContent = document.getElementById("main-content") || document.body
+    // Obtém o texto adequado para leitura de um elemento
+    getElementText(element) {
+      const tag = element.tagName.toLowerCase()
       
-      const selector = 'h1, h2, h3, h4, h5, h6, p, a, button'
-      const allElements = Array.from(mainContent.querySelectorAll(selector))
+      if (tag === 'img') {
+        const alt = element.alt?.trim()
+        const title = element.title?.trim()
+        const src = element.src
+        
+        if (alt) {
+          return `Imagem: ${alt}`
+        } else if (title) {
+          return `Imagem: ${title}`
+        } else if (src) {
+          const filename = src.split('/').pop().split('?')[0]
+          return `Imagem: ${filename}`
+        } else {
+          return 'Imagem sem descrição'
+        }
+      }
       
-      this.readableElements = allElements.filter(el => {
-        // Filtro MÍNIMO - só remove se realmente invisível
-        const style = window.getComputedStyle(el)
-        return style.display !== 'none' && style.visibility !== 'hidden'
-      })
+      if (tag === 'svg') {
+        return element.getAttribute('aria-label') || 'Gráfico sem descrição'
+      }
+      
+      if (this.isInteractiveElement(element)) {
+        const text = element.textContent.trim()
+        if (tag === 'button') {
+          return `Botão: ${text}`
+        } else if (tag === 'a') {
+          return `Link: ${text}`
+        } else {
+          return `Elemento clicável: ${text}`
+        }
+      }
 
-      this.currentReadingStatus = `${this.readableElements.length} elementos encontrados`
+      // Se é um container, indica isso no texto
+      if (this.isContainer(element) || this.hasExpandableContent(element)) {
+        const text = element.textContent.trim()
+        return `Área expandível: ${text}`
+      }
+      
+      return element.textContent.trim()
     },
 
+    // Coleta elementos que podem ser lidos - VERSÃO MELHORADA PARA IGNORAR CONTEÚDO DE CONTAINERS
+    async gatherReadableElements() {
+      const mainContent = document.getElementById("main-content") || document.body
+      
+      // Selector focado em elementos principais, ignorando conteúdo interno de containers
+      const selector = `
+        img,
+        svg[aria-label],
+        h1, h2, h3, h4, h5, h6,
+        p:not(.accordion-body p):not(.collapse p):not(.tab-pane p),
+        a:not([aria-hidden="true"]):not(.accordion-body a):not(.collapse a):not(.tab-pane a),
+        button,
+        input[type="text"], input[type="email"], input[type="password"], input[type="search"],
+        textarea,
+        select,
+        label:not(.accordion-body label):not(.collapse label):not(.tab-pane label),
+        li:not(.accordion-body li):not(.collapse li):not(.tab-pane li),
+        td:not(.accordion-body td):not(.collapse td):not(.tab-pane td),
+        th:not(.accordion-body th):not(.collapse th):not(.tab-pane th),
+        span.badge:not(.accordion-body span.badge):not(.collapse span.badge):not(.tab-pane span.badge),
+        .accordion-button,
+        .nav-link,
+        .tab-button,
+        .card-title:not(.accordion-body .card-title):not(.collapse .card-title):not(.tab-pane .card-title),
+        .card-text:not(.accordion-body .card-text):not(.collapse .card-text):not(.tab-pane .card-text)
+      `
+      
+      // Coleta todos os elementos
+      const allElements = Array.from(mainContent.querySelectorAll(selector))
+      
+      // Filtra elementos, excluindo conteúdo dentro de containers colapsados
+      this.readableElements = allElements.filter(el => {
+        // Ignora elementos do próprio leitor
+        if (el.closest('.screen-reader-control') || el.closest('[data-screen-reader-ignore]')) {
+          return false
+        }
+
+        // Ignora conteúdo dentro de containers colapsados/ocultos
+        const hiddenContainers = [
+          '.accordion-body',
+          '.collapse:not(.show)',
+          '.tab-pane:not(.active)',
+          '.dropdown-menu:not(.show)',
+          '[aria-expanded="false"] + .collapse'
+        ]
+
+        for (let containerSelector of hiddenContainers) {
+          if (el.closest(containerSelector)) {
+            // Se está dentro de um container oculto, só inclui se é o próprio elemento de controle
+            if (!el.classList.contains('accordion-button') && 
+                !el.classList.contains('nav-link') &&
+                !el.classList.contains('tab-button')) {
+              return false
+            }
+          }
+        }
+        
+        // Verifica se o elemento tem conteúdo legível
+        const text = this.getElementText(el)
+        if (!text || text.trim().length === 0) {
+          return false
+        }
+        
+        // Ignora elementos ocultos
+        const style = window.getComputedStyle(el)
+        if (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0') {
+          return false
+        }
+        
+        return true
+      }).sort((a, b) => {
+        // Ordena os elementos por posição na página
+        const rectA = a.getBoundingClientRect()
+        const rectB = b.getBoundingClientRect()
+        
+        if (Math.abs(rectA.top - rectB.top) > 10) {
+          return rectA.top - rectB.top
+        }
+        return rectA.left - rectB.left
+      })
+
+      // Remove duplicatas baseado no conteúdo
+      this.readableElements = this.removeDuplicateElements(this.readableElements)
+
+      if (this.readableElements.length > 0) {
+        this.currentReadingStatus = `Leitor ativo - ${this.readableElements.length} elementos`
+      } else {
+        this.currentReadingStatus = "Nenhum conteúdo para ler"
+      }
+    },
+
+    // Remove elementos duplicados
+    removeDuplicateElements(elements) {
+      const seen = new Map()
+      
+      return elements.filter(el => {
+        const text = this.getElementText(el).toLowerCase().trim()
+        const tag = el.tagName.toLowerCase()
+        
+        // Para imagens, usa src como chave adicional
+        if (tag === 'img') {
+          const key = `${tag}:${text}:${el.src}`
+          if (seen.has(key)) return false
+          seen.set(key, true)
+          return true
+        }
+        
+        // Para outros elementos, verifica por texto e posição
+        const key = `${tag}:${text}`
+        
+        if (seen.has(key)) {
+          return false
+        }
+        
+        seen.set(key, true)
+        return true
+      })
+    },
+
+    debounceGatherElements() {
+      if (this.gatherTimeout) clearTimeout(this.gatherTimeout)
+      this.gatherTimeout = setTimeout(() => {
+        if (this.active && !this.isInContainer) {
+          // Só recoleta elementos se não estiver dentro de um container
+          this.gatherReadableElements()
+        }
+      }, 500)
+    },
+
+    // Iniciar/pausar a leitura
     playPause() {
       if (this.isPlaying) {
         this.pauseSpeaking()
       } else {
         if (this.currentElementIndex === -1 && this.readableElements.length > 0) {
           this.currentElementIndex = 0
+          if (this.readingMode === 'word') {
+            this.setupWordReading()
+          } else {
+            this.highlightCurrentElement()
+          }
+        }
+
+        if (this.speechSynth && this.speechSynth.paused) {
+          this.resumeSpeaking()
+        } else {
+          this.speakCurrent()
+        }
+      }
+    },
+
+    // Navega para o elemento/palavra anterior
+    previousElement() {
+      if (this.navigationDebounce) return
+      this.navigationDebounce = setTimeout(() => {
+        this.navigationDebounce = null
+      }, 200)
+
+      this.stopSpeaking()
+
+      if (this.readingMode === 'word') {
+        if (this.currentWordIndex > 0) {
+          this.currentWordIndex--
+          this.highlightCurrentWord()
+        } else if (this.currentElementIndex > 0) {
+          this.currentElementIndex--
+          this.setupWordReading()
+        }
+      } else {
+        if (this.currentElementIndex > 0) {
+          this.currentElementIndex--
           this.highlightCurrentElement()
         }
-        this.speakCurrentElement()
+      }
+
+      this.updateReadingStatus()
+
+      if (this.isPlaying) {
+        setTimeout(() => {
+          if (this.isPlaying) {
+            this.speakCurrent()
+          }
+        }, 100)
       }
     },
 
-    previousElement() {
-      this.stopSpeaking()
-      if (this.currentElementIndex > 0) {
-        this.currentElementIndex--
-      } else {
-        this.currentElementIndex = this.readableElements.length - 1
-      }
-      this.highlightCurrentElement()
-    },
-
+    // Navega para o próximo elemento/palavra
     nextElement() {
+      if (this.navigationDebounce) return
+      this.navigationDebounce = setTimeout(() => {
+        this.navigationDebounce = null
+      }, 200)
+
       this.stopSpeaking()
-      if (this.currentElementIndex < this.readableElements.length - 1) {
-        this.currentElementIndex++
+
+      if (this.readingMode === 'word') {
+        if (this.currentWordIndex < this.currentWords.length - 1) {
+          this.currentWordIndex++
+          this.highlightCurrentWord()
+        } else if (this.currentElementIndex < this.readableElements.length - 1) {
+          this.currentElementIndex++
+          this.setupWordReading()
+        }
       } else {
-        this.currentElementIndex = 0
-      }
-      this.highlightCurrentElement()
-    },
-
-    restart() {
-      this.stopSpeaking()
-      if (this.readableElements.length > 0) {
-        this.currentElementIndex = 0
-        this.highlightCurrentElement()
-      }
-    },
-
-    speakCurrentElement() {
-      if (!this.speechSynth || this.currentElementIndex < 0) return
-      
-      const currentElement = this.readableElements[this.currentElementIndex]
-      const textToSpeak = currentElement.textContent.trim()
-
-      this.utterance = new SpeechSynthesisUtterance(textToSpeak)
-      this.utterance.rate = this.speechRate
-      this.utterance.lang = "pt-BR"
-
-      this.utterance.onend = () => {
         if (this.currentElementIndex < this.readableElements.length - 1) {
           this.currentElementIndex++
           this.highlightCurrentElement()
-          setTimeout(() => this.speakCurrentElement(), 200)
+        }
+      }
+
+      this.updateReadingStatus()
+
+      if (this.isPlaying) {
+        setTimeout(() => {
+          if (this.isPlaying) {
+            this.speakCurrent()
+          }
+        }, 100)
+      }
+    },
+
+    // Reinicia a leitura do primeiro elemento
+    restart() {
+      this.stopSpeaking()
+
+      if (this.readableElements.length > 0) {
+        this.currentElementIndex = 0
+        if (this.readingMode === 'word') {
+          this.setupWordReading()
+        } else {
+          this.highlightCurrentElement()
+        }
+        this.updateReadingStatus()
+
+        if (this.isPlaying) {
+          this.speakCurrent()
+        }
+      }
+    },
+
+    // Fala o elemento ou palavra atual
+    async speakCurrent() {
+      if (this.readingMode === 'word') {
+        await this.speakCurrentWord()
+      } else {
+        await this.speakCurrentElement()
+      }
+    },
+
+    // Lê em voz alta a palavra atual
+    async speakCurrentWord() {
+      if (!this.speechSynth || this.currentWordIndex < 0 || this.currentWordIndex >= this.currentWords.length) {
+        return
+      }
+
+      this.stopSpeaking()
+
+      const word = this.currentWords[this.currentWordIndex]
+      this.utterance = new SpeechSynthesisUtterance(word)
+
+      const voices = this.speechSynth.getVoices()
+      const portugueseVoice = voices.find((voice) => voice.lang.includes("pt-BR") || voice.lang.includes("pt"))
+
+      if (portugueseVoice) {
+        this.utterance.voice = portugueseVoice
+      }
+
+      this.utterance.rate = this.speechRate
+      this.utterance.pitch = 1.0
+      this.utterance.lang = "pt-BR"
+
+      this.utterance.onend = async () => {
+        if (this.active) {
+          if (this.currentWordIndex < this.currentWords.length - 1) {
+            this.currentWordIndex++
+            this.highlightCurrentWord()
+            this.updateReadingStatus()
+            this.speakCurrentWord()
+          } else if (this.currentElementIndex < this.readableElements.length - 1) {
+            this.currentElementIndex++
+            this.setupWordReading()
+            this.updateReadingStatus()
+            this.speakCurrentWord()
+          } else {
+            this.isPlaying = false
+            this.currentReadingStatus = "Leitura concluída"
+          }
+        }
+      }
+
+      this.utterance.onerror = (event) => {
+        console.error("Erro na síntese de fala:", event)
+        this.isPlaying = false
+        this.currentReadingStatus = "Erro na leitura"
+      }
+
+      this.highlightCurrentWord()
+      this.speechSynth.speak(this.utterance)
+      this.isPlaying = true
+      this.updateReadingStatus()
+    },
+
+    // Lê em voz alta o elemento atual
+    async speakCurrentElement() {
+      if (
+        !this.speechSynth ||
+        this.currentElementIndex < 0 ||
+        this.currentElementIndex >= this.readableElements.length
+      ) {
+        return
+      }
+
+      this.stopSpeaking()
+
+      const currentElement = this.readableElements[this.currentElementIndex]
+      const textToSpeak = this.getElementText(currentElement)
+
+      this.utterance = new SpeechSynthesisUtterance(textToSpeak)
+
+      const voices = this.speechSynth.getVoices()
+      const portugueseVoice = voices.find((voice) => voice.lang.includes("pt-BR") || voice.lang.includes("pt"))
+
+      if (portugueseVoice) {
+        this.utterance.voice = portugueseVoice
+      }
+
+      this.utterance.rate = this.speechRate
+      this.utterance.pitch = 1.0
+      this.utterance.lang = "pt-BR"
+
+      this.utterance.onend = async () => {
+        if (this.active && this.currentElementIndex < this.readableElements.length - 1) {
+          this.currentElementIndex++
+          this.highlightCurrentElement()
+          this.updateReadingStatus()
+          this.speakCurrentElement()
         } else {
           this.isPlaying = false
           this.currentReadingStatus = "Leitura concluída"
         }
       }
 
+      this.utterance.onerror = (event) => {
+        console.error("Erro na síntese de fala:", event)
+        this.isPlaying = false
+        this.currentReadingStatus = "Erro na leitura"
+      }
+
       this.highlightCurrentElement()
       this.speechSynth.speak(this.utterance)
       this.isPlaying = true
+      this.updateReadingStatus()
     },
 
+    // Pausa a leitura em andamento
     pauseSpeaking() {
-      if (this.speechSynth) {
+      if (this.speechSynth && this.isPlaying) {
         this.speechSynth.pause()
         this.isPlaying = false
       }
     },
 
+    // Retoma a leitura pausada
+    resumeSpeaking() {
+      if (this.speechSynth && this.speechSynth.paused) {
+        clearTimeout(this.pauseTimer)
+        this.speechSynth.resume()
+        this.isPlaying = true
+        this.updateReadingStatus()
+      }
+    },
+
+    // Para completamente a leitura
     stopSpeaking() {
       if (this.speechSynth) {
         this.speechSynth.cancel()
@@ -364,62 +1132,308 @@ export default {
       }
     },
 
+    // Remove todos os destaques visuais
     removeAllHighlights() {
+      // Remove destaques de elementos
       document.querySelectorAll(".sr-element-highlight").forEach((el) => {
-        el.classList.remove("sr-element-highlight")
+        el.classList.remove("sr-element-highlight", "sr-interactive-indicator", "sr-container-indicator")
       })
-    },
 
-    highlightCurrentElement() {
-      this.removeAllHighlights()
-      if (this.currentElementIndex >= 0 && this.readableElements[this.currentElementIndex]) {
-        const element = this.readableElements[this.currentElementIndex]
-        element.classList.add("sr-element-highlight")
-        element.scrollIntoView({ behavior: "smooth", block: "center" })
-      }
-    },
-
-    activateElement() {
-      if (this.currentElementIndex >= 0 && this.readableElements[this.currentElementIndex]) {
-        const element = this.readableElements[this.currentElementIndex]
-        if (element.click) {
-          element.click()
+      // Remove destaques de palavras
+      if (this.wordHighlightSpan) {
+        const parent = this.wordHighlightSpan.parentNode
+        if (parent) {
+          parent.replaceChild(document.createTextNode(this.wordHighlightSpan.textContent), this.wordHighlightSpan)
+          parent.normalize()
         }
+        this.wordHighlightSpan = null
       }
     },
 
+    // Destaca visualmente o elemento atual
+    async highlightCurrentElement() {
+      this.removeAllHighlights()
+
+      if (this.currentElementIndex >= 0 && this.readableElements[this.currentElementIndex]) {
+        const element = this.readableElements[this.currentElementIndex]
+        
+        element.classList.add("sr-element-highlight")
+        
+        // Adiciona indicador baseado no tipo de elemento
+        if (this.isContainer(element) || this.hasExpandableContent(element)) {
+          element.classList.add("sr-container-indicator")
+        } else if (this.isInteractiveElement(element)) {
+          element.classList.add("sr-interactive-indicator")
+        }
+
+        element.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+          inline: "nearest",
+        })
+      }
+    },
+
+    // Destaca visualmente a palavra atual
+    highlightCurrentWord() {
+      this.removeAllHighlights()
+
+      if (this.currentElementIndex >= 0 && this.currentWordIndex >= 0 && 
+          this.readableElements[this.currentElementIndex] && 
+          this.currentWords[this.currentWordIndex]) {
+        
+        const element = this.readableElements[this.currentElementIndex]
+        const word = this.currentWords[this.currentWordIndex]
+        
+        // Destaca o elemento pai também
+        element.classList.add("sr-element-highlight")
+        if (this.isContainer(element) || this.hasExpandableContent(element)) {
+          element.classList.add("sr-container-indicator")
+        } else if (this.isInteractiveElement(element)) {
+          element.classList.add("sr-interactive-indicator")
+        }
+        
+        // Encontra e destaca a palavra específica
+        this.highlightWordInElement(element, word, this.currentWordIndex)
+
+        element.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+          inline: "nearest",
+        })
+      }
+    },
+
+    // Destaca uma palavra específica dentro de um elemento
+    highlightWordInElement(element, targetWord, wordIndex) {
+      const text = element.textContent
+      const words = text.split(/(\s+)/)
+      let actualWordIndex = 0
+      
+      // Cria um novo conteúdo com a palavra destacada
+      const newContent = document.createDocumentFragment()
+      
+      words.forEach((segment) => {
+        if (segment.trim().length > 0) {
+          if (actualWordIndex === wordIndex && segment.trim() === targetWord.trim()) {
+            const span = document.createElement('span')
+            span.className = 'sr-word-highlight'
+            span.textContent = segment
+            this.wordHighlightSpan = span
+            newContent.appendChild(span)
+          } else {
+            newContent.appendChild(document.createTextNode(segment))
+          }
+          actualWordIndex++
+        } else {
+          newContent.appendChild(document.createTextNode(segment))
+        }
+      })
+      
+      // Substitui o conteúdo do elemento
+      element.innerHTML = ''
+      element.appendChild(newContent)
+    },
+
+    updateReadingStatus() {
+      if (this.readableElements.length === 0) {
+        this.currentReadingStatus = "Nenhum conteúdo para ler"
+      } else if (this.currentElementIndex >= 0) {
+        const element = this.readableElements[this.currentElementIndex]
+        if (this.isContainer(element) || this.hasExpandableContent(element)) {
+          this.currentReadingStatus = "Área expandível - Enter para entrar"
+        } else if (this.isInteractiveElement(element)) {
+          this.currentReadingStatus = "Elemento interativo - Enter para ativar"
+        } else {
+          this.currentReadingStatus = "A ler..."
+        }
+      } else {
+        this.currentReadingStatus = this.isInContainer ? "Dentro de container" : "Leitor de ecrã ativo"
+      }
+    },
+
+    // Aumenta a velocidade de leitura
     increaseRate() {
-      this.speechRate = Math.min(this.speechRate + 0.1, 2.0)
+      if (!this.speechSynth) return
+
+      const currentRate = this.utterance ? this.utterance.rate : this.speechRate
+      const newRate = Math.min(currentRate + 0.1, 2.0)
+
+      if (this.utterance) {
+        this.utterance.rate = newRate
+      }
+
+      this.speechRate = newRate
+
+      const isKeyboardEvent = event && event.type === "keydown"
+      if (isKeyboardEvent) {
+        this.announceChange(`Velocidade: ${Math.round(newRate * 10) / 10}x`)
+      }
     },
 
+    // Diminui a velocidade de leitura
     decreaseRate() {
-      this.speechRate = Math.max(this.speechRate - 0.1, 0.5)
+      if (!this.speechSynth) return
+
+      const currentRate = this.utterance ? this.utterance.rate : this.speechRate
+      const newRate = Math.max(currentRate - 0.1, 0.5)
+
+      if (this.utterance) {
+        this.utterance.rate = newRate
+      }
+
+      this.speechRate = newRate
+
+      const isKeyboardEvent = event && event.type === "keydown"
+      if (isKeyboardEvent) {
+        this.announceChange(`Velocidade: ${Math.round(newRate * 10) / 10}x`)
+      }
     },
 
+    // Exibe mensagem de confirmação temporária
+    announceChange(message) {
+      this.currentReadingStatus = message
+
+      const notification = document.createElement("div")
+      notification.style.cssText = `
+        position: fixed;
+        bottom: 80px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+        color: white;
+        padding: 12px 24px;
+        border-radius: 25px;
+        z-index: 9999;
+        font-size: 14px;
+        font-weight: 500;
+        box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        animation: sr-notification-slide 0.3s ease-out;
+      `
+      
+      notification.textContent = message
+      document.body.appendChild(notification)
+
+      setTimeout(() => {
+        if (document.body.contains(notification)) {
+          notification.style.animation = 'sr-notification-slide 0.3s ease-out reverse'
+          setTimeout(() => {
+            if (document.body.contains(notification)) {
+              document.body.removeChild(notification)
+            }
+          }, 300)
+        }
+        if (this.currentReadingStatus === message) {
+          this.updateReadingStatus()
+        }
+      }, 2000)
+    },
+
+    // Processa comandos de teclado - VERSÃO ATUALIZADA
     handleKeyboardShortcuts(event) {
       if (!this.active || !this.isInitialized) return
-      if (event.target.tagName === "INPUT" || event.target.tagName === "TEXTAREA") return
+
+      if (event.target.tagName === "INPUT" || event.target.tagName === "TEXTAREA" || event.target.isContentEditable) {
+        return
+      }
 
       switch (event.key) {
         case " ":
         case "Spacebar":
-          this.playPause()
-          event.preventDefault()
+          if (!event.ctrlKey && !event.altKey && !event.metaKey) {
+            this.playPause()
+            event.preventDefault()
+          }
+          break
+        case "p":
+        case "P":
+          if (!event.ctrlKey && !event.altKey && !event.metaKey) {
+            this.playPause()
+            event.preventDefault()
+          }
           break
         case "ArrowRight":
-          this.nextElement()
-          event.preventDefault()
+        case "Right":
+          if (!event.ctrlKey && !event.altKey && !event.metaKey) {
+            this.nextElement()
+            event.preventDefault()
+          }
+          break
+        case "n":
+        case "N":
+          if (!event.ctrlKey && !event.altKey && !event.metaKey) {
+            this.nextElement()
+            event.preventDefault()
+          }
           break
         case "ArrowLeft":
-          this.previousElement()
-          event.preventDefault()
+        case "Left":
+          if (!event.ctrlKey && !event.altKey && !event.metaKey) {
+            this.previousElement()
+            event.preventDefault()
+          }
+          break
+        case "b":
+        case "B":
+          if (!event.ctrlKey && !event.altKey && !event.metaKey) {
+            this.previousElement()
+            event.preventDefault()
+          }
           break
         case "Enter":
-          this.activateElement()
-          event.preventDefault()
+          if (!event.ctrlKey && !event.altKey && !event.metaKey) {
+            this.activateElement()
+            event.preventDefault()
+          }
+          break
+        case "Home":
+          if (!event.ctrlKey && !event.altKey && !event.metaKey) {
+            this.restart()
+            event.preventDefault()
+          }
+          break
+        case "r":
+        case "R":
+          if (!event.ctrlKey && !event.altKey && !event.metaKey) {
+            this.restart()
+            event.preventDefault()
+          }
+          break
+        case "w":
+        case "W":
+          if (!event.ctrlKey && !event.altKey && !event.metaKey) {
+            this.setReadingMode(this.readingMode === 'word' ? 'element' : 'word')
+            this.announceChange(`Modo: ${this.readingMode === 'word' ? 'Palavra' : 'Elemento'}`)
+            event.preventDefault()
+          }
           break
         case "Escape":
-          this.$emit("update:screenReader", false)
+        case "Esc":
+          if (this.isInContainer) {
+            this.exitContainer()
+          } else {
+            this.stopSpeaking()
+            this.$emit("update:screenReader", false)
+          }
+          event.preventDefault()
+          break
+        case "q":
+        case "Q":
+          if (!event.ctrlKey && !event.altKey && !event.metaKey) {
+            this.stopSpeaking()
+            this.$emit("update:screenReader", false)
+            event.preventDefault()
+          }
+          break
+        case "+":
+        case "=":
+          this.increaseRate()
+          event.preventDefault()
+          break
+        case "-":
+          this.decreaseRate()
           event.preventDefault()
           break
       }

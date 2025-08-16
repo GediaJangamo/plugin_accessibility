@@ -379,58 +379,58 @@ export default {
              (element.hasAttribute('data-bs-toggle') && element.getAttribute('data-bs-toggle') === 'collapse')
     },
 
-    async gatherReadableElements() {
-      const mainContent = document.getElementById("main-content") || document.body
+    // async gatherReadableElements() {
+    //   const mainContent = document.getElementById("main-content") || document.body
       
-      const selector = `
-        h1, h2, h3, h4, h5, h6,
-        p,
-        a:not([aria-hidden="true"]),
-        button,
-        input[type="text"], input[type="email"], input[type="password"], input[type="search"],
-        textarea,
-        select,
-        label,
-        li,
-        td,
-        th,
-        img,
-        svg[aria-label],
-        .accordion-button,
-        [data-bs-toggle="collapse"]
-      `
+    //   const selector = `
+    //     h1, h2, h3, h4, h5, h6,
+    //     p,
+    //     a:not([aria-hidden="true"]),
+    //     button,
+    //     input[type="text"], input[type="email"], input[type="password"], input[type="search"],
+    //     textarea,
+    //     select,
+    //     label,
+    //     li,
+    //     td,
+    //     th,
+    //     img,
+    //     svg[aria-label],
+    //     .accordion-button,
+    //     [data-bs-toggle="collapse"]
+    //   `
       
-      const allElements = Array.from(mainContent.querySelectorAll(selector))
+    //   const allElements = Array.from(mainContent.querySelectorAll(selector))
       
-      this.readableElements = allElements.filter(el => {
-        if (el.closest('.screen-reader-control') || el.closest('[data-screen-reader-ignore]')) {
-          return false
-        }
+    //   this.readableElements = allElements.filter(el => {
+    //     if (el.closest('.screen-reader-control') || el.closest('[data-screen-reader-ignore]')) {
+    //       return false
+    //     }
         
-        if (!this.isElementVisible(el)) {
-          return false
-        }
+    //     if (!this.isElementVisible(el)) {
+    //       return false
+    //     }
         
-        const text = this.getElementText(el)
-        return text && text.trim().length > 0
-      }).sort((a, b) => {
-        const rectA = a.getBoundingClientRect()
-        const rectB = b.getBoundingClientRect()
+    //     const text = this.getElementText(el)
+    //     return text && text.trim().length > 0
+    //   }).sort((a, b) => {
+    //     const rectA = a.getBoundingClientRect()
+    //     const rectB = b.getBoundingClientRect()
         
-        if (Math.abs(rectA.top - rectB.top) > 10) {
-          return rectA.top - rectB.top
-        }
-        return rectA.left - rectB.left
-      })
+    //     if (Math.abs(rectA.top - rectB.top) > 10) {
+    //       return rectA.top - rectB.top
+    //     }
+    //     return rectA.left - rectB.left
+    //   })
 
-      this.readableElements = this.removeDuplicateElements(this.readableElements)
+    //   this.readableElements = this.removeDuplicateElements(this.readableElements)
 
-      if (this.readableElements.length > 0) {
-        this.currentReadingStatus = `${this.readableElements.length} elementos encontrados`
-      } else {
-        this.currentReadingStatus = "Nenhum conteúdo para ler"
-      }
-    },
+    //   if (this.readableElements.length > 0) {
+    //     this.currentReadingStatus = `${this.readableElements.length} elementos encontrados`
+    //   } else {
+    //     this.currentReadingStatus = "Nenhum conteúdo para ler"
+    //   }
+    // },
 
     // isElementVisible(element) {
     //   const style = window.getComputedStyle(element)
@@ -450,36 +450,81 @@ export default {
     //   return true
     // },
 
-    isElementVisible(element) {
-  // Verificações básicas de CSS
+    async gatherReadableElements() {
+  const mainContent = document.getElementById("main-content") || document.body
+  
+  const selector = `
+    h1, h2, h3, h4, h5, h6,
+    p,
+    a:not([aria-hidden="true"]),
+    button,
+    input[type="text"], input[type="email"], input[type="password"], input[type="search"],
+    textarea,
+    select,
+    label,
+    li,
+    td,
+    th,
+    img,
+    svg[aria-label],
+    .accordion-button,
+    [data-bs-toggle="collapse"]
+  `
+  
+  const allElements = Array.from(mainContent.querySelectorAll(selector))
+  
+  this.readableElements = allElements.filter(el => {
+    // Ignora elementos do próprio leitor
+    if (el.closest('.screen-reader-control') || el.closest('[data-screen-reader-ignore]')) {
+      return false
+    }
+    
+    // Verifica visibilidade com o novo método mais preciso
+    if (!this.isElementVisible(el)) {
+      return false
+    }
+    
+    // Verifica se o elemento tem conteúdo legível
+    const text = this.getElementText(el)
+    return text && text.trim().length > 0
+  }).sort((a, b) => {
+    // Ordena os elementos por posição na página
+    const rectA = a.getBoundingClientRect()
+    const rectB = b.getBoundingClientRect()
+    
+    if (Math.abs(rectA.top - rectB.top) > 10) {
+      return rectA.top - rectB.top
+    }
+    return rectA.left - rectB.left
+  })
+
+  this.readableElements = this.removeDuplicateElements(this.readableElements)
+
+  if (this.readableElements.length > 0) {
+    this.currentReadingStatus = `${this.readableElements.length} elementos encontrados`
+  } else {
+    this.currentReadingStatus = "Nenhum conteúdo para ler"
+  }
+},
+isElementVisible(element) {
+  // Verifica estilos básicos de visibilidade
   const style = window.getComputedStyle(element)
   if (style.display === 'none' || style.visibility === 'hidden' || element.hasAttribute('hidden')) {
     return false
   }
   
-  // Para accordions Bootstrap, verificamos se o elemento está dentro de um collapse
-  let currentElement = element
-  while (currentElement && currentElement !== document.body) {
-    // Se o elemento está dentro de um accordion-collapse
-    if (currentElement.classList.contains('accordion-collapse')) {
-      // Verifica se tem a classe 'show' (expandido) ou 'collapse' (recolhido)
-      const isExpanded = currentElement.classList.contains('show')
-      return isExpanded
+  // Verifica se o elemento está dentro de um accordion recolhido
+  let parent = element
+  while (parent && parent !== document.body) {
+    // Verifica apenas accordions diretos, não todos os pais
+    if (parent.classList.contains('accordion-collapse') && !parent.classList.contains('show')) {
+      // Se for um elemento que controla o accordion, deve ser visível mesmo que o accordion esteja recolhido
+      if (element.hasAttribute('data-bs-toggle') && element.getAttribute('data-bs-toggle') === 'collapse') {
+        return true
+      }
+      return false
     }
-    
-    // Para outros tipos de collapse do Bootstrap
-    if (currentElement.classList.contains('collapse') && !currentElement.classList.contains('accordion-collapse')) {
-      const isExpanded = currentElement.classList.contains('show')
-      return isExpanded
-    }
-    
-    currentElement = currentElement.parentElement
-  }
-  
-  // Verificação de visibilidade no viewport (opcional, mas útil)
-  const rect = element.getBoundingClientRect()
-  if (rect.width === 0 && rect.height === 0) {
-    return false
+    parent = parent.parentElement
   }
   
   return true

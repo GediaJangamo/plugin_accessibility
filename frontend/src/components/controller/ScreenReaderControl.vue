@@ -802,37 +802,37 @@ handleAccordionInteraction(element) {
       }
     },
 
-    handleAccordionInteraction(element) {
-      const isExpanded = element.getAttribute('aria-expanded') === 'true'
+    // handleAccordionInteraction(element) {
+    //   const isExpanded = element.getAttribute('aria-expanded') === 'true'
       
-      this.announceChange(isExpanded ? 'Recolhendo accordion...' : 'Expandindo accordion...')
+    //   this.announceChange(isExpanded ? 'Recolhendo accordion...' : 'Expandindo accordion...')
       
-      element.click()
+    //   element.click()
       
-      setTimeout(() => {
-        this.gatherReadableElements()
+    //   setTimeout(() => {
+    //     this.gatherReadableElements()
         
-        if (!isExpanded) {
-          const targetId = element.getAttribute('data-bs-target') || 
-                          element.getAttribute('aria-controls')
-          if (targetId) {
-            const targetElement = document.querySelector(targetId)
-            if (targetElement) {
-              const firstChildElement = this.findFirstReadableChild(targetElement)
-              if (firstChildElement) {
-                const newIndex = this.readableElements.indexOf(firstChildElement)
-                if (newIndex !== -1) {
-                  this.currentElementIndex = newIndex
-                  this.highlightCurrentElement()
-                }
-              }
-            }
-          }
-        }
+    //     if (!isExpanded) {
+    //       const targetId = element.getAttribute('data-bs-target') || 
+    //                       element.getAttribute('aria-controls')
+    //       if (targetId) {
+    //         const targetElement = document.querySelector(targetId)
+    //         if (targetElement) {
+    //           const firstChildElement = this.findFirstReadableChild(targetElement)
+    //           if (firstChildElement) {
+    //             const newIndex = this.readableElements.indexOf(firstChildElement)
+    //             if (newIndex !== -1) {
+    //               this.currentElementIndex = newIndex
+    //               this.highlightCurrentElement()
+    //             }
+    //           }
+    //         }
+    //       }
+    //     }
         
-        this.announceChange(`Accordion ${isExpanded ? 'recolhido' : 'expandido'}`)
-      }, 500)
-    },
+    //     this.announceChange(`Accordion ${isExpanded ? 'recolhido' : 'expandido'}`)
+    //   }, 500)
+    // },
 
     findFirstReadableChild(container) {
       const selector = `

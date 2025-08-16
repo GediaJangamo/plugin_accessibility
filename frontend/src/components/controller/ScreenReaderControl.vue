@@ -498,13 +498,7 @@ enterContainer() {
       this.updateReadingStatus()
     },
 
-  //   isAccordionButton(element) {
-  //   return (
-  //     element.classList.contains('accordion-button') || 
-  //     (element.getAttribute('data-bs-toggle') === 'collapse' &&
-  //     element.getAttribute('aria-controls'))
-  //   );
-  // },
+  
       isAccordionButton(element) {
       return (
         element.classList.contains('accordion-button') || 
@@ -634,65 +628,6 @@ enterContainer() {
   return false
 },
 
-// handleAccordionButton(button) {
-//   const accordionTitle = this.getElementText(button).replace('botão', '').trim();
-//   const wasExpanded = button.getAttribute('aria-expanded') === 'true';
-
-//   this.announceChange(`${wasExpanded ? 'Recolhendo' : 'Expandindo'} ${accordionTitle}...`);
-  
-//   button.click();
-  
-//   setTimeout(() => {
-//     const isNowExpanded = button.getAttribute('aria-expanded') === 'true';
-//     this.announceChange(`${accordionTitle} ${isNowExpanded ? 'expandido' : 'recolhido'}`);
-//     this.gatherReadableElements();
-    
-//     // Atualiza o status do botão de entrada
-//     this.updateReadingStatus();
-//   }, 350);
-// },
-
-handleAccordionButton(button) {
-  const accordionTitle = this.getElementText(button).replace('botão', '').trim()
-  const wasExpanded = button.getAttribute('aria-expanded') === 'true'
-
-  this.announceChange(`${wasExpanded ? 'Recolhendo' : 'Expandindo'} ${accordionTitle}...`)
-  
-  button.click()
-  
-  setTimeout(() => {
-    const isNowExpanded = button.getAttribute('aria-expanded') === 'true'
-    this.announceChange(`${accordionTitle} ${isNowExpanded ? 'expandido' : 'recolhido'}`)
-    this.gatherReadableElements()
-  }, 350)
-},
-
-// activateElement() {
-//   if (this.isInContainer) {
-//     this.exitContainer();
-//     return;
-//   }
-
-//   const element = this.readableElements[this.currentElementIndex];
-  
-//   // Tratamento para links e botões normais
-//   if (this.isRegularInteractiveElement(element)) {
-//     this.activateInteractiveElement(element);
-//     return;
-//   }
-
-//   // Tratamento específico para accordions
-//   if (this.isAccordionButton(element)) {
-//     this.handleAccordionButton(element);
-//     return;
-//   }
-
-//   // Entrada em containers genéricos
-//   if (this.canEnterCurrentContainer()) {
-//     this.enterContainer();
-//   }
-// },
-
 activateElement() {
   if (this.isInContainer) {
     this.exitContainer()
@@ -723,14 +658,68 @@ activateElement() {
   }
 },
 
-// isRegularInteractiveElement(element) {
-//   const tag = element.tagName.toLowerCase();
-//   return (
-//     (tag === 'a' && element.href) || 
-//     (tag === 'button' && !this.isAccordionButton(element)) ||
-//     ['input', 'textarea', 'select'].includes(tag)
-//   );
+handleAccordionButton(button) {
+  const accordionTitle = this.getElementText(button).replace('botão', '').trim()
+  const wasExpanded = button.getAttribute('aria-expanded') === 'true'
+
+  this.announceChange(`${wasExpanded ? 'Recolhendo' : 'Expandindo'} ${accordionTitle}...`)
+  
+  // Dispara o clique programaticamente
+  button.click()
+  
+  setTimeout(() => {
+    const isNowExpanded = button.getAttribute('aria-expanded') === 'true'
+    this.announceChange(`${accordionTitle} ${isNowExpanded ? 'expandido' : 'recolhido'}`)
+    this.gatherReadableElements()
+  }, 350)
+},
+
+// handleAccordionButton(button) {
+//   const accordionTitle = this.getElementText(button).replace('botão', '').trim()
+//   const wasExpanded = button.getAttribute('aria-expanded') === 'true'
+
+//   this.announceChange(`${wasExpanded ? 'Recolhendo' : 'Expandindo'} ${accordionTitle}...`)
+  
+//   button.click()
+  
+//   setTimeout(() => {
+//     const isNowExpanded = button.getAttribute('aria-expanded') === 'true'
+//     this.announceChange(`${accordionTitle} ${isNowExpanded ? 'expandido' : 'recolhido'}`)
+//     this.gatherReadableElements()
+//   }, 350)
 // },
+
+
+// activateElement() {
+//   if (this.isInContainer) {
+//     this.exitContainer()
+//     return
+//   }
+
+//   if (this.currentElementIndex < 0 || !this.readableElements[this.currentElementIndex]) {
+//     return
+//   }
+
+//   const element = this.readableElements[this.currentElementIndex]
+  
+//   // Tratamento específico para accordions
+//   if (this.isAccordionButton(element)) {
+//     this.handleAccordionButton(element)
+//     return
+//   }
+
+//   // Tratamento para links e botões normais
+//   if (this.isRegularInteractiveElement(element)) {
+//     this.activateInteractiveElement(element)
+//     return
+//   }
+
+//   // Entrada em containers genéricos
+//   if (this.canEnterCurrentContainer()) {
+//     this.enterContainer()
+//   }
+// },
+
 
 isRegularInteractiveElement(element) {
   const tag = element.tagName.toLowerCase()
@@ -741,21 +730,7 @@ isRegularInteractiveElement(element) {
   )
 },
 
-// activateInteractiveElement(element) {
-//   const elementName = this.getElementText(element);
-//   this.announceChange(`Ativando ${elementName}`);
-  
-//   if (element.click) {
-//     element.click();
-//   } else {
-//     element.dispatchEvent(new MouseEvent('click', {
-//       bubbles: true,
-//       cancelable: true
-//     }));
-//   }
-  
-//   setTimeout(() => this.gatherReadableElements(), 300);
-// },
+
 activateInteractiveElement(element) {
   const elementName = this.getElementText(element)
   this.announceChange(`Ativando ${elementName}`)
@@ -1402,28 +1377,6 @@ activateInteractiveElement(element) {
       element.appendChild(newContent)
     },
 
-    // updateReadingStatus() {
-    // if (this.readableElements.length === 0) {
-    //   this.currentReadingStatus = "Nenhum conteúdo para ler"
-    // } else if (this.currentElementIndex >= 0) {
-    //   const element = this.readableElements[this.currentElementIndex]
-    //   const elementText = this.getElementText(element).replace('Botão:', '').replace('Link:', '').trim()
-      
-    //   if (this.isContainer(element) || this.hasExpandableContent(element)) {
-    //     this.currentReadingStatus = "Área expandível - Enter para entrar"
-    //     // Anuncia por voz para deficientes visuais
-    //     this.announceForScreenReader(`${elementText}. Pressione Enter ou Return para expandir.`)
-    //   } else if (this.isInteractiveElement(element)) {
-    //     this.currentReadingStatus = "Elemento interativo - Enter para ativar"
-    //     this.announceForScreenReader(`${elementText}. Pressione Enter ou Return para ativar.`)
-    //   } else {
-    //     this.currentReadingStatus = "A ler..."
-    //   }
-    // } else {
-    //   this.currentReadingStatus = this.isInContainer ? "Dentro de container" : "Leitor de ecrã ativo"
-    // }
-    // },
-
     updateReadingStatus() {
       if (this.readableElements.length === 0) {
         this.currentReadingStatus = "Nenhum conteúdo para ler"
@@ -1555,16 +1508,7 @@ activateInteractiveElement(element) {
     handleKeyboardShortcuts(event) {
   if (!this.active || !this.isInitialized) return
 
-  // Melhor verificação para tecla Enter/Return (compatível com Mac)
-  // const isEnterKey = event.key === 'Enter' || event.key === 'Return' || event.keyCode === 13
 
-  // if (isEnterKey) {
-  //   if (event.target.tagName !== 'INPUT' && event.target.tagName !== 'TEXTAREA' && !event.target.isContentEditable) {
-  //     event.preventDefault();
-  //     this.activateElement();
-  //   }
-  //   return; // Importante: return aqui para não executar o switch
-  // }
   const isEnterKey = event.key === 'Enter' || event.key === 'Return' || event.keyCode === 13
     if (isEnterKey) {
       if (event.target.tagName !== 'INPUT' && event.target.tagName !== 'TEXTAREA' && !event.target.isContentEditable) {

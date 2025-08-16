@@ -157,48 +157,80 @@ export default {
     }
   },
   watch: {
-    active: {
-      immediate: true,
-      handler(newValue) {
-        if (newValue) {
-          this.$nextTick(() => {
-            this.initReaderFeatures()
-          })
-        } else {
-          this.cleanupReaderFeatures()
-        }
-      },
+  active: {
+    immediate: true,
+    handler(newValue) {
+      if (newValue) {
+        this.$nextTick(() => {
+          this.initReaderFeatures()
+        })
+      } else {
+        this.cleanupReaderFeatures()
+        // CRÍTICO: Remove estilos quando desativado
+        this.removeCustomStyles()
+      }
     },
   },
+},
+
   mounted() {
     this.initMutationObserver()
-    this.addCustomStyles()
+    // this.addCustomStyles()
   },
   beforeUnmount() {
     this.cleanupReaderFeatures()
     this.removeCustomStyles()
   },
   methods: {
-    addCustomStyles() {
-      if (!document.getElementById('screen-reader-highlight-styles')) {
-        const style = document.createElement('style')
-        style.id = 'screen-reader-highlight-styles'
-        style.textContent = `
-          .sr-element-highlight {
-            outline: 2px solid rgba(59, 130, 246, 0.8) !important;
-            outline-offset: 2px !important;
-            background-color: rgba(59, 130, 246, 0.1) !important;
-          }
+    // addCustomStyles() {
+    //   if (!document.getElementById('screen-reader-highlight-styles')) {
+    //     const style = document.createElement('style')
+    //     style.id = 'screen-reader-highlight-styles'
+    //     style.textContent = `
+    //       .sr-element-highlight {
+    //         outline: 2px solid rgba(59, 130, 246, 0.8) !important;
+    //         outline-offset: 2px !important;
+    //         background-color: rgba(59, 130, 246, 0.1) !important;
+    //       }
           
-          @keyframes sr-notification-slide {
-            from { transform: translateX(-50%) translateY(20px); opacity: 0; }
-            to { transform: translateX(-50%) translateY(0); opacity: 1; }
-          }
-        `
-        document.head.appendChild(style)
+    //       @keyframes sr-notification-slide {
+    //         from { transform: translateX(-50%) translateY(20px); opacity: 0; }
+    //         to { transform: translateX(-50%) translateY(0); opacity: 1; }
+    //       }
+    //     `
+    //     document.head.appendChild(style)
+    //   }
+    // },
+    addCustomStyles() {
+  if (!document.getElementById('screen-reader-highlight-styles')) {
+    const style = document.createElement('style')
+    style.id = 'screen-reader-highlight-styles'
+    style.textContent = `
+      /* Apenas estilos para highlight - SEM interferir com accordions */
+      .sr-element-highlight {
+        outline: 2px solid rgba(59, 130, 246, 0.8) !important;
+        outline-offset: 2px !important;
+        background-color: rgba(59, 130, 246, 0.1) !important;
+        /* REMOVIDO: background-color que estava interferindo */
       }
-    },
-    
+      
+      @keyframes sr-notification-slide {
+        from { transform: translateX(-50%) translateY(20px); opacity: 0; }
+        to { transform: translateX(-50%) translateY(0); opacity: 1; }
+      }
+      
+      /* Garantir que o screen reader não interfira com accordions */
+      .accordion-collapse.collapse:not(.show) {
+        display: none !important;
+      }
+      
+      .accordion-collapse.collapse.show {
+        display: block !important;
+      }
+    `
+    document.head.appendChild(style)
+  }
+},
     removeCustomStyles() {
       const style = document.getElementById('screen-reader-highlight-styles')
       if (style) {
@@ -219,29 +251,47 @@ export default {
       this.$emit('update:screenReader', false)
     },
     
+    // initReaderFeatures() {
+    //   this.initializeSpeechSynthesis()
+
+    //   setTimeout(() => {
+    //     this.gatherReadableElements()
+    //     this.currentElementIndex = -1
+    //     this.removeAllHighlights()
+    //     this.enableKeyboardControls()
+    //     this.isInitialized = true
+    //   }, 300)
+    // },
+
     initReaderFeatures() {
-      this.initializeSpeechSynthesis()
+  // ADICIONE os estilos apenas quando inicializar
+  this.addCustomStyles()
+  
+  this.initializeSpeechSynthesis()
 
-      setTimeout(() => {
-        this.gatherReadableElements()
-        this.currentElementIndex = -1
-        this.removeAllHighlights()
-        this.enableKeyboardControls()
-        this.isInitialized = true
-      }, 300)
-    },
+  setTimeout(() => {
+    this.gatherReadableElements()
+    this.currentElementIndex = -1
+    this.removeAllHighlights()
+    this.enableKeyboardControls()
+    this.isInitialized = true
+  }, 300)
+},
 
-    cleanupReaderFeatures() {
-      this.stopSpeaking()
-      this.removeAllHighlights()
-      this.disableKeyboardControls()
 
-      if (this.observer) {
-        this.observer.disconnect()
-      }
+   cleanupReaderFeatures() {
+  this.stopSpeaking()
+  this.removeAllHighlights()
+  this.disableKeyboardControls()
 
-      this.isInitialized = false
-    },
+  if (this.observer) {
+    this.observer.disconnect()
+  }
+
+  // ADICIONE: Remove estilos na limpeza
+  this.removeCustomStyles()
+  this.isInitialized = false
+},
 
     // initMutationObserver() {
     //   if (window.MutationObserver) {
@@ -507,24 +557,17 @@ export default {
   }
 },
 isElementVisible(element) {
-  // Verifica estilos básicos de visibilidade
+  // Verificações básicas APENAS
   const style = window.getComputedStyle(element)
   if (style.display === 'none' || style.visibility === 'hidden' || element.hasAttribute('hidden')) {
     return false
   }
   
-  // Verifica se o elemento está dentro de um accordion recolhido
-  let parent = element
-  while (parent && parent !== document.body) {
-    // Verifica apenas accordions diretos, não todos os pais
-    if (parent.classList.contains('accordion-collapse') && !parent.classList.contains('show')) {
-      // Se for um elemento que controla o accordion, deve ser visível mesmo que o accordion esteja recolhido
-      if (element.hasAttribute('data-bs-toggle') && element.getAttribute('data-bs-toggle') === 'collapse') {
-        return true
-      }
-      return false
-    }
-    parent = parent.parentElement
+  // Verificação MUITO simples para accordions - sem interferir
+  const accordionParent = element.closest('.accordion-collapse')
+  if (accordionParent) {
+    // Se está dentro de accordion, verifica se está visível
+    return accordionParent.classList.contains('show')
   }
   
   return true

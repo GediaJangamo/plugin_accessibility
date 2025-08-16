@@ -391,39 +391,6 @@ export default {
       return false
     },
 
-    // Entra em um container
-//      enterContainer() {
-//   if (this.currentElementIndex < 0 || !this.readableElements[this.currentElementIndex]) {
-//     return
-//   }
-
-//   const element = this.readableElements[this.currentElementIndex]
-  
-//   // Verifica se é um accordion não expandido
-//   if ((element.classList.contains('accordion-button') || 
-//        element.getAttribute('data-bs-toggle') === 'collapse') &&
-//       element.getAttribute('aria-expanded') === 'false') {
-    
-//     this.announceChange('Expandindo accordion...')
-//     element.click()
-    
-//     // Aguarda a animação de expansão
-//     setTimeout(() => {
-//       if (element.getAttribute('aria-expanded') === 'true') {
-//         this.proceedToEnterContainer(element)
-//       } else {
-//         this.announceChange('Falha ao expandir accordion')
-//       }
-//     }, 500)
-//   } 
-//   // Se já estiver expandido ou não for accordion
-//   else {
-//     this.proceedToEnterContainer(element)
-//   }
-// },
-
-// 
-
 enterContainer() {
   if (this.currentElementIndex < 0 || !this.readableElements[this.currentElementIndex]) {
     return;
@@ -514,11 +481,6 @@ enterContainer() {
       this.highlightCurrentElement()
       this.updateReadingStatus()
     },
-
-    // isAccordionButton(element) {
-    //  return element.classList.contains('accordion-button') || 
-    //      element.getAttribute('data-bs-toggle') === 'collapse';
-    // },
 
     isAccordionButton(element) {
     return (
@@ -648,33 +610,6 @@ enterContainer() {
   return false
 },
 
-//     handleAccordionButton(button) {
-//   this.announceChange('Alternando accordion...')
-  
-//   // Dispara o evento de clique no botão
-//   if (button.click) {
-//     button.click()
-//   } else {
-//     const event = new MouseEvent('click', {
-//       bubbles: true,
-//       cancelable: true
-//     })
-//     button.dispatchEvent(event)
-//   }
-  
-//   // Aguarda a animação do accordion
-//   setTimeout(() => {
-//     this.gatherReadableElements()
-//     const isExpanded = button.getAttribute('aria-expanded') === 'true'
-//     this.announceChange(isExpanded ? 'Accordion expandido' : 'Accordion recolhido')
-    
-//     // Se foi expandido, entra no container
-//     if (isExpanded && this.canEnterCurrentContainer()) {
-//       this.enterContainer()
-//     }
-//   }, 300)
-// },
-
 handleAccordionButton(button) {
   const accordionTitle = this.getElementText(button).replace('botão', '').trim();
   const wasExpanded = button.getAttribute('aria-expanded') === 'true';
@@ -743,39 +678,6 @@ activateInteractiveElement(element) {
   setTimeout(() => this.gatherReadableElements(), 300);
 },
 
-  //   activateElement() {
-  // if (this.isInContainer) {
-  //   this.exitContainer()
-  // } else if (this.canEnterCurrentContainer()) {
-  //   this.enterContainer()
-  // } else if (this.canActivateCurrentElement()) {
-  //   const element = this.readableElements[this.currentElementIndex]
-    
-  //   // Tratamento especial para botões de accordion
-  //   if (element.classList.contains('accordion-button') || 
-  //       element.getAttribute('data-bs-toggle') === 'collapse') {
-  //     this.handleAccordionButton(element)
-  //   } else {
-  //     this.announceChange('Ativando elemento...')
-  //     if (element.click) {
-  //       element.click()
-  //     } else {
-  //       const event = new MouseEvent('click', {
-  //         bubbles: true,
-  //         cancelable: true
-  //       })
-  //       element.dispatchEvent(event)
-  //     }
-  //   }
-    
-  //   setTimeout(() => {
-  //     this.gatherReadableElements()
-  //     this.announceChange('Elemento ativado')
-  //   }, 500)
-  // } else {
-  //   this.announceChange('Elemento não pode ser ativado')
-  // }
-  //    },
     // Define o modo de leitura
     setReadingMode(mode) {
       this.stopSpeaking()
@@ -1413,22 +1315,43 @@ activateInteractiveElement(element) {
       element.appendChild(newContent)
     },
 
+    // updateReadingStatus() {
+    //   if (this.readableElements.length === 0) {
+    //     this.currentReadingStatus = "Nenhum conteúdo para ler"
+    //   } else if (this.currentElementIndex >= 0) {
+    //     const element = this.readableElements[this.currentElementIndex]
+    //     if (this.isContainer(element) || this.hasExpandableContent(element)) {
+    //       this.currentReadingStatus = "Área expandível - Enter para entrar"
+    //     } else if (this.isInteractiveElement(element)) {
+    //       this.currentReadingStatus = "Elemento interativo - Enter para ativar"
+    //     } else {
+    //       this.currentReadingStatus = "A ler..."
+    //     }
+    //   } else {
+    //     this.currentReadingStatus = this.isInContainer ? "Dentro de container" : "Leitor de ecrã ativo"
+    //   }
+    // },
     updateReadingStatus() {
-      if (this.readableElements.length === 0) {
-        this.currentReadingStatus = "Nenhum conteúdo para ler"
-      } else if (this.currentElementIndex >= 0) {
-        const element = this.readableElements[this.currentElementIndex]
-        if (this.isContainer(element) || this.hasExpandableContent(element)) {
-          this.currentReadingStatus = "Área expandível - Enter para entrar"
-        } else if (this.isInteractiveElement(element)) {
-          this.currentReadingStatus = "Elemento interativo - Enter para ativar"
-        } else {
-          this.currentReadingStatus = "A ler..."
-        }
+    if (this.readableElements.length === 0) {
+      this.currentReadingStatus = "Nenhum conteúdo para ler"
+    } else if (this.currentElementIndex >= 0) {
+      const element = this.readableElements[this.currentElementIndex]
+      const elementText = this.getElementText(element).replace('Botão:', '').replace('Link:', '').trim()
+      
+      if (this.isContainer(element) || this.hasExpandableContent(element)) {
+        this.currentReadingStatus = "Área expandível - Enter para entrar"
+        // Anuncia por voz para deficientes visuais
+        this.announceForScreenReader(`${elementText}. Pressione Enter ou Return para expandir.`)
+      } else if (this.isInteractiveElement(element)) {
+        this.currentReadingStatus = "Elemento interativo - Enter para ativar"
+        this.announceForScreenReader(`${elementText}. Pressione Enter ou Return para ativar.`)
       } else {
-        this.currentReadingStatus = this.isInContainer ? "Dentro de container" : "Leitor de ecrã ativo"
+        this.currentReadingStatus = "A ler..."
       }
-    },
+    } else {
+      this.currentReadingStatus = this.isInContainer ? "Dentro de container" : "Leitor de ecrã ativo"
+    }
+  },
 
     // Aumenta a velocidade de leitura
     increaseRate() {
@@ -1508,120 +1431,250 @@ activateInteractiveElement(element) {
         }
       }, 2000)
     },
+    announceForScreenReader(message) {
+  // Só anuncia se não estiver reproduzindo já
+  if (!this.isPlaying && this.speechSynth) {
+    const utterance = new SpeechSynthesisUtterance(message)
+    
+    const voices = this.speechSynth.getVoices()
+    const portugueseVoice = voices.find((voice) => voice.lang.includes("pt-BR") || voice.lang.includes("pt"))
+    
+    if (portugueseVoice) {
+      utterance.voice = portugueseVoice
+    }
+    
+    utterance.rate = this.speechRate
+    utterance.pitch = 1.0
+    utterance.lang = "pt-BR"
+    utterance.volume = 0.8 // Um pouco mais baixo que a leitura normal
+    
+    // Cancela qualquer anúncio anterior e fala o novo
+    this.speechSynth.cancel()
+    this.speechSynth.speak(utterance)
+  }
+},
 
     // Processa comandos de teclado - VERSÃO ATUALIZADA
+    // handleKeyboardShortcuts(event) {
+    //   if (!this.active || !this.isInitialized) return
+
+    //   // if (event.target.tagName === "INPUT" || event.target.tagName === "TEXTAREA" || event.target.isContentEditable) {
+    //   //   return
+    //   // }
+    //   if (event.key === 'Enter' || event.key === 'Return') {
+    //     if (event.target.tagName !== 'INPUT') {
+    //       event.preventDefault();
+    //       this.activateElement();
+    //     }
+    //   }
+
+    //   switch (event.key) {
+    //     case " ":
+    //     case "Spacebar":
+    //       if (!event.ctrlKey && !event.altKey && !event.metaKey) {
+    //         this.playPause()
+    //         event.preventDefault()
+    //       }
+    //       break
+    //     case "p":
+    //     case "P":
+    //       if (!event.ctrlKey && !event.altKey && !event.metaKey) {
+    //         this.playPause()
+    //         event.preventDefault()
+    //       }
+    //       break
+    //     case "ArrowRight":
+    //     case "Right":
+    //       if (!event.ctrlKey && !event.altKey && !event.metaKey) {
+    //         this.nextElement()
+    //         event.preventDefault()
+    //       }
+    //       break
+    //     case "n":
+    //     case "N":
+    //       if (!event.ctrlKey && !event.altKey && !event.metaKey) {
+    //         this.nextElement()
+    //         event.preventDefault()
+    //       }
+    //       break
+    //     case "ArrowLeft":
+    //     case "Left":
+    //       if (!event.ctrlKey && !event.altKey && !event.metaKey) {
+    //         this.previousElement()
+    //         event.preventDefault()
+    //       }
+    //       break
+    //     case "b":
+    //     case "B":
+    //       if (!event.ctrlKey && !event.altKey && !event.metaKey) {
+    //         this.previousElement()
+    //         event.preventDefault()
+    //       }
+    //       break
+    //     case "Enter":
+    //       if (!event.ctrlKey && !event.altKey && !event.metaKey) {
+    //         this.activateElement()
+    //         event.preventDefault()
+    //       }
+    //       break
+    //     case "Home":
+    //       if (!event.ctrlKey && !event.altKey && !event.metaKey) {
+    //         this.restart()
+    //         event.preventDefault()
+    //       }
+    //       break
+    //     case "r":
+    //     case "R":
+    //       if (!event.ctrlKey && !event.altKey && !event.metaKey) {
+    //         this.restart()
+    //         event.preventDefault()
+    //       }
+    //       break
+    //     case "w":
+    //     case "W":
+    //       if (!event.ctrlKey && !event.altKey && !event.metaKey) {
+    //         this.setReadingMode(this.readingMode === 'word' ? 'element' : 'word')
+    //         this.announceChange(`Modo: ${this.readingMode === 'word' ? 'Palavra' : 'Elemento'}`)
+    //         event.preventDefault()
+    //       }
+    //       break
+    //     case "Escape":
+    //     case "Esc":
+    //       if (this.isInContainer) {
+    //         this.exitContainer()
+    //       } else {
+    //         this.stopSpeaking()
+    //         this.$emit("update:screenReader", false)
+    //       }
+    //       event.preventDefault()
+    //       break
+    //     case "q":
+    //     case "Q":
+    //       if (!event.ctrlKey && !event.altKey && !event.metaKey) {
+    //         this.stopSpeaking()
+    //         this.$emit("update:screenReader", false)
+    //         event.preventDefault()
+    //       }
+    //       break
+    //     case "+":
+    //     case "=":
+    //       this.increaseRate()
+    //       event.preventDefault()
+    //       break
+    //     case "-":
+    //       this.decreaseRate()
+    //       event.preventDefault()
+    //       break
+    //   }
+    // },
+
     handleKeyboardShortcuts(event) {
-      if (!this.active || !this.isInitialized) return
+  if (!this.active || !this.isInitialized) return
 
-      // if (event.target.tagName === "INPUT" || event.target.tagName === "TEXTAREA" || event.target.isContentEditable) {
-      //   return
-      // }
-      if (event.key === 'Enter' || event.key === 'Return') {
-        if (event.target.tagName !== 'INPUT') {
-          event.preventDefault();
-          this.activateElement();
-        }
-      }
+  // Melhor verificação para tecla Enter/Return (compatível com Mac)
+  const isEnterKey = event.key === 'Enter' || event.key === 'Return' || event.keyCode === 13
 
-      switch (event.key) {
-        case " ":
-        case "Spacebar":
-          if (!event.ctrlKey && !event.altKey && !event.metaKey) {
-            this.playPause()
-            event.preventDefault()
-          }
-          break
-        case "p":
-        case "P":
-          if (!event.ctrlKey && !event.altKey && !event.metaKey) {
-            this.playPause()
-            event.preventDefault()
-          }
-          break
-        case "ArrowRight":
-        case "Right":
-          if (!event.ctrlKey && !event.altKey && !event.metaKey) {
-            this.nextElement()
-            event.preventDefault()
-          }
-          break
-        case "n":
-        case "N":
-          if (!event.ctrlKey && !event.altKey && !event.metaKey) {
-            this.nextElement()
-            event.preventDefault()
-          }
-          break
-        case "ArrowLeft":
-        case "Left":
-          if (!event.ctrlKey && !event.altKey && !event.metaKey) {
-            this.previousElement()
-            event.preventDefault()
-          }
-          break
-        case "b":
-        case "B":
-          if (!event.ctrlKey && !event.altKey && !event.metaKey) {
-            this.previousElement()
-            event.preventDefault()
-          }
-          break
-        case "Enter":
-          if (!event.ctrlKey && !event.altKey && !event.metaKey) {
-            this.activateElement()
-            event.preventDefault()
-          }
-          break
-        case "Home":
-          if (!event.ctrlKey && !event.altKey && !event.metaKey) {
-            this.restart()
-            event.preventDefault()
-          }
-          break
-        case "r":
-        case "R":
-          if (!event.ctrlKey && !event.altKey && !event.metaKey) {
-            this.restart()
-            event.preventDefault()
-          }
-          break
-        case "w":
-        case "W":
-          if (!event.ctrlKey && !event.altKey && !event.metaKey) {
-            this.setReadingMode(this.readingMode === 'word' ? 'element' : 'word')
-            this.announceChange(`Modo: ${this.readingMode === 'word' ? 'Palavra' : 'Elemento'}`)
-            event.preventDefault()
-          }
-          break
-        case "Escape":
-        case "Esc":
-          if (this.isInContainer) {
-            this.exitContainer()
-          } else {
-            this.stopSpeaking()
-            this.$emit("update:screenReader", false)
-          }
-          event.preventDefault()
-          break
-        case "q":
-        case "Q":
-          if (!event.ctrlKey && !event.altKey && !event.metaKey) {
-            this.stopSpeaking()
-            this.$emit("update:screenReader", false)
-            event.preventDefault()
-          }
-          break
-        case "+":
-        case "=":
-          this.increaseRate()
-          event.preventDefault()
-          break
-        case "-":
-          this.decreaseRate()
-          event.preventDefault()
-          break
+  if (isEnterKey) {
+    if (event.target.tagName !== 'INPUT' && event.target.tagName !== 'TEXTAREA' && !event.target.isContentEditable) {
+      event.preventDefault();
+      this.activateElement();
+    }
+    return; // Importante: return aqui para não executar o switch
+  }
+
+  switch (event.key) {
+    case " ":
+    case "Spacebar":
+      if (!event.ctrlKey && !event.altKey && !event.metaKey) {
+        this.playPause()
+        event.preventDefault()
       }
-    },
+      break
+    case "p":
+    case "P":
+      if (!event.ctrlKey && !event.altKey && !event.metaKey) {
+        this.playPause()
+        event.preventDefault()
+      }
+      break
+    case "ArrowRight":
+    case "Right":
+      if (!event.ctrlKey && !event.altKey && !event.metaKey) {
+        this.nextElement()
+        event.preventDefault()
+      }
+      break
+    case "n":
+    case "N":
+      if (!event.ctrlKey && !event.altKey && !event.metaKey) {
+        this.nextElement()
+        event.preventDefault()
+      }
+      break
+    case "ArrowLeft":
+    case "Left":
+      if (!event.ctrlKey && !event.altKey && !event.metaKey) {
+        this.previousElement()
+        event.preventDefault()
+      }
+      break
+    case "b":
+    case "B":
+      if (!event.ctrlKey && !event.altKey && !event.metaKey) {
+        this.previousElement()
+        event.preventDefault()
+      }
+      break
+    case "Home":
+      if (!event.ctrlKey && !event.altKey && !event.metaKey) {
+        this.restart()
+        event.preventDefault()
+      }
+      break
+    case "r":
+    case "R":
+      if (!event.ctrlKey && !event.altKey && !event.metaKey) {
+        this.restart()
+        event.preventDefault()
+      }
+      break
+    case "w":
+    case "W":
+      if (!event.ctrlKey && !event.altKey && !event.metaKey) {
+        this.setReadingMode(this.readingMode === 'word' ? 'element' : 'word')
+        this.announceChange(`Modo: ${this.readingMode === 'word' ? 'Palavra' : 'Elemento'}`)
+        event.preventDefault()
+      }
+      break
+    case "Escape":
+    case "Esc":
+      if (this.isInContainer) {
+        this.exitContainer()
+      } else {
+        this.stopSpeaking()
+        this.$emit("update:screenReader", false)
+      }
+      event.preventDefault()
+      break
+    case "q":
+    case "Q":
+      if (!event.ctrlKey && !event.altKey && !event.metaKey) {
+        this.stopSpeaking()
+        this.$emit("update:screenReader", false)
+        event.preventDefault()
+      }
+      break
+    case "+":
+    case "=":
+      this.increaseRate()
+      event.preventDefault()
+      break
+    case "-":
+      this.decreaseRate()
+      event.preventDefault()
+      break
+  }
+},
   },
 }
 </script>

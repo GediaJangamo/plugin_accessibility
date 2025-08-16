@@ -294,6 +294,20 @@ export default {
             display: none !important;
             visibility: hidden !important;
           }
+          /* Garante que todos elementos interativos tenham indicação visual */
+            a, button, [role="button"], [tabindex="0"] {
+              &:focus {
+                outline: 2px solid #3b82f6;
+                outline-offset: 2px;
+              }
+            }
+
+            /* Estilo específico para Mac */
+            @media (-webkit-mac-control) {
+              [role="button"] {
+                min-height: 24px; /* Melhora o target para click */
+              }
+            }
           
           @keyframes sr-glow-pulse {
             0% { opacity: 0.3; transform: scale(1); }
@@ -501,10 +515,18 @@ enterContainer() {
       this.updateReadingStatus()
     },
 
+    // isAccordionButton(element) {
+    //  return element.classList.contains('accordion-button') || 
+    //      element.getAttribute('data-bs-toggle') === 'collapse';
+    // },
+
     isAccordionButton(element) {
-     return element.classList.contains('accordion-button') || 
-         element.getAttribute('data-bs-toggle') === 'collapse';
-    },
+    return (
+      element.classList.contains('accordion-button') || 
+      (element.getAttribute('data-bs-toggle') === 'collapse' &&
+      element.getAttribute('aria-controls'))
+    );
+  },
 
     // Coleta elementos dentro de um container específico
     gatherElementsInContainer(container) {
@@ -672,19 +694,53 @@ handleAccordionButton(button) {
 },
 activateElement() {
   if (this.isInContainer) {
-    this.announceChange(`Saindo de ${this.getElementText(this.currentContainer)}`);
     this.exitContainer();
-  } 
-  else {
-    const element = this.readableElements[this.currentElementIndex];
-    if (this.isAccordionButton(element)) {
-      this.handleAccordionButton(element);
-    }
-    else if (this.canEnterCurrentContainer()) {
-      this.announceChange(`Entrando em ${this.getElementText(element)}`);
-      this.enterContainer();
-    }
+    return;
   }
+
+  const element = this.readableElements[this.currentElementIndex];
+  
+  // Tratamento para links e botões normais
+  if (this.isRegularInteractiveElement(element)) {
+    this.activateInteractiveElement(element);
+    return;
+  }
+
+  // Tratamento específico para accordions
+  if (this.isAccordionButton(element)) {
+    this.handleAccordionButton(element);
+    return;
+  }
+
+  // Entrada em containers genéricos
+  if (this.canEnterCurrentContainer()) {
+    this.enterContainer();
+  }
+},
+
+isRegularInteractiveElement(element) {
+  const tag = element.tagName.toLowerCase();
+  return (
+    (tag === 'a' && element.href) || 
+    (tag === 'button' && !this.isAccordionButton(element)) ||
+    ['input', 'textarea', 'select'].includes(tag)
+  );
+},
+
+activateInteractiveElement(element) {
+  const elementName = this.getElementText(element);
+  this.announceChange(`Ativando ${elementName}`);
+  
+  if (element.click) {
+    element.click();
+  } else {
+    element.dispatchEvent(new MouseEvent('click', {
+      bubbles: true,
+      cancelable: true
+    }));
+  }
+  
+  setTimeout(() => this.gatherReadableElements(), 300);
 },
 
   //   activateElement() {
@@ -1457,8 +1513,14 @@ activateElement() {
     handleKeyboardShortcuts(event) {
       if (!this.active || !this.isInitialized) return
 
-      if (event.target.tagName === "INPUT" || event.target.tagName === "TEXTAREA" || event.target.isContentEditable) {
-        return
+      // if (event.target.tagName === "INPUT" || event.target.tagName === "TEXTAREA" || event.target.isContentEditable) {
+      //   return
+      // }
+      if (event.key === 'Enter' || event.key === 'Return') {
+        if (event.target.tagName !== 'INPUT') {
+          event.preventDefault();
+          this.activateElement();
+        }
       }
 
       switch (event.key) {

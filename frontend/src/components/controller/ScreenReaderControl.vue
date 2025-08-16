@@ -95,7 +95,7 @@
             <button 
               @click="restart"
               class="flex items-center justify-center bg-white dark:bg-gray-600 hover:bg-gray-100 dark:hover:bg-gray-500 text-red-500 p-3 rounded-lg shadow-sm transition-colors"
-              aria-label="Reiniciar do início"
+              aria-label="Reiniciar leitura"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -150,6 +150,7 @@ export default {
       speechRate: 1.0,
       gatherTimeout: null,
       observer: null,
+      pauseTimer: null,
       isInitialized: false,
       keysEnabled: false,
       navigationDebounce: null,
@@ -185,10 +186,9 @@ export default {
         style.id = 'screen-reader-highlight-styles'
         style.textContent = `
           .sr-element-highlight {
-            outline: 3px solid #3b82f6 !important;
+            outline: 2px solid rgba(59, 130, 246, 0.8) !important;
             outline-offset: 2px !important;
             background-color: rgba(59, 130, 246, 0.1) !important;
-            border-radius: 4px !important;
           }
           
           @keyframes sr-notification-slide {
@@ -228,18 +228,11 @@ export default {
       this.initializeSpeechSynthesis()
 
       setTimeout(() => {
-        this.gatherAllReadableElements()
+        this.gatherReadableElements()
         this.currentElementIndex = -1
         this.removeAllHighlights()
         this.enableKeyboardControls()
         this.isInitialized = true
-        
-        // Começa automaticamente no primeiro elemento
-        if (this.readableElements.length > 0) {
-          this.currentElementIndex = 0
-          this.highlightCurrentElement()
-          this.updateReadingStatus()
-        }
       }, 300)
     },
 
@@ -256,7 +249,7 @@ export default {
       this.isInitialized = false
     },
 
-    // Inicializa o observador de mudanças no DOM (simplificado)
+    // Inicializa o observador de mudanças no DOM
     initMutationObserver() {
       if (window.MutationObserver) {
         this.observer = new MutationObserver(this.debounceGatherElements)
@@ -264,7 +257,7 @@ export default {
           childList: true,
           subtree: true,
           attributes: true,
-          attributeFilter: ['class', 'style', 'aria-expanded']
+          attributeFilter: ['class', 'style', 'aria-expanded', 'hidden']
         })
       }
     },
@@ -313,10 +306,15 @@ export default {
       if (tag === 'img') {
         const alt = element.alt?.trim()
         const title = element.title?.trim()
+        const src = element.src
+        
         if (alt) {
           return `Imagem: ${alt}`
         } else if (title) {
           return `Imagem: ${title}`
+        } else if (src) {
+          const filename = src.split('/').pop().split('?')[0]
+          return `Imagem: ${filename}`
         } else {
           return 'Imagem sem descrição'
         }
@@ -324,26 +322,21 @@ export default {
       
       // Para SVGs
       if (tag === 'svg') {
-        return element.getAttribute('aria-label') || 'Gráfico'
+        return element.getAttribute('aria-label') || 'Gráfico sem descrição'
       }
       
-      // Para botões de accordion, descreve o estado e função
-      if (element.classList.contains('accordion-button')) {
-        const text = element.textContent.trim()
-        const isExpanded = element.getAttribute('aria-expanded') === 'true'
-        return `${text}. Accordion ${isExpanded ? 'aberto' : 'fechado'}. Pressione Enter para ${isExpanded ? 'fechar' : 'abrir'}.`
-      }
-      
-      // Para outros elementos interativos
+      // Para elementos interativos, adiciona contexto
       if (this.isInteractiveElement(element)) {
         const text = element.textContent.trim()
         if (tag === 'button') {
-          return `Botão: ${text}. Pressione Enter para ativar.`
+          return `Botão: ${text}`
         } else if (tag === 'a') {
-          const href = element.href
-          return `Link: ${text}. ${href ? 'Endereço: ' + href + '.' : ''} Pressione Enter para seguir.`
+          return `Link: ${text}`
+        } else if (element.classList.contains('accordion-button')) {
+          const isExpanded = element.getAttribute('aria-expanded') === 'true'
+          return `Botão de accordion ${isExpanded ? 'expandido' : 'recolhido'}: ${text}`
         } else {
-          return `${text}. Pressione Enter para ativar.`
+          return `Elemento clicável: ${text}`
         }
       }
 
@@ -352,24 +345,15 @@ export default {
         const level = tag.charAt(1)
         return `Cabeçalho nível ${level}: ${element.textContent.trim()}`
       }
-
-      // Para texto com formatação especial
-      if (element.classList.contains('text-muted')) {
-        return `Texto secundário: ${element.textContent.trim()}`
-      }
-
-      if (element.classList.contains('badge')) {
-        return `Etiqueta: ${element.textContent.trim()}`
-      }
       
       return element.textContent.trim()
     },
 
-    // Coleta TODOS os elementos da página em ordem de leitura natural
-    async gatherAllReadableElements() {
+    // Coleta elementos que podem ser lidos - SIMPLIFICADO E CORRETO
+    async gatherReadableElements() {
       const mainContent = document.getElementById("main-content") || document.body
       
-      // Selector abrangente que pega tudo na ordem da página
+      // Selector que inclui TODOS os elementos relevantes da página
       const selector = `
         h1, h2, h3, h4, h5, h6,
         p,
@@ -380,24 +364,30 @@ export default {
         select,
         label,
         li,
-        td, th,
+        td,
+        th,
         img,
         svg[aria-label],
         span.badge,
-        small,
-        div.course-header,
-        div.d-flex.justify-content-between,
         .nav-link,
+        .tab-button,
         .card-title,
         .card-text,
-        .semestreText,
-        .text-muted,
+        .credits-filled,
+        .credits-available,
+        .inscricoes-abertas,
+        .section-title,
+        .precedencias-title,
+        .dropdown-select,
+        .btn-proximo,
+        .print-btn,
         .accordion-button
       `
       
-      // Coleta TODOS os elementos visíveis na página
+      // Coleta TODOS os elementos, incluindo os dentro de accordions
       const allElements = Array.from(mainContent.querySelectorAll(selector))
       
+      // Filtra apenas por critérios básicos
       this.readableElements = allElements.filter(el => {
         // Ignora elementos do próprio leitor
         if (el.closest('.screen-reader-control') || el.closest('[data-screen-reader-ignore]')) {
@@ -410,54 +400,73 @@ export default {
           return false
         }
         
-        // Ignora apenas elementos completamente ocultos
+        // Ignora apenas elementos completamente ocultos (display: none, visibility: hidden)
         const style = window.getComputedStyle(el)
         if (style.display === 'none' || style.visibility === 'hidden') {
           return false
         }
         
-        // Não ignora elementos dentro de accordions fechados - queremos ler tudo!
+        // Ignora elementos com atributo hidden
+        if (el.hasAttribute('hidden')) {
+          return false
+        }
         
         return true
       }).sort((a, b) => {
-        // Ordena os elementos por posição visual na página (ordem de leitura)
+        // Ordena os elementos por posição na página (ordem de leitura natural)
         const rectA = a.getBoundingClientRect()
         const rectB = b.getBoundingClientRect()
         
-        // Primeiro por posição vertical (de cima para baixo)
-        if (Math.abs(rectA.top - rectB.top) > 5) {
+        // Primeiro ordena por posição vertical
+        if (Math.abs(rectA.top - rectB.top) > 10) {
           return rectA.top - rectB.top
         }
-        // Depois por posição horizontal (esquerda para direita)
+        // Depois por posição horizontal
         return rectA.left - rectB.left
       })
 
-      // Remove duplicatas por conteúdo
+      // Remove duplicatas baseado no conteúdo
       this.readableElements = this.removeDuplicateElements(this.readableElements)
 
-      console.log(`Coletados ${this.readableElements.length} elementos para leitura`)
-
       if (this.readableElements.length > 0) {
-        this.currentReadingStatus = `${this.readableElements.length} elementos encontrados. Pronto para ler.`
+        this.currentReadingStatus = `Leitor ativo - ${this.readableElements.length} elementos encontrados`
       } else {
-        this.currentReadingStatus = "Nenhum conteúdo encontrado"
+        this.currentReadingStatus = "Nenhum conteúdo para ler"
       }
     },
 
-    // Remove elementos duplicados baseado no conteúdo
+    // Remove elementos duplicados
     removeDuplicateElements(elements) {
-      const seen = new Set()
+      const seen = new Map()
       
       return elements.filter(el => {
         const text = this.getElementText(el).toLowerCase().trim()
         const tag = el.tagName.toLowerCase()
-        const key = `${tag}:${text.substring(0, 50)}`
         
-        if (seen.has(key)) {
-          return false
+        // Para imagens, usa src como chave adicional
+        if (tag === 'img') {
+          const key = `${tag}:${text}:${el.src}`
+          if (seen.has(key)) return false
+          seen.set(key, true)
+          return true
         }
         
-        seen.add(key)
+        // Para outros elementos, verifica por texto e tag
+        const key = `${tag}:${text}`
+        
+        if (seen.has(key)) {
+          // Se já vimos este conteúdo, verifica se é realmente duplicado
+          const rect = el.getBoundingClientRect()
+          const seenData = seen.get(key)
+          
+          // Se estão na mesma posição, é duplicado
+          if (seenData && Math.abs(seenData.top - rect.top) < 5 && Math.abs(seenData.left - rect.left) < 5) {
+            return false
+          }
+        }
+        
+        const rect = el.getBoundingClientRect()
+        seen.set(key, { top: rect.top, left: rect.left })
         return true
       })
     },
@@ -466,18 +475,9 @@ export default {
       if (this.gatherTimeout) clearTimeout(this.gatherTimeout)
       this.gatherTimeout = setTimeout(() => {
         if (this.active) {
-          const currentElement = this.currentElementIndex >= 0 ? this.readableElements[this.currentElementIndex] : null
-          this.gatherAllReadableElements()
-          
-          // Tenta manter o elemento atual após a recoleta
-          if (currentElement) {
-            const newIndex = this.readableElements.findIndex(el => el === currentElement)
-            if (newIndex >= 0) {
-              this.currentElementIndex = newIndex
-            }
-          }
+          this.gatherReadableElements()
         }
-      }, 1000)
+      }, 500)
     },
 
     // Iniciar/pausar a leitura
@@ -511,14 +511,14 @@ export default {
       if (this.currentElementIndex > 0) {
         this.currentElementIndex--
       } else {
-        // Vai para o último elemento
+        // Volta para o último elemento (navegação circular)
         this.currentElementIndex = this.readableElements.length - 1
       }
 
       this.highlightCurrentElement()
       this.updateReadingStatus()
 
-      // Se estava lendo continuamente, continua
+      // Se estava lendo, continua lendo o novo elemento
       if (this.isPlaying) {
         setTimeout(() => {
           if (this.isPlaying) {
@@ -540,14 +540,14 @@ export default {
       if (this.currentElementIndex < this.readableElements.length - 1) {
         this.currentElementIndex++
       } else {
-        // Volta para o primeiro elemento
+        // Volta para o primeiro elemento (navegação circular)
         this.currentElementIndex = 0
       }
 
       this.highlightCurrentElement()
       this.updateReadingStatus()
 
-      // Se estava lendo continuamente, continua
+      // Se estava lendo, continua lendo o novo elemento
       if (this.isPlaying) {
         setTimeout(() => {
           if (this.isPlaying) {
@@ -557,7 +557,7 @@ export default {
       }
     },
 
-    // Reinicia do primeiro elemento
+    // Reinicia a leitura do primeiro elemento
     restart() {
       this.stopSpeaking()
 
@@ -566,8 +566,9 @@ export default {
         this.highlightCurrentElement()
         this.updateReadingStatus()
 
-        // Anuncia o reinício
-        this.announceChange("Reiniciando do início da página")
+        if (this.isPlaying) {
+          this.speakCurrentElement()
+        }
       }
     },
 
@@ -604,16 +605,12 @@ export default {
           this.currentElementIndex++
           this.highlightCurrentElement()
           this.updateReadingStatus()
-          
-          // Pausa breve entre elementos para clareza
           setTimeout(() => {
-            if (this.isPlaying) {
-              this.speakCurrentElement()
-            }
-          }, 300)
-        } else if (this.active) {
+            this.speakCurrentElement()
+          }, 200)
+        } else {
           this.isPlaying = false
-          this.currentReadingStatus = "Fim da página. Pressione R para recomeçar."
+          this.currentReadingStatus = "Leitura concluída"
         }
       }
 
@@ -634,13 +631,13 @@ export default {
       if (this.speechSynth && this.isPlaying) {
         this.speechSynth.pause()
         this.isPlaying = false
-        this.currentReadingStatus = "Leitura pausada"
       }
     },
 
     // Retoma a leitura pausada
     resumeSpeaking() {
       if (this.speechSynth && this.speechSynth.paused) {
+        clearTimeout(this.pauseTimer)
         this.speechSynth.resume()
         this.isPlaying = true
         this.updateReadingStatus()
@@ -662,17 +659,17 @@ export default {
       })
     },
 
-    // Destaca visualmente o elemento atual
+    // Destaca visualmente o elemento atual de forma SUTIL
     async highlightCurrentElement() {
       this.removeAllHighlights()
 
       if (this.currentElementIndex >= 0 && this.readableElements[this.currentElementIndex]) {
         const element = this.readableElements[this.currentElementIndex]
         
-        // Adiciona destaque sutil
+        // Apenas um outline sutil, sem alterar a aparência do elemento
         element.classList.add("sr-element-highlight")
 
-        // Scroll suave para o elemento, garantindo que seja visível
+        // Scroll suave para o elemento
         element.scrollIntoView({
           behavior: "smooth",
           block: "center",
@@ -689,7 +686,7 @@ export default {
         const elementType = this.getElementType(element)
         this.currentReadingStatus = `${elementType} (${this.currentElementIndex + 1}/${this.readableElements.length})`
       } else {
-        this.currentReadingStatus = "Leitor pronto"
+        this.currentReadingStatus = "Leitor de tela ativo"
       }
     },
 
@@ -697,21 +694,13 @@ export default {
     getElementType(element) {
       const tag = element.tagName.toLowerCase()
       
-      if (element.classList.contains('accordion-button')) {
-        const isExpanded = element.getAttribute('aria-expanded') === 'true'
-        return `Accordion ${isExpanded ? 'aberto' : 'fechado'}`
-      }
       if (tag === 'button') return 'Botão'
       if (tag === 'a') return 'Link'
-      if (tag.startsWith('h')) return `Cabeçalho ${tag.charAt(1)}`
+      if (tag.startsWith('h')) return 'Cabeçalho'
       if (tag === 'img') return 'Imagem'
       if (tag === 'p') return 'Parágrafo'
       if (tag === 'li') return 'Item de lista'
-      if (element.classList.contains('text-muted')) return 'Informação secundária'
-      if (element.classList.contains('badge')) return 'Etiqueta'
-      if (tag === 'small') return 'Texto pequeno'
-      if (tag === 'span') return 'Texto'
-      if (tag === 'div') return 'Conteúdo'
+      if (element.classList.contains('accordion-button')) return 'Botão de accordion'
       
       return 'Elemento'
     },
@@ -722,14 +711,7 @@ export default {
         const element = this.readableElements[this.currentElementIndex]
         
         if (this.isInteractiveElement(element)) {
-          this.announceChange('Ativando...')
-          
-          // Para botões de accordion, anuncia a ação
-          if (element.classList.contains('accordion-button')) {
-            const isExpanded = element.getAttribute('aria-expanded') === 'true'
-            const action = isExpanded ? 'Fechando' : 'Abrindo'
-            this.announceChange(`${action} accordion...`)
-          }
+          this.announceChange('Ativando elemento...')
           
           if (element.click) {
             element.click()
@@ -741,21 +723,12 @@ export default {
             element.dispatchEvent(event)
           }
           
-          // Aguarda um pouco para a animação do accordion e depois recoleta
           setTimeout(() => {
-            this.gatherAllReadableElements()
-            
-            // Anuncia o resultado
-            if (element.classList.contains('accordion-button')) {
-              const isNowExpanded = element.getAttribute('aria-expanded') === 'true'
-              const result = isNowExpanded ? 'Accordion aberto' : 'Accordion fechado'
-              this.announceChange(result)
-            } else {
-              this.announceChange('Elemento ativado')
-            }
-          }, 800)
+            this.gatherReadableElements()
+            this.announceChange('Elemento ativado')
+          }, 500)
         } else {
-          this.announceChange('Este elemento não pode ser ativado')
+          this.announceChange('Elemento não é interativo')
         }
       }
     },
@@ -774,19 +747,7 @@ export default {
         return true
       }
       
-      // Elementos com data-bs-toggle são interativos (Bootstrap)
-      if (element.getAttribute('data-bs-toggle')) {
-        return true
-      }
-      
-      // Elementos com classes específicas do Bootstrap
-      if (element.classList.contains('accordion-button') || 
-          element.classList.contains('course-header')) {
-        return true
-      }
-      
-      // Verifica se tem onclick ou outros event handlers
-      if (element.onclick) {
+      if (element.onclick || element.getAttribute('data-bs-toggle') || element.classList.contains('accordion-button')) {
         return true
       }
       
@@ -797,13 +758,14 @@ export default {
     increaseRate() {
       if (!this.speechSynth) return
 
-      const newRate = Math.min(this.speechRate + 0.1, 2.0)
-      this.speechRate = newRate
+      const currentRate = this.utterance ? this.utterance.rate : this.speechRate
+      const newRate = Math.min(currentRate + 0.1, 2.0)
 
       if (this.utterance) {
         this.utterance.rate = newRate
       }
 
+      this.speechRate = newRate
       this.announceChange(`Velocidade: ${Math.round(newRate * 10) / 10}x`)
     },
 
@@ -811,25 +773,21 @@ export default {
     decreaseRate() {
       if (!this.speechSynth) return
 
-      const newRate = Math.max(this.speechRate - 0.1, 0.5)
-      this.speechRate = newRate
+      const currentRate = this.utterance ? this.utterance.rate : this.speechRate
+      const newRate = Math.max(currentRate - 0.1, 0.5)
 
       if (this.utterance) {
         this.utterance.rate = newRate
       }
 
+      this.speechRate = newRate
       this.announceChange(`Velocidade: ${Math.round(newRate * 10) / 10}x`)
     },
 
-    // Exibe mensagem de confirmação temporária e fala ela
+    // Exibe mensagem de confirmação temporária
     announceChange(message) {
-      // Para a leitura atual temporariamente para anunciar a mudança
-      const wasPlaying = this.isPlaying
-      this.stopSpeaking()
-      
       this.currentReadingStatus = message
 
-      // Cria notificação visual
       const notification = document.createElement("div")
       notification.style.cssText = `
         position: fixed;
@@ -852,32 +810,6 @@ export default {
       notification.textContent = message
       document.body.appendChild(notification)
 
-      // Fala a mensagem
-      if (this.speechSynth) {
-        const announcement = new SpeechSynthesisUtterance(message)
-        announcement.rate = this.speechRate
-        announcement.lang = "pt-BR"
-        
-        const voices = this.speechSynth.getVoices()
-        const portugueseVoice = voices.find((voice) => voice.lang.includes("pt-BR") || voice.lang.includes("pt"))
-        if (portugueseVoice) {
-          announcement.voice = portugueseVoice
-        }
-
-        announcement.onend = () => {
-          // Retoma a leitura se estava lendo antes
-          if (wasPlaying) {
-            setTimeout(() => {
-              this.isPlaying = true
-              this.speakCurrentElement()
-            }, 500)
-          }
-        }
-
-        this.speechSynth.speak(announcement)
-      }
-
-      // Remove a notificação visual após um tempo
       setTimeout(() => {
         if (document.body.contains(notification)) {
           notification.style.animation = 'sr-notification-slide 0.3s ease-out reverse'
@@ -890,7 +822,7 @@ export default {
         if (this.currentReadingStatus === message) {
           this.updateReadingStatus()
         }
-      }, 2500)
+      }, 2000)
     },
 
     // Processa comandos de teclado
@@ -987,51 +919,7 @@ export default {
           this.decreaseRate()
           event.preventDefault()
           break
-        case "s":
-        case "S":
-          if (!event.ctrlKey && !event.altKey && !event.metaKey) {
-            this.stopSpeaking()
-            this.announceChange("Leitura parada")
-            event.preventDefault()
-          }
-          break
-        case "i":
-        case "I":
-          if (!event.ctrlKey && !event.altKey && !event.metaKey) {
-            // Informa sobre o elemento atual
-            if (this.currentElementIndex >= 0 && this.readableElements[this.currentElementIndex]) {
-              const element = this.readableElements[this.currentElementIndex]
-              const info = this.getDetailedElementInfo(element)
-              this.announceChange(info)
-            }
-            event.preventDefault()
-          }
-          break
       }
-    },
-
-    // Fornece informações detalhadas sobre o elemento atual
-    getDetailedElementInfo(element) {
-      const tag = element.tagName.toLowerCase()
-      const text = element.textContent.trim().substring(0, 100)
-      let info = `Elemento ${tag}`
-      
-      if (element.classList.contains('accordion-button')) {
-        const isExpanded = element.getAttribute('aria-expanded') === 'true'
-        info += `, accordion ${isExpanded ? 'aberto' : 'fechado'}`
-      }
-      
-      if (this.isInteractiveElement(element)) {
-        info += ', interativo'
-      }
-      
-      if (element.href) {
-        info += `, link para ${element.href}`
-      }
-      
-      info += `. Conteúdo: ${text}`
-      
-      return info
     },
   },
 }

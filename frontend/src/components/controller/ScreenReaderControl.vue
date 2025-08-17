@@ -353,35 +353,20 @@ export default {
     },
 
     // Verifica se pode entrar no container atual
-    // canEnterCurrentContainer(){
-    //   if (this.currentElementIndex < 0 || !this.readableElements[this.currentElementIndex]) {
-    //     return false
-    //   }
-      
-    //   const element = this.readableElements[this.currentElementIndex]
-      
-    //   // Verifica se é um accordion expandido
-    //   if (this.isAccordionButton(element) && 
-    //       element.getAttribute('aria-expanded') === 'true') {
-    //     return true
-    //   }
-      
-    //   return this.isContainer(element) || this.hasExpandableContent(element)
-    // },
-canEnterCurrentContainer() {
-  if (this.currentElementIndex < 0 || !this.readableElements[this.currentElementIndex]) {
-    return false
-  }
-  
-  const element = this.readableElements[this.currentElementIndex]
-  
-  // Verifica se é um accordion expandido
-  if (this.isAccordionButton(element)) {
-    return true // Permite entrar mesmo se não estiver expandido
-  }
-  
-  return this.isContainer(element) || this.hasExpandableContent(element)
-},
+    canEnterCurrentContainer() {
+    if (this.currentElementIndex < 0 || !this.readableElements[this.currentElementIndex]) {
+      return false
+    }
+    
+    const element = this.readableElements[this.currentElementIndex]
+    
+    // Verifica se é um accordion expandido
+    if (this.isAccordionButton(element)) {
+      return true // Permite entrar mesmo se não estiver expandido
+    }
+    
+    return this.isContainer(element) || this.hasExpandableContent(element)
+    },
     // Verifica se tem conteúdo expansível
     hasExpandableContent(element) {
       // Accordion buttons
@@ -477,42 +462,6 @@ canEnterCurrentContainer() {
     },
 
     // Procede para entrar no container
-    // proceedToEnterContainer(element) {
-    //   // Salva o estado atual
-    //   this.containerStack.push({
-    //     container: this.currentContainer,
-    //     elements: [...this.readableElements],
-    //     index: this.currentElementIndex
-    //   })
-
-    //   this.currentContainer = element
-    //   this.isInContainer = true
-
-    //   // Encontra os elementos dentro do container
-    //   let containerContent = null
-      
-    //   if (element.classList.contains('accordion-button')) {
-    //     const controls = element.getAttribute('aria-controls')
-    //     if (controls) {
-    //       containerContent = document.getElementById(controls)
-    //     }
-    //   } else if (this.isContainer(element)) {
-    //     containerContent = element
-    //   }
-
-    //   if (containerContent) {
-    //     this.gatherElementsInContainer(containerContent)
-    //     this.currentElementIndex = 0
-    //     this.announceChange(`Entrando no container com ${this.readableElements.length} elementos`)
-        
-    //     if (this.readableElements.length > 0) {
-    //       this.highlightCurrentElement()
-    //     }
-    //   } else {
-    //     this.announceChange("Container vazio")
-    //   }
-    //   this.announceChange(`Entrando em ${this.getElementText(element)}`);
-    // },
     proceedToEnterContainer(element) {
   // Salva o estado atual
   this.containerStack.push({
@@ -737,137 +686,67 @@ canEnterCurrentContainer() {
   }
 },
 
-    // Função melhorada para lidar com botões de accordion
-  // handleAccordionButton(button) {
-  //   const accordionTitle = this.getElementText(button).replace('botão', '').replace('Botão:', '').trim()
-  //   const wasExpanded = button.getAttribute('aria-expanded') === 'true'
+   // Função melhorada para lidar com botões de accordion
+  handleAccordionButton(button) {
+    const accordionTitle = this.getElementText(button).replace('botão', '').replace('Botão:', '').trim()
+    const wasExpanded = button.getAttribute('aria-expanded') === 'true'
     
-  //   this.announceChange(`${wasExpanded ? 'Recolhendo' : 'Expandindo'} ${accordionTitle}...`)
+    this.announceChange(`${wasExpanded ? 'Recolhendo' : 'Expandindo'} ${accordionTitle}...`)
     
-  //   // Primeiro tenta usar a API do Bootstrap se disponível
-  //   if (window.bootstrap && window.bootstrap.Collapse) {
-  //     try {
-  //       const targetId = button.getAttribute('data-bs-target') || 
-  //                     button.getAttribute('aria-controls') || 
-  //                     button.getAttribute('data-target')
-  //       const selector = targetId?.startsWith('#') ? targetId : `#${targetId}`
-  //       const target = selector ? document.querySelector(selector) : null
+    // Primeiro tenta usar a API do Bootstrap se disponível
+    if (window.bootstrap && window.bootstrap.Collapse) {
+      try {
+        const targetId = button.getAttribute('data-bs-target') || 
+                      button.getAttribute('aria-controls') || 
+                      button.getAttribute('data-target')
+        const selector = targetId?.startsWith('#') ? targetId : `#${targetId}`
+        const target = selector ? document.querySelector(selector) : null
         
-  //       if (target) {
-  //         const bsCollapse = window.bootstrap.Collapse.getOrCreateInstance(target, {
-  //           toggle: false // Desativa o toggle automático para termos mais controle
-  //         })
+        if (target) {
+          const bsCollapse = window.bootstrap.Collapse.getOrCreateInstance(target, {
+            toggle: false
+          })
           
-  //         // Força a abertura/fechamento imediato
-  //         if (wasExpanded) {
-  //           bsCollapse.hide()
-  //         } else {
-  //           bsCollapse.show()
-  //         }
-          
-  //         // Atualiza o estado após a animação
-  //         setTimeout(() => {
-  //           const isNowExpanded = button.getAttribute('aria-expanded') === 'true'
-  //           const newStatus = isNowExpanded ? 'expandido' : 'recolhido'
-  //           this.announceChange(`${accordionTitle} ${newStatus}`)
-  //           this.gatherReadableElements()
-  //         }, 350)
-  //         return
-  //       }
-  //     } catch (e) {
-  //       console.error('Erro ao usar API Bootstrap:', e)
-  //     }
-  //   }
-    
-  //   // Método alternativo robusto
-  //   this.forceAccordionToggle(button)
-    
-  //   // Feedback imediato
-  //   setTimeout(() => {
-  //     const isNowExpanded = button.getAttribute('aria-expanded') === 'true'
-  //     const newStatus = isNowExpanded ? 'expandido' : 'recolhido'
-  //     this.announceChange(`${accordionTitle} ${newStatus}`)
-  //     this.gatherReadableElements()
-      
-  //     // Se expandiu, move o foco para o primeiro elemento dentro do accordion
-  //     if (isNowExpanded && !wasExpanded) {
-  //       setTimeout(() => {
-  //         const targetId = button.getAttribute('aria-controls') || 
-  //                       button.getAttribute('data-bs-target')?.replace('#', '') || 
-  //                       button.getAttribute('data-target')?.replace('#', '')
-  //         if (targetId) {
-  //           const target = document.getElementById(targetId)
-  //           if (target) {
-  //             const firstFocusable = target.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')
-  //             if (firstFocusable) {
-  //               firstFocusable.focus()
-  //             }
-  //           }
-  //         }
-  //       }, 100)
-  //     }
-  //   }, 350)
-  // },
-handleAccordionButton(button) {
-  const accordionTitle = this.getElementText(button).replace('botão', '').replace('Botão:', '').trim()
-  const wasExpanded = button.getAttribute('aria-expanded') === 'true'
-  
-  this.announceChange(`${wasExpanded ? 'Recolhendo' : 'Expandindo'} ${accordionTitle}...`)
-  
-  // Primeiro tenta usar a API do Bootstrap se disponível
-  if (window.bootstrap && window.bootstrap.Collapse) {
-    try {
-      const targetId = button.getAttribute('data-bs-target') || 
-                    button.getAttribute('aria-controls') || 
-                    button.getAttribute('data-target')
-      const selector = targetId?.startsWith('#') ? targetId : `#${targetId}`
-      const target = selector ? document.querySelector(selector) : null
-      
-      if (target) {
-        const bsCollapse = window.bootstrap.Collapse.getOrCreateInstance(target, {
-          toggle: false
-        })
-        
-        // Força a abertura/fechamento imediato
-        if (wasExpanded) {
-          bsCollapse.hide()
-        } else {
-          bsCollapse.show()
-        }
-        
-        // Atualiza o estado após a animação
-        setTimeout(() => {
-          const isNowExpanded = button.getAttribute('aria-expanded') === 'true'
-          const newStatus = isNowExpanded ? 'expandido' : 'recolhido'
-          this.announceChange(`${accordionTitle} ${newStatus}`)
-          
-          // Se for um accordion pai, atualiza a lista de elementos
-          if (!target.closest('.accordion-collapse')) {
-            this.gatherReadableElements()
+          // Força a abertura/fechamento imediato
+          if (wasExpanded) {
+            bsCollapse.hide()
+          } else {
+            bsCollapse.show()
           }
-        }, 350)
-        return
+          
+          // Atualiza o estado após a animação
+          setTimeout(() => {
+            const isNowExpanded = button.getAttribute('aria-expanded') === 'true'
+            const newStatus = isNowExpanded ? 'expandido' : 'recolhido'
+            this.announceChange(`${accordionTitle} ${newStatus}`)
+            
+            // Se for um accordion pai, atualiza a lista de elementos
+            if (!target.closest('.accordion-collapse')) {
+              this.gatherReadableElements()
+            }
+          }, 350)
+          return
+        }
+      } catch (e) {
+        console.error('Erro ao usar API Bootstrap:', e)
       }
-    } catch (e) {
-      console.error('Erro ao usar API Bootstrap:', e)
     }
-  }
-  
-  // Método alternativo robusto
-  this.forceAccordionToggle(button)
-  
-  // Feedback imediato
-  setTimeout(() => {
-    const isNowExpanded = button.getAttribute('aria-expanded') === 'true'
-    const newStatus = isNowExpanded ? 'expandido' : 'recolhido'
-    this.announceChange(`${accordionTitle} ${newStatus}`)
     
-    // Se for um accordion pai, atualiza a lista de elementos
-    if (!button.closest('.accordion-collapse')) {
-      this.gatherReadableElements()
-    }
-  }, 350)
-},
+    // Método alternativo robusto
+    this.forceAccordionToggle(button)
+    
+    // Feedback imediato
+    setTimeout(() => {
+      const isNowExpanded = button.getAttribute('aria-expanded') === 'true'
+      const newStatus = isNowExpanded ? 'expandido' : 'recolhido'
+      this.announceChange(`${accordionTitle} ${newStatus}`)
+      
+      // Se for um accordion pai, atualiza a lista de elementos
+      if (!button.closest('.accordion-collapse')) {
+        this.gatherReadableElements()
+      }
+    }, 350)
+  },
     // Método robusto para forçar o toggle do accordion
   forceAccordionToggle(button) {
   try {

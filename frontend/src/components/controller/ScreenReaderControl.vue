@@ -353,22 +353,35 @@ export default {
     },
 
     // Verifica se pode entrar no container atual
-    canEnterCurrentContainer(){
-      if (this.currentElementIndex < 0 || !this.readableElements[this.currentElementIndex]) {
-        return false
-      }
+    // canEnterCurrentContainer(){
+    //   if (this.currentElementIndex < 0 || !this.readableElements[this.currentElementIndex]) {
+    //     return false
+    //   }
       
-      const element = this.readableElements[this.currentElementIndex]
+    //   const element = this.readableElements[this.currentElementIndex]
       
-      // Verifica se é um accordion expandido
-      if (this.isAccordionButton(element) && 
-          element.getAttribute('aria-expanded') === 'true') {
-        return true
-      }
+    //   // Verifica se é um accordion expandido
+    //   if (this.isAccordionButton(element) && 
+    //       element.getAttribute('aria-expanded') === 'true') {
+    //     return true
+    //   }
       
-      return this.isContainer(element) || this.hasExpandableContent(element)
-    },
-
+    //   return this.isContainer(element) || this.hasExpandableContent(element)
+    // },
+canEnterCurrentContainer() {
+  if (this.currentElementIndex < 0 || !this.readableElements[this.currentElementIndex]) {
+    return false
+  }
+  
+  const element = this.readableElements[this.currentElementIndex]
+  
+  // Verifica se é um accordion expandido
+  if (this.isAccordionButton(element)) {
+    return true // Permite entrar mesmo se não estiver expandido
+  }
+  
+  return this.isContainer(element) || this.hasExpandableContent(element)
+},
     // Verifica se tem conteúdo expansível
     hasExpandableContent(element) {
       // Accordion buttons
@@ -464,42 +477,77 @@ export default {
     },
 
     // Procede para entrar no container
-    proceedToEnterContainer(element) {
-      // Salva o estado atual
-      this.containerStack.push({
-        container: this.currentContainer,
-        elements: [...this.readableElements],
-        index: this.currentElementIndex
-      })
+    // proceedToEnterContainer(element) {
+    //   // Salva o estado atual
+    //   this.containerStack.push({
+    //     container: this.currentContainer,
+    //     elements: [...this.readableElements],
+    //     index: this.currentElementIndex
+    //   })
 
-      this.currentContainer = element
-      this.isInContainer = true
+    //   this.currentContainer = element
+    //   this.isInContainer = true
 
-      // Encontra os elementos dentro do container
-      let containerContent = null
+    //   // Encontra os elementos dentro do container
+    //   let containerContent = null
       
-      if (element.classList.contains('accordion-button')) {
-        const controls = element.getAttribute('aria-controls')
-        if (controls) {
-          containerContent = document.getElementById(controls)
-        }
-      } else if (this.isContainer(element)) {
-        containerContent = element
-      }
+    //   if (element.classList.contains('accordion-button')) {
+    //     const controls = element.getAttribute('aria-controls')
+    //     if (controls) {
+    //       containerContent = document.getElementById(controls)
+    //     }
+    //   } else if (this.isContainer(element)) {
+    //     containerContent = element
+    //   }
 
-      if (containerContent) {
-        this.gatherElementsInContainer(containerContent)
-        this.currentElementIndex = 0
-        this.announceChange(`Entrando no container com ${this.readableElements.length} elementos`)
+    //   if (containerContent) {
+    //     this.gatherElementsInContainer(containerContent)
+    //     this.currentElementIndex = 0
+    //     this.announceChange(`Entrando no container com ${this.readableElements.length} elementos`)
         
-        if (this.readableElements.length > 0) {
-          this.highlightCurrentElement()
-        }
-      } else {
-        this.announceChange("Container vazio")
-      }
-      this.announceChange(`Entrando em ${this.getElementText(element)}`);
-    },
+    //     if (this.readableElements.length > 0) {
+    //       this.highlightCurrentElement()
+    //     }
+    //   } else {
+    //     this.announceChange("Container vazio")
+    //   }
+    //   this.announceChange(`Entrando em ${this.getElementText(element)}`);
+    // },
+    proceedToEnterContainer(element) {
+  // Salva o estado atual
+  this.containerStack.push({
+    container: this.currentContainer,
+    elements: [...this.readableElements],
+    index: this.currentElementIndex
+  })
+
+  this.currentContainer = element
+  this.isInContainer = true
+
+  // Encontra os elementos dentro do container
+  let containerContent = null
+  
+  if (this.isAccordionButton(element)) {
+    const controls = element.getAttribute('aria-controls')
+    if (controls) {
+      containerContent = document.getElementById(controls)
+    }
+  } else if (this.isContainer(element)) {
+    containerContent = element
+  }
+
+  if (containerContent) {
+    this.gatherElementsInContainer(containerContent)
+    this.currentElementIndex = 0
+    this.announceChange(`Entrando no container com ${this.readableElements.length} elementos`)
+    
+    if (this.readableElements.length > 0) {
+      this.highlightCurrentElement()
+    }
+  } else {
+    this.announceChange("Container vazio")
+  }
+},
 
     // Sai do container atual
     exitContainer() {
@@ -655,36 +703,6 @@ export default {
 
     // Função principal melhorada para ativação de elementos
    
-  //   activateElement() {
-  // if (this.isInContainer) {
-  //   this.exitContainer()
-  //   return
-  // }
-
-  // if (this.currentElementIndex < 0 || !this.readableElements[this.currentElementIndex]) {
-  //   return
-  // }
-
-  // const element = this.readableElements[this.currentElementIndex]
-  
-  // // Tratamento específico para accordions
-  // if (this.isAccordionButton(element)) {
-  //   this.handleAccordionButton(element)
-  //   return
-  // }
-
-  // // Tratamento para links e botões normais
-  // if (this.isRegularInteractiveElement(element)) {
-  //   this.activateInteractiveElement(element)
-  //   return
-  // }
-
-  // // Entrada em containers genéricos
-  // if (this.canEnterCurrentContainer()) {
-  //   this.enterContainer()
-  // }
-  //   },
-
   activateElement() {
   if (this.isInContainer) {
     this.exitContainer()
@@ -720,151 +738,137 @@ export default {
 },
 
     // Função melhorada para lidar com botões de accordion
-  //   handleAccordionButton(button) {
-  // const accordionTitle = this.getElementText(button).replace('botão', '').replace('Botão:', '').trim()
-  // const wasExpanded = button.getAttribute('aria-expanded') === 'true'
-  
-  // this.announceChange(`${wasExpanded ? 'Recolhendo' : 'Expandindo'} ${accordionTitle}...`)
-  
-  // // Primeiro tenta usar a API do Bootstrap se disponível
-  // if (window.bootstrap && window.bootstrap.Collapse) {
-  //   try {
-  //     const targetId = button.getAttribute('data-bs-target') || 
+  // handleAccordionButton(button) {
+  //   const accordionTitle = this.getElementText(button).replace('botão', '').replace('Botão:', '').trim()
+  //   const wasExpanded = button.getAttribute('aria-expanded') === 'true'
+    
+  //   this.announceChange(`${wasExpanded ? 'Recolhendo' : 'Expandindo'} ${accordionTitle}...`)
+    
+  //   // Primeiro tenta usar a API do Bootstrap se disponível
+  //   if (window.bootstrap && window.bootstrap.Collapse) {
+  //     try {
+  //       const targetId = button.getAttribute('data-bs-target') || 
   //                     button.getAttribute('aria-controls') || 
   //                     button.getAttribute('data-target')
-  //     const selector = targetId.startsWith('#') ? targetId : `#${targetId}`
-  //     const target = document.querySelector(selector)
-      
-  //     if (target) {
-  //       const bsCollapse = window.bootstrap.Collapse.getOrCreateInstance(target)
-  //       bsCollapse.toggle()
-  //       this.announceChange(`${accordionTitle} ${wasExpanded ? 'recolhido' : 'expandido'}`)
-  //       this.gatherReadableElements()
-  //       return
+  //       const selector = targetId?.startsWith('#') ? targetId : `#${targetId}`
+  //       const target = selector ? document.querySelector(selector) : null
+        
+  //       if (target) {
+  //         const bsCollapse = window.bootstrap.Collapse.getOrCreateInstance(target, {
+  //           toggle: false // Desativa o toggle automático para termos mais controle
+  //         })
+          
+  //         // Força a abertura/fechamento imediato
+  //         if (wasExpanded) {
+  //           bsCollapse.hide()
+  //         } else {
+  //           bsCollapse.show()
+  //         }
+          
+  //         // Atualiza o estado após a animação
+  //         setTimeout(() => {
+  //           const isNowExpanded = button.getAttribute('aria-expanded') === 'true'
+  //           const newStatus = isNowExpanded ? 'expandido' : 'recolhido'
+  //           this.announceChange(`${accordionTitle} ${newStatus}`)
+  //           this.gatherReadableElements()
+  //         }, 350)
+  //         return
+  //       }
+  //     } catch (e) {
+  //       console.error('Erro ao usar API Bootstrap:', e)
   //     }
-  //   } catch (e) {
-  //     console.error('Erro ao usar API Bootstrap:', e)
   //   }
-  // }
-  
-  // // Método alternativo se Bootstrap não estiver disponível
-  // this.forceAccordionToggle(button)
-  
-  // setTimeout(() => {
-  //   const isNowExpanded = button.getAttribute('aria-expanded') === 'true'
-  //   const newStatus = isNowExpanded ? 'expandido' : 'recolhido'
-  //   this.announceChange(`${accordionTitle} ${newStatus}`)
-  //   this.gatherReadableElements()
-  // }, 350)
-  //   },
-
-  handleAccordionButton(button) {
-    const accordionTitle = this.getElementText(button).replace('botão', '').replace('Botão:', '').trim()
-    const wasExpanded = button.getAttribute('aria-expanded') === 'true'
     
-    this.announceChange(`${wasExpanded ? 'Recolhendo' : 'Expandindo'} ${accordionTitle}...`)
+  //   // Método alternativo robusto
+  //   this.forceAccordionToggle(button)
     
-    // Primeiro tenta usar a API do Bootstrap se disponível
-    if (window.bootstrap && window.bootstrap.Collapse) {
-      try {
-        const targetId = button.getAttribute('data-bs-target') || 
-                      button.getAttribute('aria-controls') || 
-                      button.getAttribute('data-target')
-        const selector = targetId?.startsWith('#') ? targetId : `#${targetId}`
-        const target = selector ? document.querySelector(selector) : null
-        
-        if (target) {
-          const bsCollapse = window.bootstrap.Collapse.getOrCreateInstance(target, {
-            toggle: false // Desativa o toggle automático para termos mais controle
-          })
-          
-          // Força a abertura/fechamento imediato
-          if (wasExpanded) {
-            bsCollapse.hide()
-          } else {
-            bsCollapse.show()
-          }
-          
-          // Atualiza o estado após a animação
-          setTimeout(() => {
-            const isNowExpanded = button.getAttribute('aria-expanded') === 'true'
-            const newStatus = isNowExpanded ? 'expandido' : 'recolhido'
-            this.announceChange(`${accordionTitle} ${newStatus}`)
-            this.gatherReadableElements()
-          }, 350)
-          return
-        }
-      } catch (e) {
-        console.error('Erro ao usar API Bootstrap:', e)
-      }
-    }
-    
-    // Método alternativo robusto
-    this.forceAccordionToggle(button)
-    
-    // Feedback imediato
-    setTimeout(() => {
-      const isNowExpanded = button.getAttribute('aria-expanded') === 'true'
-      const newStatus = isNowExpanded ? 'expandido' : 'recolhido'
-      this.announceChange(`${accordionTitle} ${newStatus}`)
-      this.gatherReadableElements()
+  //   // Feedback imediato
+  //   setTimeout(() => {
+  //     const isNowExpanded = button.getAttribute('aria-expanded') === 'true'
+  //     const newStatus = isNowExpanded ? 'expandido' : 'recolhido'
+  //     this.announceChange(`${accordionTitle} ${newStatus}`)
+  //     this.gatherReadableElements()
       
-      // Se expandiu, move o foco para o primeiro elemento dentro do accordion
-      if (isNowExpanded && !wasExpanded) {
-        setTimeout(() => {
-          const targetId = button.getAttribute('aria-controls') || 
-                        button.getAttribute('data-bs-target')?.replace('#', '') || 
-                        button.getAttribute('data-target')?.replace('#', '')
-          if (targetId) {
-            const target = document.getElementById(targetId)
-            if (target) {
-              const firstFocusable = target.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')
-              if (firstFocusable) {
-                firstFocusable.focus()
-              }
-            }
-          }
-        }, 100)
-      }
-    }, 350)
-  },
-
-    // Método robusto para forçar o toggle do accordion
-  //   forceAccordionToggle(button) {
-  //   try {
-  //       // Dispara o evento click completo
-  //       const clickEvent = new MouseEvent('click', {
-  //         bubbles: true,
-  //         cancelable: true,
-  //         view: window
-  //       })
-  //       button.dispatchEvent(clickEvent)
-        
-  //       // Alterna manualmente os atributos se necessário
+  //     // Se expandiu, move o foco para o primeiro elemento dentro do accordion
+  //     if (isNowExpanded && !wasExpanded) {
   //       setTimeout(() => {
-  //         const targetId = button.getAttribute('data-bs-target') || 
-  //                         button.getAttribute('aria-controls') || 
-  //                         button.getAttribute('data-target')
-  //         const selector = targetId.startsWith('#') ? targetId : `#${targetId}`
-  //         const target = document.querySelector(selector)
-          
-  //         if (target) {
-  //           const wasExpanded = button.getAttribute('aria-expanded') === 'true'
-  //           button.setAttribute('aria-expanded', !wasExpanded)
-            
-  //           if (target.classList.contains('show')) {
-  //             target.classList.remove('show')
-  //           } else {
-  //             target.classList.add('show')
+  //         const targetId = button.getAttribute('aria-controls') || 
+  //                       button.getAttribute('data-bs-target')?.replace('#', '') || 
+  //                       button.getAttribute('data-target')?.replace('#', '')
+  //         if (targetId) {
+  //           const target = document.getElementById(targetId)
+  //           if (target) {
+  //             const firstFocusable = target.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')
+  //             if (firstFocusable) {
+  //               firstFocusable.focus()
+  //             }
   //           }
   //         }
-  //       }, 50)
-  //     } catch (error) {
-  //       console.error('Erro ao alternar accordion:', error)
-  //       this.announceChange('Erro ao ativar accordion')
+  //       }, 100)
   //     }
-  //  },
-
+  //   }, 350)
+  // },
+handleAccordionButton(button) {
+  const accordionTitle = this.getElementText(button).replace('botão', '').replace('Botão:', '').trim()
+  const wasExpanded = button.getAttribute('aria-expanded') === 'true'
+  
+  this.announceChange(`${wasExpanded ? 'Recolhendo' : 'Expandindo'} ${accordionTitle}...`)
+  
+  // Primeiro tenta usar a API do Bootstrap se disponível
+  if (window.bootstrap && window.bootstrap.Collapse) {
+    try {
+      const targetId = button.getAttribute('data-bs-target') || 
+                    button.getAttribute('aria-controls') || 
+                    button.getAttribute('data-target')
+      const selector = targetId?.startsWith('#') ? targetId : `#${targetId}`
+      const target = selector ? document.querySelector(selector) : null
+      
+      if (target) {
+        const bsCollapse = window.bootstrap.Collapse.getOrCreateInstance(target, {
+          toggle: false
+        })
+        
+        // Força a abertura/fechamento imediato
+        if (wasExpanded) {
+          bsCollapse.hide()
+        } else {
+          bsCollapse.show()
+        }
+        
+        // Atualiza o estado após a animação
+        setTimeout(() => {
+          const isNowExpanded = button.getAttribute('aria-expanded') === 'true'
+          const newStatus = isNowExpanded ? 'expandido' : 'recolhido'
+          this.announceChange(`${accordionTitle} ${newStatus}`)
+          
+          // Se for um accordion pai, atualiza a lista de elementos
+          if (!target.closest('.accordion-collapse')) {
+            this.gatherReadableElements()
+          }
+        }, 350)
+        return
+      }
+    } catch (e) {
+      console.error('Erro ao usar API Bootstrap:', e)
+    }
+  }
+  
+  // Método alternativo robusto
+  this.forceAccordionToggle(button)
+  
+  // Feedback imediato
+  setTimeout(() => {
+    const isNowExpanded = button.getAttribute('aria-expanded') === 'true'
+    const newStatus = isNowExpanded ? 'expandido' : 'recolhido'
+    this.announceChange(`${accordionTitle} ${newStatus}`)
+    
+    // Se for um accordion pai, atualiza a lista de elementos
+    if (!button.closest('.accordion-collapse')) {
+      this.gatherReadableElements()
+    }
+  }, 350)
+},
+    // Método robusto para forçar o toggle do accordion
   forceAccordionToggle(button) {
   try {
     // Dispara um clique completo (mousedown + mouseup + click)
@@ -1459,24 +1463,7 @@ export default {
       }
     },
 
-    // Remove todos os destaques visuais
-    // removeAllHighlights() {
-    //   // Remove destaques de elementos
-    //   document.querySelectorAll(".sr-element-highlight").forEach((el) => {
-    //     el.classList.remove("sr-element-highlight", "sr-interactive-indicator", "sr-container-indicator")
-    //   })
-
-    //   // Remove destaques de palavras
-    //   if (this.wordHighlightSpan) {
-    //     const parent = this.wordHighlightSpan.parentNode
-    //     if (parent) {
-    //       parent.replaceChild(document.createTextNode(this.wordHighlightSpan.textContent), this.wordHighlightSpan)
-    //       parent.normalize()
-    //     }
-    //     this.wordHighlightSpan = null
-    //   }
-    // },
-
+   
     removeAllHighlights() {
   // Remove destaques de elementos
   document.querySelectorAll(".sr-element-highlight").forEach((el) => {
@@ -1501,29 +1488,6 @@ export default {
 },
 
     // Destaca visualmente o elemento atual
-    // async highlightCurrentElement() {
-    //   this.removeAllHighlights()
-
-    //   if (this.currentElementIndex >= 0 && this.readableElements[this.currentElementIndex]) {
-    //     const element = this.readableElements[this.currentElementIndex]
-        
-    //     element.classList.add("sr-element-highlight")
-        
-    //     // Adiciona indicador baseado no tipo de elemento
-    //     if (this.isContainer(element) || this.hasExpandableContent(element)) {
-    //       element.classList.add("sr-container-indicator")
-    //     } else if (this.isInteractiveElement(element)) {
-    //       element.classList.add("sr-interactive-indicator")
-    //     }
-
-    //     element.scrollIntoView({
-    //       behavior: "smooth",
-    //       block: "center",
-    //       inline: "nearest",
-    //     })
-    //   }
-    // },
-
     highlightCurrentElement() {
   this.removeAllHighlights()
 
@@ -1652,8 +1616,6 @@ export default {
     this.currentReadingStatus = this.isInContainer ? "Dentro de container" : "Leitor de ecrã ativo"
   }
 },
-
-
 
     // Aumenta a velocidade de leitura
     increaseRate() {

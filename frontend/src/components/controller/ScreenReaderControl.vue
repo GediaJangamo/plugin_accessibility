@@ -208,6 +208,14 @@ export default {
   mounted() {
     this.initMutationObserver()
     this.addCustomStyles()
+    speechSynthesis.getVoices()
+
+  //   if (window.speechSynthesis) {
+  //   window.speechSynthesis.onvoiceschanged = this.loadVoices;
+  //   // Força a atualização (alguns navegadores precisam disso)
+  //   window.speechSynthesis.getVoices();
+  // }
+
   },
   beforeUnmount() {
     this.cleanupReaderFeatures()
@@ -930,11 +938,31 @@ export default {
       }
     },
 
+    // loadVoices() {
+    //   if (this.speechSynth) {
+    //     this.availableVoices = this.speechSynth.getVoices()
+    //   }
+    // },
     loadVoices() {
-      if (this.speechSynth) {
-        this.availableVoices = this.speechSynth.getVoices()
-      }
-    },
+  if (this.speechSynth) {
+    const voices = this.speechSynth.getVoices();
+    
+    // Filtra vozes femininas em português (prioriza as marcadas como "female" ou com nomes femininos)
+    this.femaleVoice = voices.find(voice => {
+      const isPortuguese = voice.lang.includes("pt-BR") || voice.lang.includes("pt");
+      const isFemale = voice.name.toLowerCase().includes("female") || 
+                       voice.name.includes("Maria") || // Voz do Windows
+                       voice.name.includes("Luciana") || // Voz do macOS
+                       voice.name.includes("Vitória"); // Voz do Google/Android
+      return isPortuguese && isFemale;
+    });
+
+    // Se não encontrar uma voz explicitamente feminina, usa qualquer voz em português
+    if (!this.femaleVoice) {
+      this.femaleVoice = voices.find(voice => voice.lang.includes("pt"));
+    }
+  }
+},
 
     // Obtém o texto adequado para leitura de um elemento
     getElementText(element) {
@@ -1222,16 +1250,20 @@ export default {
       const word = this.currentWords[this.currentWordIndex]
       this.utterance = new SpeechSynthesisUtterance(word)
 
-      const voices = this.speechSynth.getVoices()
-      const portugueseVoice = voices.find((voice) => voice.lang.includes("pt-BR") || voice.lang.includes("pt"))
+      // const voices = this.speechSynth.getVoices()
+      // const portugueseVoice = voices.find((voice) => voice.lang.includes("pt-BR") || voice.lang.includes("pt"))
 
-      if (portugueseVoice) {
-        this.utterance.voice = portugueseVoice
+      // if (portugueseVoice) {
+      //   this.utterance.voice = portugueseVoice
+      // }
+      if (this.femaleVoice) {
+      this.utterance.voice = this.femaleVoice;
       }
 
       this.utterance.rate = this.speechRate
       this.utterance.pitch = 1.0
       this.utterance.lang = "pt-BR"
+
 
       this.utterance.onend = async () => {
         if (this.active) {
@@ -1265,57 +1297,87 @@ export default {
     },
 
     // Lê em voz alta o elemento atual
-    async speakCurrentElement() {
-      if (
-        !this.speechSynth ||
-        this.currentElementIndex < 0 ||
-        this.currentElementIndex >= this.readableElements.length
-      ) {
-        return
-      }
+    // async speakCurrentElement() {
+    //   if (
+    //     !this.speechSynth ||
+    //     this.currentElementIndex < 0 ||
+    //     this.currentElementIndex >= this.readableElements.length
+    //   ) {
+    //     return
+    //   }
 
-      this.stopSpeaking()
+    //   this.stopSpeaking()
 
-      const currentElement = this.readableElements[this.currentElementIndex]
-      const textToSpeak = this.getElementText(currentElement)
+    //   const currentElement = this.readableElements[this.currentElementIndex]
+    //   const textToSpeak = this.getElementText(currentElement)
 
-      this.utterance = new SpeechSynthesisUtterance(textToSpeak)
+    //   this.utterance = new SpeechSynthesisUtterance(textToSpeak)
 
-      const voices = this.speechSynth.getVoices()
-      const portugueseVoice = voices.find((voice) => voice.lang.includes("pt-BR") || voice.lang.includes("pt"))
+    //   const voices = this.speechSynth.getVoices()
+    //   const portugueseVoice = voices.find((voice) => voice.lang.includes("pt-BR") || voice.lang.includes("pt"))
 
-      if (portugueseVoice) {
-        this.utterance.voice = portugueseVoice
-      }
+    //   if (portugueseVoice) {
+    //     this.utterance.voice = portugueseVoice
+    //   }
 
-      this.utterance.rate = this.speechRate
-      this.utterance.pitch = 1.0
-      this.utterance.lang = "pt-BR"
+    //   this.utterance.rate = this.speechRate
+    //   this.utterance.pitch = 1.0
+    //   this.utterance.lang = "pt-BR"
 
-      this.utterance.onend = async () => {
-        if (this.active && this.currentElementIndex < this.readableElements.length - 1) {
-          this.currentElementIndex++
-          this.highlightCurrentElement()
-          this.updateReadingStatus()
-          this.speakCurrentElement()
-        } else {
-          this.isPlaying = false
-          this.currentReadingStatus = "Leitura concluída"
-        }
-      }
+    //   this.utterance.onend = async () => {
+    //     if (this.active && this.currentElementIndex < this.readableElements.length - 1) {
+    //       this.currentElementIndex++
+    //       this.highlightCurrentElement()
+    //       this.updateReadingStatus()
+    //       this.speakCurrentElement()
+    //     } else {
+    //       this.isPlaying = false
+    //       this.currentReadingStatus = "Leitura concluída"
+    //     }
+    //   }
 
-      this.utterance.onerror = (event) => {
-        console.error("Erro na síntese de fala:", event)
-        this.isPlaying = false
-        this.currentReadingStatus = "Erro na leitura"
-      }
+    //   this.utterance.onerror = (event) => {
+    //     console.error("Erro na síntese de fala:", event)
+    //     this.isPlaying = false
+    //     this.currentReadingStatus = "Erro na leitura"
+    //   }
 
-      this.highlightCurrentElement()
-      this.speechSynth.speak(this.utterance)
-      this.isPlaying = true
-      this.updateReadingStatus()
-    },
+    //   this.highlightCurrentElement()
+    //   this.speechSynth.speak(this.utterance)
+    //   this.isPlaying = true
+    //   this.updateReadingStatus()
+    // },
+speakCurrentElement() {
+  if (!this.speechSynth || this.currentElementIndex < 0) return;
 
+  const element = this.readableElements[this.currentElementIndex];
+  const textToSpeak = this.getElementText(element); // Texto definido corretamente
+  
+  this.stopSpeaking(); // Para qualquer fala anterior
+
+  this.utterance = new SpeechSynthesisUtterance(textToSpeak);
+  
+  // Configuração da voz feminina
+  if (this.femaleVoice) {
+    this.utterance.voice = this.femaleVoice;
+  } else {
+    // Fallback para qualquer voz em português
+    const voices = this.speechSynth.getVoices();
+    const portugueseVoice = voices.find(v => v.lang.includes('pt'));
+    if (portugueseVoice) this.utterance.voice = portugueseVoice;
+  }
+
+  // Ajustes para naturalidade
+  this.utterance.rate = 1.0;
+  this.utterance.pitch = 1.0;
+  this.utterance.lang = "pt-BR";
+
+  this.utterance.onend = () => {
+    // Lógica para próximo elemento
+  };
+
+  this.speechSynth.speak(this.utterance);
+},
     // Pausa a leitura em andamento
     pauseSpeaking() {
       if (this.speechSynth && this.isPlaying) {

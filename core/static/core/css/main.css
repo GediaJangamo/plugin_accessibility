@@ -130,33 +130,29 @@ button[data-v-3d9a4370]:focus {
 .hover\:bg-red-600[data-v-3d9a4370]:hover {
   background-color: rgb(220 38 38);
 }
-.sr-reading-highlight[data-v-3d9a4370] {
+.sr-voice-highlight[data-v-3d9a4370] {
   position: relative !important;
   background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(147, 197, 253, 0.2)) !important;
   border-radius: 8px !important;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5), 0 0 25px rgba(59, 130, 246, 0.3) !important;
-  transform: scale(1.02) !important;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-  z-index: 10 !important;
+  transition: all 0.3s ease !important;
 }
-.sr-reading-highlight[data-v-3d9a4370]::before {
+.sr-voice-highlight[data-v-3d9a4370]::after {
   content: '' !important;
   position: absolute !important;
-  top: -6px !important;
-  left: -6px !important;
-  right: -6px !important;
-  bottom: -6px !important;
-  background: linear-gradient(45deg, #3b82f6, #06b6d4) !important;
-  border-radius: 14px !important;
-  z-index: -1 !important;
-  opacity: 0.4 !important;
-  filter: blur(10px) !important;
-  animation: sr-glow-pulse-3d9a4370 2s ease-in-out infinite alternate !important;
+  top: -4px !important;
+  left: -4px !important;
+  right: -4px !important;
+  bottom: -4px !important;
+  border: 2px solid #3b82f6 !important;
+  border-radius: 10px !important;
+  pointer-events: none !important;
+  animation: voice-pulse-3d9a4370 2s infinite !important;
 }
-@keyframes sr-glow-pulse-3d9a4370 {
-0% { opacity: 0.3; transform: scale(1);
+@keyframes voice-pulse-3d9a4370 {
+0%, 100% { opacity: 0.8;
 }
-100% { opacity: 0.6; transform: scale(1.01);
+50% { opacity: 0.4;
 }
 }
 

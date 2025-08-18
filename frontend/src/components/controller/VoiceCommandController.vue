@@ -482,48 +482,18 @@ export default {
     //   this.synthesis.speak(utterance);
     // },
 
-    speak(text, priority = 'normal') {
+  speak(text = 'normal') {
   if (!this.speakerEnabled || !this.synthesis) return;
-  
-  // Cancela falas anteriores se for alta prioridade
-  if (priority === 'high') {
-    this.synthesis.cancel();
-    this.isReading = false;
-    this.removeReadingHighlights();
-  }
-  
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = 'pt-BR';
-  utterance.rate = 0.8;
-  utterance.pitch = 1.0;
-  utterance.volume = 0.8;
-  
-  // Seleciona voz em português se disponível
-  const voices = this.synthesis.getVoices();
-  const portugueseVoice = voices.find(voice => 
-    voice.lang.includes('pt') || voice.lang.includes('PT')
-  );
-  if (portugueseVoice) {
-    utterance.voice = portugueseVoice;
-  }
 
-  // Configurações específicas para leitura de página
-  if (text.length > 200) {
-    this.isReading = true;
-    
-    utterance.onboundary = (event) => {
-      if (event.name === 'word') {
-        this.scrollToReadingElement();
-      }
-    };
-    
-    utterance.onend = () => {
-      this.isReading = false;
-      this.removeReadingHighlights();
-    };
+  // Se for leitura longa (página)
+  if (text.length > 100) {
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.onend = () => this.stopReading();
+    this.synthesis.speak(utterance);
+  } else {
+    // Fala normal (comandos curtos)
+    this.synthesis.speak(new SpeechSynthesisUtterance(text));
   }
-  
-  this.synthesis.speak(utterance);
 },
 
     // Controles de áudio
@@ -589,33 +559,46 @@ export default {
     //     }
     //   }, 1000);
     // },
-    readPageContent() {
+  readPageContent() {
   if (this.isReading) {
-    this.speak('Já está lendo. Diga parar leitura para interromper.');
+    this.stopReading();
     return;
   }
 
-  this.speak('Iniciando leitura', 'high');
   this.isReading = true;
+  this.addPageHighlights();
   
-  // Para a leitura atual se houver
-  this.synthesis.cancel();
-  
-  // Remove highlights anteriores
-  this.removeReadingHighlights();
-  
-  setTimeout(() => {
-    // Coleta texto principal da página
-    const content = this.extractPageContent();
-    if (content.trim()) {
-      // Adiciona highlight nos elementos sendo lidos
-      this.highlightContentForReading();
-      this.speak(content);
-    } else {
-      this.speak('Nenhum conteúdo encontrado');
-      this.isReading = false;
-    }
-  }, 1000);
+  const content = this.extractPageContent();
+  if (content.trim()) {
+    this.speak(content);
+  } else {
+    this.stopReading();
+    this.speak('Nenhum conteúdo encontrado');
+  }
+},
+
+addPageHighlights() {
+  // Aplica apenas em elementos da página (exclui o componente)
+  document.querySelectorAll('body h1, body h2, body h3, body h4, body p, body li')
+    .forEach(el => {
+      if (!el.closest('.voice-controller')) { // Exclui elementos dentro do controlador
+        el.classList.add('sr-voice-highlight');
+      }
+    });
+},
+
+removePageHighlights() {
+  document.querySelectorAll('.sr-voice-highlight').forEach(el => {
+    el.classList.remove('sr-voice-highlight');
+  });
+},
+
+stopReading() {
+  if (this.synthesis) {
+    this.synthesis.cancel();
+  }
+  this.isReading = false;
+  this.removePageHighlights();
 },
 
 // Novo método para adicionar highlight durante a leitura
@@ -637,12 +620,12 @@ removeReadingHighlights() {
   });
 },
 
-stopReading() {
-  this.synthesis.cancel();
-  this.isReading = false;
-  this.removeReadingHighlights();
-  this.speak('Leitura parada');
-},
+// stopReading() {
+//   this.synthesis.cancel();
+//   this.isReading = false;
+//   this.removeReadingHighlights();
+//   this.speak('Leitura parada');
+// },
 extractPageContent() {
   // Remove elementos que não devem ser lidos
   const excludeSelectors = [
@@ -1438,31 +1421,29 @@ button:focus {
   background-color: rgb(220 38 38);
 }
 
-.sr-reading-highlight {
+.sr-voice-highlight {
   position: relative !important;
   background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(147, 197, 253, 0.2)) !important;
   border-radius: 8px !important;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5), 0 0 25px rgba(59, 130, 246, 0.3) !important;
-  transform: scale(1.02) !important;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-  z-index: 10 !important;
+  transition: all 0.3s ease !important;
 }
-.sr-reading-highlight::before {
+
+.sr-voice-highlight::after {
   content: '' !important;
   position: absolute !important;
-  top: -6px !important;
-  left: -6px !important;
-  right: -6px !important;
-  bottom: -6px !important;
-  background: linear-gradient(45deg, #3b82f6, #06b6d4) !important;
-  border-radius: 14px !important;
-  z-index: -1 !important;
-  opacity: 0.4 !important;
-  filter: blur(10px) !important;
-  animation: sr-glow-pulse 2s ease-in-out infinite alternate !important;
+  top: -4px !important;
+  left: -4px !important;
+  right: -4px !important;
+  bottom: -4px !important;
+  border: 2px solid #3b82f6 !important;
+  border-radius: 10px !important;
+  pointer-events: none !important;
+  animation: voice-pulse 2s infinite !important;
 }
-@keyframes sr-glow-pulse {
-  0% { opacity: 0.3; transform: scale(1); }
-  100% { opacity: 0.6; transform: scale(1.01); }
+
+@keyframes voice-pulse {
+  0%, 100% { opacity: 0.8; }
+  50% { opacity: 0.4; }
 }
 </style>

@@ -205,18 +205,31 @@ export default {
       },
     },
   },
+
   mounted() {
-    this.initMutationObserver()
-    this.addCustomStyles()
-    speechSynthesis.getVoices()
+  this.initMutationObserver();
+  this.addCustomStyles();
+  
+  // Força o carregamento das vozes
+  if (window.speechSynthesis) {
+    // Alguns navegadores precisam deste timeout
+    setTimeout(() => {
+      this.loadVoices();
+    }, 500);
+  }
+},
+  // mounted() {
+  //   this.initMutationObserver()
+  //   this.addCustomStyles()
+  //   speechSynthesis.getVoices()
 
-  //   if (window.speechSynthesis) {
-  //   window.speechSynthesis.onvoiceschanged = this.loadVoices;
-  //   // Força a atualização (alguns navegadores precisam disso)
-  //   window.speechSynthesis.getVoices();
-  // }
+  // //   if (window.speechSynthesis) {
+  // //   window.speechSynthesis.onvoiceschanged = this.loadVoices;
+  // //   // Força a atualização (alguns navegadores precisam disso)
+  // //   window.speechSynthesis.getVoices();
+  // // }
 
-  },
+  // },
   beforeUnmount() {
     this.cleanupReaderFeatures()
     this.removeCustomStyles()
@@ -943,21 +956,22 @@ export default {
     //     this.availableVoices = this.speechSynth.getVoices()
     //   }
     // },
-    loadVoices() {
+   loadVoices() {
   if (this.speechSynth) {
+    // Força a atualização das vozes (necessário em alguns navegadores)
     const voices = this.speechSynth.getVoices();
     
-    // Filtra vozes femininas em português (prioriza as marcadas como "female" ou com nomes femininos)
+    // Tenta encontrar uma voz feminina em português
     this.femaleVoice = voices.find(voice => {
       const isPortuguese = voice.lang.includes("pt-BR") || voice.lang.includes("pt");
       const isFemale = voice.name.toLowerCase().includes("female") || 
-                       voice.name.includes("Maria") || // Voz do Windows
-                       voice.name.includes("Luciana") || // Voz do macOS
-                       voice.name.includes("Vitória"); // Voz do Google/Android
+                      voice.name.includes("Maria") || 
+                      voice.name.includes("Luciana") || 
+                      voice.name.includes("Vitória");
       return isPortuguese && isFemale;
     });
 
-    // Se não encontrar uma voz explicitamente feminina, usa qualquer voz em português
+    // Se não encontrar, usa qualquer voz em português
     if (!this.femaleVoice) {
       this.femaleVoice = voices.find(voice => voice.lang.includes("pt"));
     }
@@ -1347,36 +1361,84 @@ export default {
     //   this.isPlaying = true
     //   this.updateReadingStatus()
     // },
+// speakCurrentElement() {
+//   if (!this.speechSynth || this.currentElementIndex < 0) return;
+
+//   const element = this.readableElements[this.currentElementIndex];
+//   const textToSpeak = this.getElementText(element); // Texto definido corretamente
+  
+//   this.stopSpeaking(); // Para qualquer fala anterior
+
+//   this.utterance = new SpeechSynthesisUtterance(textToSpeak);
+  
+//   // Configuração da voz feminina
+//   if (this.femaleVoice) {
+//     this.utterance.voice = this.femaleVoice;
+//   } else {
+//     // Fallback para qualquer voz em português
+//     const voices = this.speechSynth.getVoices();
+//     const portugueseVoice = voices.find(v => v.lang.includes('pt'));
+//     if (portugueseVoice) this.utterance.voice = portugueseVoice;
+//   }
+
+//   // Ajustes para naturalidade
+//   this.utterance.rate = 1.0;
+//   this.utterance.pitch = 1.0;
+//   this.utterance.lang = "pt-BR";
+
+//   this.utterance.onend = () => {
+//     // Lógica para próximo elemento
+//   };
+
+//   this.speechSynth.speak(this.utterance);
+// },
+
 speakCurrentElement() {
-  if (!this.speechSynth || this.currentElementIndex < 0) return;
-
-  const element = this.readableElements[this.currentElementIndex];
-  const textToSpeak = this.getElementText(element); // Texto definido corretamente
-  
-  this.stopSpeaking(); // Para qualquer fala anterior
-
-  this.utterance = new SpeechSynthesisUtterance(textToSpeak);
-  
-  // Configuração da voz feminina
-  if (this.femaleVoice) {
-    this.utterance.voice = this.femaleVoice;
-  } else {
-    // Fallback para qualquer voz em português
-    const voices = this.speechSynth.getVoices();
-    const portugueseVoice = voices.find(v => v.lang.includes('pt'));
-    if (portugueseVoice) this.utterance.voice = portugueseVoice;
+  if (!this.speechSynth || this.currentElementIndex < 0 || 
+      this.currentElementIndex >= this.readableElements.length) {
+    return;
   }
 
-  // Ajustes para naturalidade
-  this.utterance.rate = 1.0;
+  this.stopSpeaking();
+
+  const element = this.readableElements[this.currentElementIndex];
+  const textToSpeak = this.getElementText(element);
+
+  this.utterance = new SpeechSynthesisUtterance(textToSpeak);
+
+  // Usa a voz feminina se disponível
+  if (this.femaleVoice) {
+    this.utterance.voice = this.femaleVoice;
+  }
+
+  this.utterance.rate = this.speechRate;
   this.utterance.pitch = 1.0;
   this.utterance.lang = "pt-BR";
 
   this.utterance.onend = () => {
-    // Lógica para próximo elemento
+    if (this.active && this.isPlaying) {
+      if (this.currentElementIndex < this.readableElements.length - 1) {
+        this.currentElementIndex++;
+        this.highlightCurrentElement();
+        this.updateReadingStatus();
+        this.speakCurrentElement();
+      } else {
+        this.isPlaying = false;
+        this.currentReadingStatus = "Leitura concluída";
+      }
+    }
   };
 
+  this.utterance.onerror = (event) => {
+    console.error("Erro na síntese de fala:", event);
+    this.isPlaying = false;
+    this.currentReadingStatus = "Erro na leitura";
+  };
+
+  this.highlightCurrentElement();
   this.speechSynth.speak(this.utterance);
+  this.isPlaying = true;
+  this.updateReadingStatus();
 },
     // Pausa a leitura em andamento
     pauseSpeaking() {
@@ -1399,6 +1461,7 @@ speakCurrentElement() {
     // Para completamente a leitura
     stopSpeaking() {
       if (this.speechSynth) {
+        this.speechSynth.pause();
         this.speechSynth.cancel()
         this.isPlaying = false
       }

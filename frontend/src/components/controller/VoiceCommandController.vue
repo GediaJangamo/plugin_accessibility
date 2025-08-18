@@ -1,3 +1,7 @@
+COMAND GOOD
+
+
+
 <template>
   <div v-if="showComponent">
     <!-- Controlador de Voz - Versão melhorada -->
@@ -447,54 +451,40 @@ export default {
       }
     },
 
-    // speak(text, priority = 'normal') {
-    //   if (!this.speakerEnabled || !this.synthesis) return;
+    speak(text, priority = 'normal') {
+      if (!this.speakerEnabled || !this.synthesis) return;
       
-    //   // Cancela falas anteriores se for alta prioridade
-    //   if (priority === 'high') {
-    //     this.synthesis.cancel();
-    //     this.isReading = false;
-    //   }
+      // Cancela falas anteriores se for alta prioridade
+      if (priority === 'high') {
+        this.synthesis.cancel();
+        this.isReading = false;
+      }
       
-    //   const utterance = new SpeechSynthesisUtterance(text);
-    //   utterance.lang = 'pt-BR';
-    //   utterance.rate = 0.8; // Velocidade ligeiramente mais rápida
-    //   utterance.pitch = 1.0;
-    //   utterance.volume = 0.8;
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'pt-BR';
+      utterance.rate = 0.8; // Velocidade ligeiramente mais rápida
+      utterance.pitch = 1.0;
+      utterance.volume = 0.8;
       
-    //   // Seleciona voz em português se disponível
-    //   const voices = this.synthesis.getVoices();
-    //   const portugueseVoice = voices.find(voice => 
-    //     voice.lang.includes('pt') || voice.lang.includes('PT')
-    //   );
-    //   if (portugueseVoice) {
-    //     utterance.voice = portugueseVoice;
-    //   }
+      // Seleciona voz em português se disponível
+      const voices = this.synthesis.getVoices();
+      const portugueseVoice = voices.find(voice => 
+        voice.lang.includes('pt') || voice.lang.includes('PT')
+      );
+      if (portugueseVoice) {
+        utterance.voice = portugueseVoice;
+      }
 
-    //   // Marca como lendo se for leitura de página
-    //   if (text.length > 200) {
-    //     this.isReading = true;
-    //     utterance.onend = () => {
-    //       this.isReading = false;
-    //     };
-    //   }
+      // Marca como lendo se for leitura de página
+      if (text.length > 200) {
+        this.isReading = true;
+        utterance.onend = () => {
+          this.isReading = false;
+        };
+      }
       
-    //   this.synthesis.speak(utterance);
-    // },
-
-  speak(text = 'normal') {
-  if (!this.speakerEnabled || !this.synthesis) return;
-
-  // Se for leitura longa (página)
-  if (text.length > 100) {
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.onend = () => this.stopReading();
-    this.synthesis.speak(utterance);
-  } else {
-    // Fala normal (comandos curtos)
-    this.synthesis.speak(new SpeechSynthesisUtterance(text));
-  }
-},
+      this.synthesis.speak(utterance);
+    },
 
     // Controles de áudio
     toggleSpeaker() {
@@ -536,193 +526,68 @@ export default {
     },
 
     // Leitura do conteúdo da página
-    // readPageContent() {
-    //   if (this.isReading) {
-    //     this.speak('Já está lendo. Diga parar leitura para interromper.');
-    //     return;
-    //   }
-
-    //   this.speak('Iniciando leitura', 'high');
-    //   this.isReading = true;
-      
-    //   // Para a leitura atual se houver
-    //   this.synthesis.cancel();
-      
-    //   setTimeout(() => {
-    //     // Coleta texto principal da página
-    //     const content = this.extractPageContent();
-    //     if (content.trim()) {
-    //       this.speak(content);
-    //     } else {
-    //       this.speak('Nenhum conteúdo encontrado');
-    //       this.isReading = false;
-    //     }
-    //   }, 1000);
-    // },
-  readPageContent() {
-  if (this.isReading) {
-    this.stopReading();
-    return;
-  }
-
-  this.isReading = true;
-  this.addPageHighlights();
-  
-  const content = this.extractPageContent();
-  if (content.trim()) {
-    this.speak(content);
-  } else {
-    this.stopReading();
-    this.speak('Nenhum conteúdo encontrado');
-  }
-},
-
-addPageHighlights() {
-  // Aplica apenas em elementos da página (exclui o componente)
-  document.querySelectorAll('body h1, body h2, body h3, body h4, body p, body li')
-    .forEach(el => {
-      if (!el.closest('.voice-controller')) { // Exclui elementos dentro do controlador
-        el.classList.add('sr-voice-highlight');
+    readPageContent() {
+      if (this.isReading) {
+        this.speak('Já está lendo. Diga parar leitura para interromper.');
+        return;
       }
-    });
-},
 
-removePageHighlights() {
-  document.querySelectorAll('.sr-voice-highlight').forEach(el => {
-    el.classList.remove('sr-voice-highlight');
-  });
-},
-
-stopReading() {
-  if (this.synthesis) {
-    this.synthesis.cancel();
-  }
-  this.isReading = false;
-  this.removePageHighlights();
-},
-
-// Novo método para adicionar highlight durante a leitura
-highlightContentForReading() {
-  // Seleciona os elementos principais da página
-  const elements = document.querySelectorAll(
-    'h1, h2, h3, h4, h5, h6, p, li, article, section, main, [role="main"]'
-  );
-  
-  elements.forEach(el => {
-    el.classList.add('sr-reading-highlight');
-  });
-},
-
-// Novo método para remover highlights
-removeReadingHighlights() {
-  document.querySelectorAll('.sr-reading-highlight').forEach(el => {
-    el.classList.remove('sr-reading-highlight');
-  });
-},
-
-// stopReading() {
-//   this.synthesis.cancel();
-//   this.isReading = false;
-//   this.removeReadingHighlights();
-//   this.speak('Leitura parada');
-// },
-extractPageContent() {
-  // Remove elementos que não devem ser lidos
-  const excludeSelectors = [
-    'script', 'style', 'nav', 'header', 'footer', 
-    '.voice-controller', '[aria-hidden="true"]',
-    '.breadcrumb', '.pagination'
-  ];
-  
-  // Prioriza elementos principais
-  const prioritySelectors = [
-    'main', '.main-content', '#content', '.content',
-    'article', '.article', 'section', '.section'
-  ];
-  
-  let content = '';
-  this.readingElements = []; // Novo array para armazenar elementos sendo lidos
-  
-  // Tenta encontrar conteúdo principal primeiro
-  for (const selector of prioritySelectors) {
-    const element = document.querySelector(selector);
-    if (element) {
-      content = this.getTextContent(element, excludeSelectors);
-      // Adiciona elementos filhos relevantes ao array
-      this.readingElements = Array.from(element.querySelectorAll('h1, h2, h3, h4, h5, h6, p, li'));
-      break;
-    }
-  }
-  
-  // Se não encontrou conteúdo principal, usa o body
-  if (!content.trim()) {
-    content = this.getTextContent(document.body, excludeSelectors);
-    this.readingElements = Array.from(document.body.querySelectorAll('h1, h2, h3, h4, h5, h6, p, li'));
-  }
-  
-  // Limita o tamanho do texto
-  const words = content.split(/\s+/);
-  if (words.length > 150) {
-    content = words.slice(0, 150).join(' ') + '... Conteúdo truncado.';
-  }
-  
-  return content;
-},
-
-scrollToReadingElement() {
-  if (this.readingElements && this.readingElements.length > 0) {
-    const firstVisible = this.readingElements.find(el => {
-      const rect = el.getBoundingClientRect();
-      return rect.top < window.innerHeight && rect.bottom > 0;
-    });
-    
-    if (firstVisible) {
-      firstVisible.scrollIntoView({
-        behavior: 'smooth',
-        block: 'center'
-      });
-    }
-  }
-},
-
-    // extractPageContent() {
-    //   // Remove elementos que não devem ser lidos
-    //   const excludeSelectors = [
-    //     'script', 'style', 'nav', 'header', 'footer', 
-    //     '.voice-controller', '[aria-hidden="true"]',
-    //     '.breadcrumb', '.pagination'
-    //   ];
+      this.speak('Iniciando leitura', 'high');
+      this.isReading = true;
       
-    //   // Prioriza elementos principais
-    //   const prioritySelectors = [
-    //     'main', '.main-content', '#content', '.content',
-    //     'article', '.article', 'section', '.section'
-    //   ];
+      // Para a leitura atual se houver
+      this.synthesis.cancel();
       
-    //   let content = '';
+      setTimeout(() => {
+        // Coleta texto principal da página
+        const content = this.extractPageContent();
+        if (content.trim()) {
+          this.speak(content);
+        } else {
+          this.speak('Nenhum conteúdo encontrado');
+          this.isReading = false;
+        }
+      }, 1000);
+    },
+
+    extractPageContent() {
+      // Remove elementos que não devem ser lidos
+      const excludeSelectors = [
+        'script', 'style', 'nav', 'header', 'footer', 
+        '.voice-controller', '[aria-hidden="true"]',
+        '.breadcrumb', '.pagination'
+      ];
       
-    //   // Tenta encontrar conteúdo principal primeiro
-    //   for (const selector of prioritySelectors) {
-    //     const element = document.querySelector(selector);
-    //     if (element) {
-    //       content = this.getTextContent(element, excludeSelectors);
-    //       break;
-    //     }
-    //   }
+      // Prioriza elementos principais
+      const prioritySelectors = [
+        'main', '.main-content', '#content', '.content',
+        'article', '.article', 'section', '.section'
+      ];
       
-    //   // Se não encontrou conteúdo principal, usa o body
-    //   if (!content.trim()) {
-    //     content = this.getTextContent(document.body, excludeSelectors);
-    //   }
+      let content = '';
       
-    //   // Limita o tamanho do texto
-    //   const words = content.split(/\s+/);
-    //   if (words.length > 150) {
-    //     content = words.slice(0, 150).join(' ') + '... Conteúdo truncado.';
-    //   }
+      // Tenta encontrar conteúdo principal primeiro
+      for (const selector of prioritySelectors) {
+        const element = document.querySelector(selector);
+        if (element) {
+          content = this.getTextContent(element, excludeSelectors);
+          break;
+        }
+      }
       
-    //   return content;
-    // },
+      // Se não encontrou conteúdo principal, usa o body
+      if (!content.trim()) {
+        content = this.getTextContent(document.body, excludeSelectors);
+      }
+      
+      // Limita o tamanho do texto
+      const words = content.split(/\s+/);
+      if (words.length > 150) {
+        content = words.slice(0, 150).join(' ') + '... Conteúdo truncado.';
+      }
+      
+      return content;
+    },
 
     getTextContent(element, excludeSelectors) {
       const clone = element.cloneNode(true);
@@ -743,11 +608,11 @@ scrollToReadingElement() {
       return text;
     },
 
-    // stopReading() {
-    //   this.synthesis.cancel();
-    //   this.isReading = false;
-    //   this.speak('Leitura parada');
-    // },
+    stopReading() {
+      this.synthesis.cancel();
+      this.isReading = false;
+      this.speak('Leitura parada');
+    },
 
     // Obter cor do status
     getStatusColor() {
@@ -1419,31 +1284,5 @@ button:focus {
 
 .hover\:bg-red-600:hover {
   background-color: rgb(220 38 38);
-}
-
-.sr-voice-highlight {
-  position: relative !important;
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(147, 197, 253, 0.2)) !important;
-  border-radius: 8px !important;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5), 0 0 25px rgba(59, 130, 246, 0.3) !important;
-  transition: all 0.3s ease !important;
-}
-
-.sr-voice-highlight::after {
-  content: '' !important;
-  position: absolute !important;
-  top: -4px !important;
-  left: -4px !important;
-  right: -4px !important;
-  bottom: -4px !important;
-  border: 2px solid #3b82f6 !important;
-  border-radius: 10px !important;
-  pointer-events: none !important;
-  animation: voice-pulse 2s infinite !important;
-}
-
-@keyframes voice-pulse {
-  0%, 100% { opacity: 0.8; }
-  50% { opacity: 0.4; }
 }
 </style>

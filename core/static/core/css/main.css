@@ -130,31 +130,6 @@ button[data-v-3d9a4370]:focus {
 .hover\:bg-red-600[data-v-3d9a4370]:hover {
   background-color: rgb(220 38 38);
 }
-.sr-voice-highlight[data-v-3d9a4370] {
-  position: relative !important;
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(147, 197, 253, 0.2)) !important;
-  border-radius: 8px !important;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5), 0 0 25px rgba(59, 130, 246, 0.3) !important;
-  transition: all 0.3s ease !important;
-}
-.sr-voice-highlight[data-v-3d9a4370]::after {
-  content: '' !important;
-  position: absolute !important;
-  top: -4px !important;
-  left: -4px !important;
-  right: -4px !important;
-  bottom: -4px !important;
-  border: 2px solid #3b82f6 !important;
-  border-radius: 10px !important;
-  pointer-events: none !important;
-  animation: voice-pulse-3d9a4370 2s infinite !important;
-}
-@keyframes voice-pulse-3d9a4370 {
-0%, 100% { opacity: 0.8;
-}
-50% { opacity: 0.4;
-}
-}
 
 /*!**************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
   !*** css ./node_modules/css-loader/dist/cjs.js??clonedRuleSet-12.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-12.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/AccessibilityComponent.vue?vue&type=style&index=0&id=a9d96c02&lang=css ***!

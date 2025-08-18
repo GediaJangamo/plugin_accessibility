@@ -939,25 +939,51 @@ export default {
       }
     },
 
-   loadVoices() {
-  if (this.speechSynth) {
-    // Força a atualização das vozes (necessário em alguns navegadores)
-    const voices = this.speechSynth.getVoices();
+//    loadVoices() {
+//   if (this.speechSynth) {
+//     // Força a atualização das vozes (necessário em alguns navegadores)
+//     const voices = this.speechSynth.getVoices();
     
-    // Tenta encontrar uma voz feminina em português
-    this.femaleVoice = voices.find(voice => {
-      const isPortuguese = voice.lang.includes("pt-BR") || voice.lang.includes("pt");
-      const isFemale = voice.name.toLowerCase().includes("female") || 
-                      voice.name.includes("Maria") || 
-                      voice.name.includes("Luciana") || 
-                      voice.name.includes("Vitória");
-      return isPortuguese && isFemale;
-    });
+//     // Tenta encontrar uma voz feminina em português
+//     this.femaleVoice = voices.find(voice => {
+//       const isPortuguese = voice.lang.includes("pt-BR") || voice.lang.includes("pt");
+//       const isFemale = voice.name.toLowerCase().includes("female") || 
+//                       voice.name.includes("Maria") || 
+//                       voice.name.includes("Luciana") || 
+//                       voice.name.includes("Vitória");
+//       return isPortuguese && isFemale;
+//     });
 
-    // Se não encontrar, usa qualquer voz em português
-    if (!this.femaleVoice) {
-      this.femaleVoice = voices.find(voice => voice.lang.includes("pt"));
-    }
+//     // Se não encontrar, usa qualquer voz em português
+//     if (!this.femaleVoice) {
+//       this.femaleVoice = voices.find(voice => voice.lang.includes("pt"));
+//     }
+//   }
+// },
+loadVoices() {
+  if (!this.speechSynth) return;
+
+  // Força a atualização das vozes (necessário em alguns navegadores)
+  const voices = this.speechSynth.getVoices();
+  
+  // Tenta encontrar uma voz feminina em português
+  this.femaleVoice = voices.find(voice => {
+    const isPortuguese = voice.lang.includes("pt-BR") || voice.lang.includes("pt");
+    const isFemale = voice.name.toLowerCase().includes("female") || 
+                    voice.name.includes("Maria") || 
+                    voice.name.includes("Luciana") || 
+                    voice.name.includes("Vitória");
+    return isPortuguese && isFemale;
+  });
+
+  // Se não encontrar, usa qualquer voz em português
+  if (!this.femaleVoice) {
+    this.femaleVoice = voices.find(voice => voice.lang.includes("pt"));
+  }
+
+  // Se ainda não encontrou, usa a primeira voz disponível
+  if (!this.femaleVoice && voices.length > 0) {
+    this.femaleVoice = voices[0];
   }
 },
 
@@ -1116,81 +1142,131 @@ export default {
       }, 500)
     },
 
-    // Iniciar/pausar a leitura
-    // playPause() {
-    //   if (this.isPlaying) {
-    //     this.pauseSpeaking()
-    //   } else {
-    //     if (this.currentElementIndex === -1 && this.readableElements.length > 0) {
-    //       this.currentElementIndex = 0
-    //       if (this.readingMode === 'word') {
-    //         this.setupWordReading()
-    //       } else {
-    //         this.highlightCurrentElement()
-    //       }
-    //     }
-
-    //     if (this.speechSynth && this.speechSynth.paused) {
-    //       this.resumeSpeaking()
-    //     } else {
-    //       this.speakCurrent()
-    //     }
-    //   }
-    // },
-    playPause() {
+//     playPause() {
+//   if (!this.speechSynth) return;
+  
+//   if (this.speechSynth.paused) {
+//     this.resumeSpeaking();
+//   } else if (this.isPlaying) {
+//     this.pauseSpeaking();
+//   } else {
+//     if (this.currentElementIndex === -1 && this.readableElements.length > 0) {
+//       this.currentElementIndex = 0;
+//       if (this.readingMode === 'word') {
+//         this.setupWordReading();
+//       } else {
+//         this.highlightCurrentElement();
+//       }
+//     }
+//     this.speakCurrent();
+//   }
+// },
+playPause() {
   if (!this.speechSynth) return;
   
+  // Se estiver pausado, retomar
   if (this.speechSynth.paused) {
-    this.resumeSpeaking();
-  } else if (this.isPlaying) {
-    this.pauseSpeaking();
-  } else {
-    if (this.currentElementIndex === -1 && this.readableElements.length > 0) {
-      this.currentElementIndex = 0;
-      if (this.readingMode === 'word') {
-        this.setupWordReading();
-      } else {
-        this.highlightCurrentElement();
-      }
+    this.speechSynth.resume();
+    this.isPlaying = true;
+    this.currentReadingStatus = "Retomando leitura";
+    return;
+  }
+  
+  // Se estiver falando, pausar
+  if (this.speechSynth.speaking && this.isPlaying) {
+    this.speechSynth.pause();
+    this.isPlaying = false;
+    this.currentReadingStatus = "Leitura pausada";
+    return;
+  }
+  
+  // Se não estiver falando, começar a ler
+  if (this.currentElementIndex === -1 && this.readableElements.length > 0) {
+    this.currentElementIndex = 0;
+  }
+  
+  if (this.readableElements.length > 0) {
+    if (this.readingMode === 'word') {
+      this.setupWordReading();
+    } else {
+      this.highlightCurrentElement();
     }
     this.speakCurrent();
   }
 },
 
     // Navega para o elemento/palavra anterior
+    // previousElement() {
+    //   if (this.navigationDebounce) return
+    //   this.navigationDebounce = setTimeout(() => {
+    //     this.navigationDebounce = null
+    //   }, 200)
+
+    //   this.stopSpeaking()
+
+    //   if (this.readingMode === 'word') {
+    //     if (this.currentWordIndex > 0) {
+    //       this.currentWordIndex--
+    //       this.highlightCurrentWord()
+    //     } else if (this.currentElementIndex > 0) {
+    //       this.currentElementIndex--
+    //       this.setupWordReading()
+    //     }
+    //   } else {
+    //     if (this.currentElementIndex > 0) {
+    //       this.currentElementIndex--
+    //       this.highlightCurrentElement()
+    //     }
+    //   }
+
+    //   this.updateReadingStatus()
+
+    //   if (this.isPlaying) {
+    //     setTimeout(() => {
+    //       if (this.isPlaying) {
+    //         this.speakCurrent()
+    //       }
+    //     }, 100)
+    //   }
+    // },
     previousElement() {
-      if (this.navigationDebounce) return
-      this.navigationDebounce = setTimeout(() => {
-        this.navigationDebounce = null
-      }, 200)
+  if (this.navigationDebounce) return;
+  this.navigationDebounce = setTimeout(() => {
+    this.navigationDebounce = null;
+  }, 200);
 
-      this.stopSpeaking()
+  this.stopSpeaking();
 
-      if (this.readingMode === 'word') {
-        if (this.currentWordIndex > 0) {
-          this.currentWordIndex--
-          this.highlightCurrentWord()
-        } else if (this.currentElementIndex > 0) {
-          this.currentElementIndex--
-          this.setupWordReading()
-        }
-      } else {
-        if (this.currentElementIndex > 0) {
-          this.currentElementIndex--
-          this.highlightCurrentElement()
-        }
-      }
+  if (this.readingMode === 'word') {
+    if (this.currentWordIndex > 0) {
+      this.currentWordIndex--;
+    } else if (this.currentElementIndex > 0) {
+      this.currentElementIndex--;
+      this.setupWordReading();
+    }
+  } else {
+    if (this.currentElementIndex > 0) {
+      this.currentElementIndex--;
+    }
+  }
 
-      this.updateReadingStatus()
+  // Garante que o índice não fique negativo
+  if (this.currentElementIndex < 0) {
+    this.currentElementIndex = 0;
+  }
 
+  this.updateReadingStatus();
+  this.highlightCurrentElement();
+
+  if (this.isPlaying) {
+    // Pequeno delay para garantir que o highlight foi aplicado
+    setTimeout(() => {
       if (this.isPlaying) {
-        setTimeout(() => {
-          if (this.isPlaying) {
-            this.speakCurrent()
-          }
-        }, 100)
+        this.speakCurrent();
       }
-    },
+    }, 100);
+  }
+},
 
     // Navega para o próximo elemento/palavra
     nextElement() {
@@ -1256,55 +1332,6 @@ export default {
     },
 
     // Lê em voz alta a palavra atual
-    // async speakCurrentWord() {
-    //   if (!this.speechSynth || this.currentWordIndex < 0 || this.currentWordIndex >= this.currentWords.length) {
-    //     return
-    //   }
-
-    //   this.stopSpeaking()
-
-    //   const word = this.currentWords[this.currentWordIndex]
-    //   this.utterance = new SpeechSynthesisUtterance(word)
-
-    //   if (this.femaleVoice) {
-    //   this.utterance.voice = this.femaleVoice;
-    //   }
-
-    //   this.utterance.rate = this.speechRate
-    //   this.utterance.pitch = 1.0
-    //   this.utterance.lang = "pt-BR"
-
-
-    //   this.utterance.onend = async () => {
-    //     if (this.active) {
-    //       if (this.currentWordIndex < this.currentWords.length - 1) {
-    //         this.currentWordIndex++
-    //         this.highlightCurrentWord()
-    //         this.updateReadingStatus()
-    //         this.speakCurrentWord()
-    //       } else if (this.currentElementIndex < this.readableElements.length - 1) {
-    //         this.currentElementIndex++
-    //         this.setupWordReading()
-    //         this.updateReadingStatus()
-    //         this.speakCurrentWord()
-    //       } else {
-    //         this.isPlaying = false
-    //         this.currentReadingStatus = "Leitura concluída"
-    //       }
-    //     }
-    //   }
-
-    //   this.utterance.onerror = (event) => {
-    //     console.error("Erro na síntese de fala:", event)
-    //     this.isPlaying = false
-    //     this.currentReadingStatus = "Erro na leitura"
-    //   }
-
-    //   this.highlightCurrentWord()
-    //   this.speechSynth.speak(this.utterance)
-    //   this.isPlaying = true
-    //   this.updateReadingStatus()
-    // },
 
     speakCurrentWord() {
   if (!this.speechSynth || this.currentWordIndex < 0 || this.currentWordIndex >= this.currentWords.length) {
@@ -1359,7 +1386,7 @@ export default {
   this.updateReadingStatus();
 },
 
-    speakCurrentElement() {
+async speakCurrentElement() {
   if (!this.speechSynth || this.currentElementIndex < 0 || 
       this.currentElementIndex >= this.readableElements.length) {
     return;
@@ -1367,28 +1394,31 @@ export default {
 
   this.stopSpeaking();
 
+  // Garante que as vozes estão carregadas
+  await this.ensureVoicesLoaded();
+
   const element = this.readableElements[this.currentElementIndex];
   const textToSpeak = this.getElementText(element);
 
   this.utterance = new SpeechSynthesisUtterance(textToSpeak);
 
-  // Sempre usar a voz feminina quando disponível
+  // Sempre usar a voz feminina
   if (this.femaleVoice) {
     this.utterance.voice = this.femaleVoice;
   } else {
-    // Fallback para qualquer voz em português
+    // Fallback: tentar encontrar qualquer voz em português
     const voices = this.speechSynth.getVoices();
     const portugueseVoice = voices.find(v => v.lang.includes('pt'));
     if (portugueseVoice) this.utterance.voice = portugueseVoice;
   }
 
+  // Configurações da fala
   this.utterance.rate = this.speechRate;
   this.utterance.pitch = 1.0;
   this.utterance.lang = "pt-BR";
 
-  // Manter referência ao componente Vue no callback
+  // Configura os callbacks
   const self = this;
-  
   this.utterance.onend = function() {
     if (self.active && self.isPlaying) {
       if (self.currentElementIndex < self.readableElements.length - 1) {
@@ -1415,7 +1445,22 @@ export default {
   this.updateReadingStatus();
 },
 
-// speakCurrentElement() {
+// Novo método para garantir que as vozes estão carregadas
+ensureVoicesLoaded() {
+  return new Promise((resolve) => {
+    const voices = this.speechSynth.getVoices();
+    if (voices.length > 0) {
+      resolve();
+    } else {
+      this.speechSynth.onvoiceschanged = () => {
+        this.loadVoices();
+        resolve();
+      };
+    }
+  });
+},
+
+//     speakCurrentElement() {
 //   if (!this.speechSynth || this.currentElementIndex < 0 || 
 //       this.currentElementIndex >= this.readableElements.length) {
 //     return;
@@ -1428,33 +1473,41 @@ export default {
 
 //   this.utterance = new SpeechSynthesisUtterance(textToSpeak);
 
-//   // Usa a voz feminina se disponível
+//   // Sempre usar a voz feminina quando disponível
 //   if (this.femaleVoice) {
 //     this.utterance.voice = this.femaleVoice;
+//   } else {
+//     // Fallback para qualquer voz em português
+//     const voices = this.speechSynth.getVoices();
+//     const portugueseVoice = voices.find(v => v.lang.includes('pt'));
+//     if (portugueseVoice) this.utterance.voice = portugueseVoice;
 //   }
 
 //   this.utterance.rate = this.speechRate;
 //   this.utterance.pitch = 1.0;
 //   this.utterance.lang = "pt-BR";
 
-//   this.utterance.onend = () => {
-//     if (this.active && this.isPlaying) {
-//       if (this.currentElementIndex < this.readableElements.length - 1) {
-//         this.currentElementIndex++;
-//         this.highlightCurrentElement();
-//         this.updateReadingStatus();
-//         this.speakCurrentElement();
+//   // Manter referência ao componente Vue no callback
+//   const self = this;
+  
+//   this.utterance.onend = function() {
+//     if (self.active && self.isPlaying) {
+//       if (self.currentElementIndex < self.readableElements.length - 1) {
+//         self.currentElementIndex++;
+//         self.highlightCurrentElement();
+//         self.updateReadingStatus();
+//         self.speakCurrentElement();
 //       } else {
-//         this.isPlaying = false;
-//         this.currentReadingStatus = "Leitura concluída";
+//         self.isPlaying = false;
+//         self.currentReadingStatus = "Leitura concluída";
 //       }
 //     }
 //   };
 
-//   this.utterance.onerror = (event) => {
+//   this.utterance.onerror = function(event) {
 //     console.error("Erro na síntese de fala:", event);
-//     this.isPlaying = false;
-//     this.currentReadingStatus = "Erro na leitura";
+//     self.isPlaying = false;
+//     self.currentReadingStatus = "Erro na leitura";
 //   };
 
 //   this.highlightCurrentElement();
@@ -1462,13 +1515,7 @@ export default {
 //   this.isPlaying = true;
 //   this.updateReadingStatus();
 // },
-    // Pausa a leitura em andamento
-    // pauseSpeaking() {
-    //   if (this.speechSynth && this.isPlaying) {
-    //     this.speechSynth.pause()
-    //     this.isPlaying = false
-    //   }
-    // },
+
   pauseSpeaking() {
     if (this.speechSynth && this.speechSynth.speaking) {
       this.speechSynth.pause();
@@ -1479,33 +1526,37 @@ export default {
     // Retoma a leitura pausada
     // resumeSpeaking() {
     //   if (this.speechSynth && this.speechSynth.paused) {
-    //     clearTimeout(this.pauseTimer)
-    //     this.speechSynth.resume()
-    //     this.isPlaying = true
-    //     this.updateReadingStatus()
+    //     this.speechSynth.resume();
+    //     this.isPlaying = true;
+    //     this.updateReadingStatus();
     //   }
     // },
     resumeSpeaking() {
-      if (this.speechSynth && this.speechSynth.paused) {
-        this.speechSynth.resume();
-        this.isPlaying = true;
-        this.updateReadingStatus();
-      }
-    },
+  if (this.speechSynth && this.speechSynth.paused) {
+    // Garante que a voz feminina está sendo usada ao retomar
+    if (this.utterance && this.femaleVoice) {
+      this.utterance.voice = this.femaleVoice;
+    }
+    this.speechSynth.resume();
+    this.isPlaying = true;
+    this.currentReadingStatus = "Retomando leitura";
+  }
+},
     // Para completamente a leitura
     // stopSpeaking() {
     //   if (this.speechSynth) {
-    //     this.speechSynth.pause();
-    //     this.speechSynth.cancel()
-    //     this.isPlaying = false
+    //     this.speechSynth.cancel();
+    //     this.isPlaying = false;
     //   }
     // },
     stopSpeaking() {
-      if (this.speechSynth) {
-        this.speechSynth.cancel();
-        this.isPlaying = false;
-      }
-    },
+  if (this.speechSynth) {
+    this.speechSynth.cancel();
+    this.isPlaying = false;
+    // Limpa o utterance atual
+    this.utterance = null;
+  }
+},
     removeAllHighlights() {
   // Remove destaques de elementos
   document.querySelectorAll(".sr-element-highlight").forEach((el) => {

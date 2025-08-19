@@ -18,16 +18,16 @@
 /*!************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
   !*** css ./node_modules/css-loader/dist/cjs.js??clonedRuleSet-12.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-12.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/options/ScreenReader.vue?vue&type=style&index=0&id=16666c50&scoped=true&lang=css ***!
   \************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
-
-/* Estilos personalizados para o toggle */
+ 
+/* Estilos personalizados para o toggle */  
 
 /* Animação suave para o switch */
-input:checked + div[data-v-16666c50] {
+input:checked + div[data-v-16666c50] {   
   background: linear-gradient(135deg, #3b82f6);
 }
-input:checked + div > div[data-v-16666c50] {
+input:checked + div > div[data-v-16666c50] {   
   box-shadow: 0 3px 8px #3b82f6;
-}
+} 
 
 /*!*************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
   !*** css ./node_modules/css-loader/dist/cjs.js??clonedRuleSet-12.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-12.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/controller/VoiceCommandController.vue?vue&type=style&index=0&id=3d9a4370&scoped=true&lang=css ***!
@@ -762,6 +762,9 @@ video {
 .left-0 {
   left: 0px;
 }
+.left-0\.5 {
+  left: 0.125rem;
+}
 .left-1 {
   left: 0.25rem;
 }
@@ -776,6 +779,9 @@ video {
 }
 .top-0 {
   top: 0px;
+}
+.top-0\.5 {
+  top: 0.125rem;
 }
 .top-1 {
   top: 0.25rem;
@@ -943,6 +949,9 @@ video {
 .max-w-4xl {
   max-width: 56rem;
 }
+.max-w-full {
+  max-width: 100%;
+}
 .max-w-sm {
   max-width: 24rem;
 }
@@ -961,6 +970,10 @@ video {
 }
 .-translate-y-1\/2 {
   --tw-translate-y: -50%;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
+.translate-x-5 {
+  --tw-translate-x: 1.25rem;
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
 }
 .translate-x-7 {
@@ -1743,8 +1756,37 @@ body.high-contrast button:not(.accessibility-button) {
 
 @media (min-width: 640px) {
 
+  .sm\:mr-3 {
+    margin-right: 0.75rem;
+  }
+
+  .sm\:h-5 {
+    height: 1.25rem;
+  }
+
+  .sm\:h-6 {
+    height: 1.5rem;
+  }
+
+  .sm\:w-12 {
+    width: 3rem;
+  }
+
+  .sm\:w-5 {
+    width: 1.25rem;
+  }
+
+  .sm\:w-6 {
+    width: 1.5rem;
+  }
+
   .sm\:w-96 {
     width: 24rem;
+  }
+
+  .sm\:translate-x-6 {
+    --tw-translate-x: 1.5rem;
+    transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
   }
 
   .sm\:space-y-1 > :not([hidden]) ~ :not([hidden]) {
@@ -1757,6 +1799,10 @@ body.high-contrast button:not(.accessibility-button) {
     --tw-space-y-reverse: 0;
     margin-top: calc(0.75rem * calc(1 - var(--tw-space-y-reverse)));
     margin-bottom: calc(0.75rem * var(--tw-space-y-reverse));
+  }
+
+  .sm\:p-3 {
+    padding: 0.75rem;
   }
 
   .sm\:px-6 {
@@ -1777,6 +1823,11 @@ body.high-contrast button:not(.accessibility-button) {
     font-size: 1rem;
     line-height: 1.5rem;
   }
+
+  .sm\:text-sm {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
 }
 
 @media (min-width: 768px) {
@@ -1789,8 +1840,25 @@ body.high-contrast button:not(.accessibility-button) {
     margin-right: 0.75rem;
   }
 
+  .md\:h-7 {
+    height: 1.75rem;
+  }
+
+  .md\:w-14 {
+    width: 3.5rem;
+  }
+
+  .md\:w-7 {
+    width: 1.75rem;
+  }
+
   .md\:w-auto {
     width: auto;
+  }
+
+  .md\:translate-x-7 {
+    --tw-translate-x: 1.75rem;
+    transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
   }
 
   .md\:grid-cols-2 {
@@ -1804,6 +1872,11 @@ body.high-contrast button:not(.accessibility-button) {
   .md\:text-base {
     font-size: 1rem;
     line-height: 1.5rem;
+  }
+
+  .md\:text-lg {
+    font-size: 1.125rem;
+    line-height: 1.75rem;
   }
 }
 

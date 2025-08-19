@@ -19,6 +19,55 @@
   !*** css ./node_modules/css-loader/dist/cjs.js??clonedRuleSet-12.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-12.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/options/ScreenReader.vue?vue&type=style&index=0&id=16666c50&scoped=true&lang=css ***!
   \************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
 
+/* Media queries para dispositivos muito pequenos */
+@media (max-width: 480px) {
+.screen-reader-container[data-v-16666c50] {
+    padding: 0.375rem !important; /* 6px */
+    margin: 0.25rem;
+}
+.screen-reader-icon[data-v-16666c50] {
+    width: 1rem !important; /* 16px */
+    height: 1rem !important; /* 16px */
+}
+.screen-reader-title[data-v-16666c50] {
+    font-size: 0.75rem !important; /* 12px */
+    line-height: 1rem !important;
+}
+.screen-reader-subtitle[data-v-16666c50] {
+    font-size: 0.625rem !important; /* 10px */
+    line-height: 0.875rem !important;
+}
+.screen-reader-toggle[data-v-16666c50] {
+    width: 2rem !important; /* 32px */
+    height: 1.125rem !important; /* 18px */
+}
+.screen-reader-toggle-button[data-v-16666c50] {
+    width: 0.875rem !important; /* 14px */
+    height: 0.875rem !important; /* 14px */
+    left: 0.125rem !important; /* 2px */
+    top: 0.125rem !important; /* 2px */
+}
+.screen-reader-toggle-button.translate-x-5[data-v-16666c50] {
+    transform: translateX(0.875rem) !important; /* 14px */
+}
+}
+@media (max-width: 360px) {
+.screen-reader-container[data-v-16666c50] {
+    padding: 0.25rem !important; /* 4px */
+}
+.screen-reader-toggle[data-v-16666c50] {
+    width: 1.75rem !important; /* 28px */
+    height: 1rem !important; /* 16px */
+}
+.screen-reader-toggle-button[data-v-16666c50] {
+    width: 0.75rem !important; /* 12px */
+    height: 0.75rem !important; /* 12px */
+}
+.screen-reader-toggle-button.translate-x-5[data-v-16666c50] {
+    transform: translateX(0.75rem) !important; /* 12px */
+}
+}
+
 /* Animação suave para o switch */
 input:checked + div[data-v-16666c50] {
   background: linear-gradient(135deg, #3b82f6);

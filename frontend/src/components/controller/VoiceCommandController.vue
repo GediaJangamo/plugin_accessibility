@@ -1,6 +1,3 @@
-COMAND GOOD
-
-
 
 <template>
   <div v-if="showComponent">

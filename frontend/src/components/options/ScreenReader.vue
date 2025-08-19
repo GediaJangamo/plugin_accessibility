@@ -1,5 +1,5 @@
 <template>
-  <div class="p-2 sm:p-3 bg-[#f1f5f9] border-[#64758b] dark:bg-gray-800 rounded-lg hover:shadow-md transition-shadow duration-300 screen-reader-container">
+  <div class="p-2 sm:p-3 bg-[#f1f5f9] border-[#64758b] dark:bg-gray-800 rounded-lg hover:shadow-md transition-shadow duration-300 screen-reader-container max-w-xs sm:max-w-sm md:max-w-md">
     <label class="flex items-center cursor-pointer gap-2 sm:gap-3">
       <div class="flex-shrink-0">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 text-[#3b82f6] screen-reader-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -63,8 +63,10 @@ export default {
 /* Media queries para dispositivos muito pequenos */
 @media (max-width: 480px) {
   .screen-reader-container {
-    padding: 0.375rem !important; /* 6px */
-    margin: 0.25rem;
+    padding: 0.25rem !important; /* Reduzido de 6px para 4px */
+    margin: 0.125rem !important; /* Reduzido margin */
+    max-width: 280px !important; /* Largura máxima muito menor */
+    width: 90vw !important; /* Largura baseada na viewport */
   }
   
   .screen-reader-icon {
@@ -101,7 +103,24 @@ export default {
 
 @media (max-width: 360px) {
   .screen-reader-container {
-    padding: 0.25rem !important; /* 4px */
+    padding: 0.125rem !important; /* Padding ainda menor */
+    max-width: 240px !important; /* Container ainda menor */
+    width: 85vw !important; /* Largura ainda menor */
+  }
+  
+  .screen-reader-icon {
+    width: 0.875rem !important; /* 14px */
+    height: 0.875rem !important; /* 14px */
+  }
+  
+  .screen-reader-title {
+    font-size: 0.625rem !important; /* 10px */
+    line-height: 0.875rem !important;
+  }
+  
+  .screen-reader-subtitle {
+    font-size: 0.5rem !important; /* 8px */
+    line-height: 0.75rem !important;
   }
   
   .screen-reader-toggle {
@@ -116,6 +135,23 @@ export default {
   
   .screen-reader-toggle-button.translate-x-5 {
     transform: translateX(0.75rem) !important; /* 12px */
+  }
+}
+
+/* Media query para telas extra pequenas */
+@media (max-width: 320px) {
+  .screen-reader-container {
+    max-width: 200px !important;
+    width: 80vw !important;
+    padding: 0.125rem !important;
+  }
+  
+  .screen-reader-title {
+    font-size: 0.625rem !important; /* 10px */
+  }
+  
+  .screen-reader-subtitle {
+    font-size: 0.5rem !important; /* 8px */
   }
 }
 

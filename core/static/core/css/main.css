@@ -19,94 +19,138 @@
   !*** css ./node_modules/css-loader/dist/cjs.js??clonedRuleSet-12.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-12.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/options/ScreenReader.vue?vue&type=style&index=0&id=16666c50&scoped=true&lang=css ***!
   \************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
 
-/* Media queries para dispositivos muito pequenos */
-@media (max-width: 480px) {
 .screen-reader-container[data-v-16666c50] {
-    padding: 0.25rem !important; /* Reduzido de 6px para 4px */
-    margin: 0.125rem !important; /* Reduzido margin */
-    max-width: 280px !important; /* Largura máxima muito menor */
-    width: 90vw !important; /* Largura baseada na viewport */
+  width: 100%;
+  max-width: 100%;
+  padding: clamp(0.5rem, 2vw, 0.75rem);
+  background: #f1f5f9;
+  border: 1px solid #64758b;
+  border-radius: 0.5rem;
+  transition: box-shadow 0.3s ease;
+  box-sizing: border-box;
+}
+.screen-reader-container[data-v-16666c50]:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+.screen-reader-label[data-v-16666c50] {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  gap: clamp(0.5rem, 2vw, 0.75rem);
+  width: 100%;
+}
+.screen-reader-icon-wrapper[data-v-16666c50] {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .screen-reader-icon[data-v-16666c50] {
-    width: 1rem !important; /* 16px */
-    height: 1rem !important; /* 16px */
+  width: clamp(1rem, 4vw, 1.5rem);
+  height: clamp(1rem, 4vw, 1.5rem);
+  color: #3b82f6;
+}
+.screen-reader-content[data-v-16666c50] {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
 }
 .screen-reader-title[data-v-16666c50] {
-    font-size: 0.75rem !important; /* 12px */
-    line-height: 1rem !important;
+  font-size: clamp(0.75rem, 3vw, 1rem);
+  font-weight: 500;
+  color: #1f2937;
+  line-height: 1.2;
+  word-wrap: break-word;
+  hyphens: auto;
 }
 .screen-reader-subtitle[data-v-16666c50] {
-    font-size: 0.625rem !important; /* 10px */
-    line-height: 0.875rem !important;
+  font-size: clamp(0.625rem, 2.5vw, 0.875rem);
+  color: #64748b;
+  line-height: 1.2;
+  word-wrap: break-word;
+  hyphens: auto;
+}
+.screen-reader-toggle-wrapper[data-v-16666c50] {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
 }
 .screen-reader-toggle[data-v-16666c50] {
-    width: 2rem !important; /* 32px */
-    height: 1.125rem !important; /* 18px */
+  position: relative;
+  width: clamp(2rem, 5vw, 3.5rem);
+  height: clamp(1rem, 2.5vw, 1.75rem);
+  background: #d1d5db;
+  border-radius: 9999px;
+  transition: all 0.3s ease;
+}
+.screen-reader-toggle.active[data-v-16666c50] {
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
 }
 .screen-reader-toggle-button[data-v-16666c50] {
-    width: 0.875rem !important; /* 14px */
-    height: 0.875rem !important; /* 14px */
-    left: 0.125rem !important; /* 2px */
-    top: 0.125rem !important; /* 2px */
+  position: absolute;
+  top: 0.125rem;
+  left: 0.125rem;
+  width: clamp(0.75rem, 2vw, 1.5rem);
+  height: clamp(0.75rem, 2vw, 1.5rem);
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
 }
-.screen-reader-toggle-button.translate-x-5[data-v-16666c50] {
-    transform: translateX(0.875rem) !important; /* 14px */
+.screen-reader-toggle-button.active[data-v-16666c50] {
+  transform: translateX(calc(clamp(2rem, 5vw, 3.5rem) - clamp(0.75rem, 2vw, 1.5rem) - 0.25rem));
+  box-shadow: 0 3px 8px rgba(59, 130, 246, 0.3);
 }
-}
-@media (max-width: 360px) {
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
 .screen-reader-container[data-v-16666c50] {
-    padding: 0.125rem !important; /* Padding ainda menor */
-    max-width: 240px !important; /* Container ainda menor */
-    width: 85vw !important; /* Largura ainda menor */
-}
-.screen-reader-icon[data-v-16666c50] {
-    width: 0.875rem !important; /* 14px */
-    height: 0.875rem !important; /* 14px */
+    background: #374151;
+    border-color: #6b7280;
 }
 .screen-reader-title[data-v-16666c50] {
-    font-size: 0.625rem !important; /* 10px */
-    line-height: 0.875rem !important;
+    color: #f9fafb;
 }
 .screen-reader-subtitle[data-v-16666c50] {
-    font-size: 0.5rem !important; /* 8px */
-    line-height: 0.75rem !important;
+    color: #d1d5db;
 }
 .screen-reader-toggle[data-v-16666c50] {
-    width: 1.75rem !important; /* 28px */
-    height: 1rem !important; /* 16px */
-}
-.screen-reader-toggle-button[data-v-16666c50] {
-    width: 0.75rem !important; /* 12px */
-    height: 0.75rem !important; /* 12px */
-}
-.screen-reader-toggle-button.translate-x-5[data-v-16666c50] {
-    transform: translateX(0.75rem) !important; /* 12px */
+    background: #4b5563;
 }
 }
 
-/* Media query para telas extra pequenas */
+/* Breakpoint específico para dispositivos muito pequenos */
+@media (max-width: 375px) {
+.screen-reader-container[data-v-16666c50] {
+    padding: 0.5rem;
+}
+.screen-reader-label[data-v-16666c50] {
+    gap: 0.5rem;
+}
+.screen-reader-content[data-v-16666c50] {
+    gap: 0.0625rem;
+}
+}
 @media (max-width: 320px) {
 .screen-reader-container[data-v-16666c50] {
-    max-width: 200px !important;
-    width: 80vw !important;
-    padding: 0.125rem !important;
+    padding: 0.375rem;
 }
+.screen-reader-label[data-v-16666c50] {
+    gap: 0.375rem;
+}
+}
+
+/* Garante que nunca seja menor que o conteúdo mínimo */
+@media (max-width: 280px) {
 .screen-reader-title[data-v-16666c50] {
-    font-size: 0.625rem !important; /* 10px */
+    font-size: 0.65rem;
 }
 .screen-reader-subtitle[data-v-16666c50] {
-    font-size: 0.5rem !important; /* 8px */
+    font-size: 0.55rem;
 }
 }
-
-/* Animação suave para o switch */
-input:checked + div[data-v-16666c50] {
-  background: linear-gradient(135deg, #3b82f6);
-}
-input:checked + div > div[data-v-16666c50] {
-  box-shadow: 0 3px 8px #3b82f6;
-}
-
 /*!*************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
   !*** css ./node_modules/css-loader/dist/cjs.js??clonedRuleSet-12.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-12.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/controller/VoiceCommandController.vue?vue&type=style&index=0&id=3d9a4370&scoped=true&lang=css ***!
   \*************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
@@ -1058,6 +1102,9 @@ video {
 .flex-shrink-0 {
   flex-shrink: 0;
 }
+.flex-shrink {
+  flex-shrink: 1;
+}
 .flex-grow {
   flex-grow: 1;
 }
@@ -1384,6 +1431,9 @@ video {
 }
 .p-6 {
   padding: 1.5rem;
+}
+.p-12 {
+  padding: 3rem;
 }
 .px-2 {
   padding-left: 0.5rem;

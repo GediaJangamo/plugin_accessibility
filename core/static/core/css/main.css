@@ -19,179 +19,16 @@
   !*** css ./node_modules/css-loader/dist/cjs.js??clonedRuleSet-12.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-12.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/options/ScreenReader.vue?vue&type=style&index=0&id=16666c50&scoped=true&lang=css ***!
   \************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
 
-.container[data-v-16666c50] {
-  padding: 8px;
-  background: #f1f5f9;
-  border: 1px solid #64758b;
-  border-radius: 8px;
-  transition: box-shadow 0.3s ease;
-  margin: 4px;
-  min-width: 0;
-  overflow: hidden;
+/* Estilos personalizados para o toggle */
+
+/* Animação suave para o switch */
+input:checked + div[data-v-16666c50] {
+  background: linear-gradient(135deg, #3b82f6);
 }
-.container[data-v-16666c50]:hover {
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-}
-.label[data-v-16666c50] {
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  gap: 8px;
-  min-width: 0;
-}
-.icon-wrapper[data-v-16666c50] {
-  flex-shrink: 0;
-}
-.icon[data-v-16666c50] {
-  width: 20px;
-  height: 20px;
-  color: #3b82f6;
-}
-.content[data-v-16666c50] {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-}
-.title[data-v-16666c50] {
-  display: block;
-  font-size: 14px;
-  font-weight: 500;
-  color: #1f2937;
-  line-height: 1.3;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.subtitle[data-v-16666c50] {
-  display: block;
-  font-size: 12px;
-  color: #64748b;
-  line-height: 1.3;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.toggle-wrapper[data-v-16666c50] {
-  flex-shrink: 0;
-}
-.toggle[data-v-16666c50] {
-  position: relative;
-  width: 40px;
-  height: 20px;
-  background: #d1d5db;
-  border-radius: 20px;
-  transition: all 0.3s ease;
-}
-.toggle.active[data-v-16666c50] {
-  background: #3b82f6;
-}
-.toggle-button[data-v-16666c50] {
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 16px;
-  height: 16px;
-  background: white;
-  border-radius: 50%;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
-}
-.toggle-button.active[data-v-16666c50] {
-  transform: translateX(20px);
-  box-shadow: 0 3px 8px rgba(59, 130, 246, 0.3);
-}
-.sr-only[data-v-16666c50] {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
+input:checked + div > div[data-v-16666c50] {
+  box-shadow: 0 3px 8px #3b82f6;
 }
 
-/* Mobile pequeno */
-@media (max-width: 400px) {
-.container[data-v-16666c50] {
-    padding: 6px;
-    margin: 2px;
-}
-.label[data-v-16666c50] {
-    gap: 6px;
-}
-.icon[data-v-16666c50] {
-    width: 18px;
-    height: 18px;
-}
-.title[data-v-16666c50] {
-    font-size: 13px;
-}
-.subtitle[data-v-16666c50] {
-    font-size: 11px;
-}
-.toggle[data-v-16666c50] {
-    width: 36px;
-    height: 18px;
-}
-.toggle-button[data-v-16666c50] {
-    width: 14px;
-    height: 14px;
-}
-.toggle-button.active[data-v-16666c50] {
-    transform: translateX(18px);
-}
-}
-
-/* Mobile muito pequeno */
-@media (max-width: 320px) {
-.container[data-v-16666c50] {
-    padding: 4px;
-    margin: 1px;
-}
-.label[data-v-16666c50] {
-    gap: 4px;
-}
-.icon[data-v-16666c50] {
-    width: 16px;
-    height: 16px;
-}
-.title[data-v-16666c50] {
-    font-size: 12px;
-}
-.subtitle[data-v-16666c50] {
-    font-size: 10px;
-}
-.toggle[data-v-16666c50] {
-    width: 32px;
-    height: 16px;
-}
-.toggle-button[data-v-16666c50] {
-    width: 12px;
-    height: 12px;
-}
-.toggle-button.active[data-v-16666c50] {
-    transform: translateX(16px);
-}
-}
-
-/* Dark mode */
-@media (prefers-color-scheme: dark) {
-.container[data-v-16666c50] {
-    background: #374151;
-    border-color: #6b7280;
-}
-.title[data-v-16666c50] {
-    color: #f9fafb;
-}
-.subtitle[data-v-16666c50] {
-    color: #d1d5db;
-}
-.toggle[data-v-16666c50] {
-    background: #4b5563;
-}
-}
 /*!*************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
   !*** css ./node_modules/css-loader/dist/cjs.js??clonedRuleSet-12.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-12.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/controller/VoiceCommandController.vue?vue&type=style&index=0&id=3d9a4370&scoped=true&lang=css ***!
   \*************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
@@ -2058,6 +1895,10 @@ body.high-contrast button:not(.accessibility-button) {
 
   .sm\:p-3 {
     padding: 0.75rem;
+  }
+
+  .sm\:p-48 {
+    padding: 12rem;
   }
 
   .sm\:px-6 {

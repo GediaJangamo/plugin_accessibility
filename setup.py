@@ -1,11 +1,11 @@
-from setuptools import setup, find_packages
+from setuptools import setup, find_packages # type: ignore
 
 setup(
     name="siga-accessibility",
     version="0.1",
     packages=find_packages(),
     include_package_data=True,
-    description="Accessibility plugin for Django applications (SIGA)",
+    description="Accessibility plugin for Django applications to provide assistive technologies",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
     author="Gédia Genifa Lucas Jangamo",
@@ -18,6 +18,6 @@ setup(
     ],
     python_requires=">=3.6",
     install_requires=[
-        "Django>=2.2",
+        "Django>=2.1",
     ],
 )

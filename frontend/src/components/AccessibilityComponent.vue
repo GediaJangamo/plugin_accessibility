@@ -9,7 +9,7 @@
     <button 
       v-if="!isOpen"
       @click="toggleMenu"
-      class="fixed bottom-32 left-0 bg-[#4ae24a] hover:bg-[#357ABD] text-white py-4 px-6 rounded-r-full shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 z-50 group accessibility-control"
+      class="fixed bottom-32 left-0 bg-[#4A90E2] hover:bg-[#357ABD] text-white py-4 px-6 rounded-r-full shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 z-50 group accessibility-control"
       aria-label="Opcoes de acessibilidade"
     >
       <img src="/static/core/img/accessibility_icon.png" alt="Icone de acessibilidade" class="h-8 w-8 brightness-0 invert">

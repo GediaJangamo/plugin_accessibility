@@ -4,7 +4,7 @@ Este documento apresenta o passo a passo completo para instalação e integraç�
 
 ## Requisitos Prévios
 
-- Python 3.8 ou superior
+- Python 3.6 ou superior
 - Django 2.2 ou superior
 - pip (gerenciador de pacotes Python)
 - Um projecto Django existente onde o plugin será instalado

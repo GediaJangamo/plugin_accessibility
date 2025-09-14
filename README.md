@@ -8,44 +8,34 @@ Promovendo a Inclusão Digital de Estudantes com Deficiência Visual Caso de Est
 Universidade Eduardo Mondlane – Faculdade de Letras e Ciências Sociais, Faculdade de Educação e Faculdade de Filosofia.
 
 
-# 🎧 Plugin de Acessibilidade para Sistemas Académicos com IA
+# 🎧 Plugin de Acessibilidade
 
-Este projeto é um **plugin de acessibilidade inteligente** desenvolvido em **Python e Django**, com foco na **inclusão digital de estudantes com deficiência visual**. O plugin pode ser incorporado a sistemas robustos já existentes, como o **SIGA (Sistema Integrado de Gestão Académica)**, para tornar suas funcionalidades mais acessíveis por meio de **comandos de voz, leitura de conteúdo e navegação inteligente** — tudo isso funcionando mesmo em ambientes com **internet fraca ou indisponivel**.
+Este projeto é um **plugin de acessibilidade** desenvolvido em **Python e Django**, com foco na **inclusão digital de estudantes com deficiência visual**. O plugin pode ser integrado a sistemas robustos já existentes, para tornar suas funcionalidades mais acessíveis por meio de **comandos de voz, leitura de conteúdo, ajuste de fonte e controlo de contraste** — tudo isso funcionando mesmo em ambientes com **internet fraca ou indisponivel( excepto navegação por comandos de voz)**.
 
 ## 🧩 O que este plugin faz?
 
 📢 **Navegação por Voz**: permite que estudantes usem comandos de voz para navegar no sistema (ex: "ver notas", "fazer matrícula").
 🧠 **Leitura de Conteúdo**: usa síntese de voz para ler textos da tela para estudantes com cegueira total ou baixa visão.
-🌐 **IA Adaptativa**: deteta automaticamente a qualidade da conexão e escolhe entre:
-IA local (offline)
-IA online (por exemplo, integração futura com API da HandTalk ou outros recursos)
 🧭 **Menu de Acessibilidade**: inclui botão fixo em todas as páginas para acesso rápido às ferramentas assistivas.
 ⚙️ **Arquitetura Modular**: pode ser facilmente integrado a qualquer sistema Django, com possibilidade de expandir para outras deficiências no futuro.
 
 ## 🚀 Tecnologias utilizadas
 
 🐍 ** Python Python 3.13.2 **
-🌐 **Django 5.1.7 **
-🧠 **Vosk** – reconhecimento de voz offline
-🔊 **pyttsx3** – leitura de texto (text-to-speech)
-🧱 **HTML, CSS, JS (Vanilla ou com Tailwind para responsividade)**
-🔁 (Opcional) Integração futura com **HandTalk API** ou outros recursos online
+🌐 **Django 5.0 **
+🧱 **HTML, CSS, JS 
+
 
 ## 📱 Compatibilidade
 
-O plugin foi projetado para funcionar:
-✅ Em **laptops** e **computadores de secretária**
-✅ Em **telemóveis** e **tablets**
-✅ Mesmo **sem internet ou com internet lenta**
-✅ Em qualquer sistema académico feito com **Django**
+O plugin foi projetado para funcionar em qualquer sistema feito em Django e Python a partir da versão django 2.1 ou superior e python 3.6 ou superior
 
 ## 👩🏽‍💻 Autora
- Desenvolvido por **Gédia Jangamo**, estudante de Engenharia de Tecnologias e Sistemas de Informação, com foco em **inclusão digital e tecnologias assistivas** para
- a educação superior em Moçambique.
+ Desenvolvido por **Gédia Jangamo**, estudante de Engenharia de Tecnologias e Sistemas de Informação da Universidade Joaquim Chissano.
  Email: gedyahgennyfah@gmail.com
  Contacto: 845771303
 
 ## 📜 Licença
 Este projeto está sob a licença MIT. Sinta-se livre para usar, modificar e expandir este plugin.
 
-**Nota:** O plugin não interfere diretamente nas funcionalidades do sistema. Ele atua como uma camada de acessibilidade que melhora a experiência do utilizador.
+**Nota:** O plugin não interfere directamente nas funcionalidades do sistema. Ele actua como um módulo de acessibilidade que melhora a experiência do utilizador.

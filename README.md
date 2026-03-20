@@ -1,41 +1,55 @@
 # plugin_accessibility
 
-Este projeto faz parte do Trabalho de Conclusão de Curso (TCC) da estudante Gédia Jangamo,
-no curso de Engenharia de Tecnologias e Sistemas de Informação. Universidade Joaquim Chissano
+This project was developed as part of my Final Year Project (Thesis) for the Bachelor's degree in Information Systems and Technology Engineering at Joaquim Chissano University.
 
-Tema: Implementação de Tecnologias Assistivas no Sistema Integrado de Gestão Académica (SIGA):
-Promovendo a Inclusão Digital de Estudantes com Deficiência Visual Caso de Estudo:
-Universidade Eduardo Mondlane – Faculdade de Letras e Ciências Sociais, Faculdade de Educação e Faculdade de Filosofia.
+**Topic:** Implementation of Assistive Technologies in the Integrated Academic Management System (SIGA):
+Promoting Digital Inclusion for Students with Visual Impairment.
 
+**Case Study:**
+Eduardo Mondlane University – Faculty of Arts and Social Sciences, Faculty of Education, and Faculty of Philosophy.
 
-#  Plugin de Acessibilidade
+---
 
-Este projeto é um **plugin de acessibilidade** desenvolvido em **Python e Django**, com foco na **inclusão digital de estudantes com deficiência visual**. O plugin pode ser integrado a sistemas robustos já existentes, para tornar suas funcionalidades mais acessíveis por meio de **comandos de voz, leitura de conteúdo, ajuste de fonte e controlo de contraste** — tudo isso funcionando mesmo em ambientes com **internet fraca ou indisponivel( excepto navegação por comandos de voz)**.
+# ♿ Accessibility Plugin
 
-## O que este plugin faz?
+This project is an **accessibility plugin** developed using **Python and Django**, focused on the **digital inclusion of students with visual impairments**.
 
- **Navegação por Voz**: permite que estudantes usem comandos de voz para navegar no sistema (ex: "ver notas", "fazer matrícula").
- **Leitura de Conteúdo**: usa síntese de voz para ler textos da tela para estudantes com cegueira total ou baixa visão.
- **Menu de Acessibilidade**: inclui botão fixo em todas as páginas para acesso rápido às ferramentas assistivas.
- **Arquitetura Modular**: pode ser facilmente integrado a qualquer sistema Django, com possibilidade de expandir para outras deficiências no futuro.
+The plugin can be integrated into existing systems to enhance accessibility through features such as **voice commands, content reading, font adjustment, and contrast control** — all designed to work even in environments with **limited or no internet access** *(except for voice navigation features)*.
 
-##  Tecnologias utilizadas
+---
 
- ** Python Python 3.13.2 **
- **Django 5.0 **
- **HTML, CSS, JS 
+##  What does this plugin do?
 
+*  **Voice Navigation**: Allows students to navigate the system using voice commands (e.g., "view grades", "register for courses").
+*  **Content Reading**: Uses speech synthesis to read on-screen content for blind or low-vision users.
+* **Accessibility Menu**: Provides a fixed button on all pages for quick access to assistive tools.
+* **Modular Architecture**: Easily integrable into any Django-based system, with potential expansion for other types of disabilities in the future.
 
-##  Compatibilidade
+---
 
-O plugin foi projetado para funcionar em qualquer sistema feito em Django e Python a partir da versão django 2.1 ou superior e python 3.6 ou superior
+##  Technologies Used
 
-##  Autora
- Desenvolvido por **Gédia Jangamo**, estudante de Engenharia de Tecnologias e Sistemas de Informação da Universidade Joaquim Chissano.
- Email: gediajangamo@gmail.com
+* Python 3.13.2
+* Django 5.0
+* HTML, CSS, JavaScript
 
+---
 
-##  Licença
-Este projeto está sob a licença MIT. Sinta-se livre para usar, modificar e expandir este plugin.
+##  Compatibility
 
-**Nota:** O plugin não interfere directamente nas funcionalidades do sistema. Ele actua como um módulo de acessibilidade que melhora a experiência do utilizador.
+The plugin is designed to work with any system built using:
+
+* Django 2.1 or higher
+* Python 3.6 or higher
+
+---
+
+## Author
+
+Developed by **Gédia Jangamo**
+---
+
+##  Note
+
+The plugin does not directly interfere with the core functionalities of the system.
+It acts as an accessibility layer that enhances the overall user experience.

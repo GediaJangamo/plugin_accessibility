@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages # type: ignore
 
 setup(
-    name="siga-accessibility",
+    name="accessjay",
     version="0.1",
     packages=find_packages(),
     include_package_data=True,
@@ -9,7 +9,7 @@ setup(
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
     author="Gédia Genifa Lucas Jangamo",
-    author_email="gedyahgennyfah@gmail.com",
+    author_email="gediajangamo@gmail.com",
     url="https://github.com/GediaJangamo/plugin_accessibility.git",
     classifiers=[
         "Framework :: Django",

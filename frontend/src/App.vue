@@ -2,7 +2,7 @@
   <div>
     <accessibility-component></accessibility-component>
     <main id="main-content">
-      <!-- Your main content here -->
+   
     </main>
   </div>
 </template>

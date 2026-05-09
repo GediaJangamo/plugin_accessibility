@@ -27,7 +27,7 @@ Se preferir instalar a partir de uma cópia local:
 git clone https://github.com/GediaJangamo/plugin_accessibility.git
 
 # Entre no diretório do projeto
-cd plugin_siga_accessibility
+cd plugin_accessibility
 
 # Instale em modo de desenvolvimento
 pip install -e .
@@ -49,7 +49,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     # Adicione o plugin de acessibilidade
-    'core' 
+    'core'
 ]
 ```
 
@@ -67,7 +67,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    
+
     # Adicione o middleware de acessibilidade
     'core.middleware.AccessibilityMiddleware'
 ]
@@ -99,13 +99,13 @@ python manage.py collectstatic
 Para verificar se o plugin foi instalado correctamente:
 
 1. Inicie o servidor de desenvolvimento:
+
    ```bash
    python manage.py runserver
    ```
 
 2. Acesse qualquer página do seu sistema no navegador.
    O botão de acessibilidade deve aparecer automaticamente do lado esquerdo em todas as páginas.
-
 
 ### 6.2 Excluindo o Botão de Páginas Específicas
 
@@ -137,11 +137,9 @@ Se o plugin estiver a causar conflitos com outros scripts:
 2. Verifique o console do navegador para identificar possíveis erros
 3. Use as configurações `ACCESSIBILITY_SETTINGS` para ajustar o comportamento
 
-
 ## 8. Suporte e Actualizações
 
 Para obter suporte ou reportar problemas, visite o repositório do projecto:
 https://github.com/GediaJangamo/plugin_accessibility.git
 
-Email: gedyahgennyfah@gmail.com
-Telefone: 845771303
+Email: gediajangamo@gmail.com

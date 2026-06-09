@@ -6,21 +6,21 @@
       </svg>
       <h3 class="font-medium text-lg text-gray-800 dark:text-white">Cursor</h3>
     </div>
-    <p class="text-sm text-[#64748b] dark:text-gray-400 mb-2">Amplie o cursor e altere a sua cor</p>
+    <p class="text-sm text-[#64748b] dark:text-gray-400 mb-2">Increase cursor size and change its color</p>
     <div class="flex gap-3">
       <button 
         @click="setCursorColor('white')"
         class="flex-1 py-2 text-center border border-gray-300 dark:border-gray-600 rounded-md font-medium text-lg"
         :class="cursorColor === 'white' ? 'ring-2 ring-[#3b82f6] bg-white text-black' : 'bg-white text-black'"
       >
-        BRANCO
+        WHITE
       </button>
       <button 
         @click="setCursorColor('black')"
         class="flex-1 py-2 text-center border border-gray-300 dark:border-gray-600 rounded-md font-medium text-lg"
         :class="cursorColor === 'black' ? 'ring-2 ring-[#3b82f6] bg-gray-900 text-white' : 'bg-gray-900 text-white'"
       >
-        PRETO
+        BLACK
       </button>
     </div>
   </div>

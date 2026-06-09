@@ -18,7 +18,7 @@
       
       <div class="flex-1 min-w-0">
         <h3 class="font-semibold text-lg text-gray-900 dark:text-gray-100 leading-tight">
-          Tamanho da Fonte
+          Font Size
         </h3>
       </div>
     </div>
@@ -36,7 +36,7 @@
       <div class="flex-1 text-center px-2 truncate">
         <div class="bg-white dark:bg-gray-700 rounded-lg py-2 px-3 border border-gray-200 dark:border-gray-600">
           <span class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-1">
-            Actual
+            Current Size
           </span>
           <span class="font-semibold text-base text-gray-900 dark:text-white block whitespace-nowrap overflow-hidden text-ellipsis">
             {{ fontSize }}
@@ -80,7 +80,8 @@ export default {
   },
   data() {
     return {
-      fontSizes: ['Pequeno', 'Normal', 'Grande', 'Muito Grande']
+      // fontSizes: ['Pequeno', 'Normal', 'Grande', 'Muito Grande']
+      fontSizes: ['Small', 'Normal', 'Large', 'Extra Large']
     }
   },
   watch: {
@@ -121,10 +122,10 @@ export default {
     applyFontSize(size) {
       // Mapeamento mais preciso dos tamanhos
       const fontSizeMap = {
-        'Pequeno': '0.875rem',      // 14px
+        'Small': '0.875rem',      // 14px
         'Normal': '1rem',           // 16px
-        'Grande': '1.125rem',       // 18px
-        'Muito Grande': '1.25rem'   // 20px
+        'Large': '1.125rem',       // 18px
+        'Extra Large': '1.25rem'   // 20px
       };
       
       const fontSize = fontSizeMap[size] || fontSizeMap['Normal'];

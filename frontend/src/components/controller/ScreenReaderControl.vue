@@ -30,28 +30,28 @@
         <div class="flex items-center justify-between mb-4 gap-4">
           <!-- Modo de leitura -->
           <div class="flex items-center gap-2">
-            <span class="text-sm text-gray-500 dark:text-gray-400">Modo</span>
+            <span class="text-sm text-gray-500 dark:text-gray-400">Mode</span>
             <div class="flex items-center rounded-full bg-gray-100 dark:bg-gray-700 overflow-hidden">
               <button 
                 @click="setReadingMode('element')"
                 :class="readingMode === 'element' ? 'bg-[#3b82f6] text-white' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'"
                 class="px-3 py-1 text-xs font-medium transition-colors"
               >
-                Elemento
+                Sentence
               </button>
               <button 
                 @click="setReadingMode('word')"
                 :class="readingMode === 'word' ? 'bg-[#3b82f6] text-white' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'"
                 class="px-3 py-1 text-xs font-medium transition-colors"
               >
-                Palavra
+                Word
               </button>
             </div>
           </div>
 
           <!-- Controle de velocidade -->
           <div class="flex items-center gap-2">
-            <span class="text-sm text-gray-500 dark:text-gray-400">Velocidade</span>
+            <span class="text-sm text-gray-500 dark:text-gray-400">Speech Speed</span>
             <div class="flex items-center rounded-full bg-gray-100 dark:bg-gray-700 overflow-hidden">
               <button 
                 @click="decreaseRate"

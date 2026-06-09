@@ -23,8 +23,8 @@
 
         </div>
         <div class="flex-grow">
-          <span class="block text-lg text-gray-800 dark:text-white font-medium">Comandos de Voz</span>
-          <span class="text-sm text-[#64748b] dark:text-gray-300">Navegue com a sua voz</span>
+          <span class="block text-lg text-gray-800 dark:text-white font-medium">Voice Commands</span>
+          <span class="text-sm text-[#64748b] dark:text-gray-300">Navigate using your voice</span>
         </div>
         <div class="flex items-center">
           <input

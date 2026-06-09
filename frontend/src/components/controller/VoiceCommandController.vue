@@ -107,7 +107,7 @@
                 </svg>
               </div>
               <h2 class="text-2xl font-bold text-white">
-                Comandos de Voz Disponíveis
+                Voice Commands Available
               </h2>
             </div>
             <button 
@@ -122,7 +122,7 @@
             </button>
           </div>
           <p class="text-blue-100 mt-2 max-w-2xl">
-            Utilize estes comandos para navegar pelo sistema usando apenas sua voz. Diga "ajuda" a qualquer momento para ver esta lista.
+            Use these commands to navigate the system using only your voice. Say "help" at any time to view this list.
           </p>
         </div>
         
@@ -131,7 +131,7 @@
           <!-- Navegação Geral -->
           <div class="mb-6">
             <h3 class="text-lg font-bold text-[#3b82f6] dark:text-[#93c5fd] mb-3 border-b border-blue-200 dark:border-blue-700 pb-2">
-              Navegação Geral
+               General Navigation
             </h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div v-for="(command, commandKey) in commandCategories.navegacao.commands" :key="commandKey" class="flex flex-col md:flex-row bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm border border-blue-200 dark:border-blue-700 hover:shadow-md transition-shadow">
@@ -148,7 +148,7 @@
           <!-- Comandos do Sistema -->
           <div class="mb-6">
             <h3 class="text-lg font-bold text-[#3b82f6] dark:text-[#93c5fd] mb-3 border-b border-blue-200 dark:border-blue-700 pb-2">
-              Módulos do Sistema
+             System Modules
             </h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div v-for="(command, commandKey) in commandCategories.modulos.commands" :key="commandKey" class="flex flex-col md:flex-row bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm border border-blue-100 dark:border-blue-700 hover:shadow-md transition-shadow">
@@ -165,7 +165,7 @@
           <!-- Comandos de Acessibilidade -->
           <div class="mb-6">
             <h3 class="text-lg font-bold text-[#3b82f6] dark:text-[#93c5fd] mb-3 border-b border-blue-200 dark:border-blue-700 pb-2">
-              Acessibilidade
+              Accessibility
             </h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div v-for="(command, commandKey) in commandCategories.acessibilidade.commands" :key="commandKey" class="flex flex-col md:flex-row bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm border border-blue-100 dark:border-blue-700 hover:shadow-md transition-shadow">
@@ -182,39 +182,43 @@
           <!-- Atalhos Importantes -->
           <div class="mb-6">
             <h3 class="text-lg font-bold text-[#3b82f6] dark:text-[#93c5fd] mb-3 border-b border-blue-200 dark:border-blue-700 pb-2">
-              Atalhos Importantes
+              Important Shortcuts
             </h3>
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div class="flex flex-col md:flex-row bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm border border-blue-100 dark:border-blue-700 hover:shadow-md transition-shadow">
                 <div class="font-mono text-sm bg-blue-50 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-3 py-2 rounded-md mb-2 md:mb-0 md:mr-3 flex-shrink-0 md:w-auto w-full">
-                  ler página
+                  read page
                 </div>
                 <div class="text-gray-700 dark:text-gray-300 text-sm md:text-base flex items-center">
-                  Lê todo o conteúdo da página atual
+                  Reads the full content of the current page
                 </div>
               </div>
+
               <div class="flex flex-col md:flex-row bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm border border-blue-100 dark:border-blue-700 hover:shadow-md transition-shadow">
                 <div class="font-mono text-sm bg-blue-50 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-3 py-2 rounded-md mb-2 md:mb-0 md:mr-3 flex-shrink-0 md:w-auto w-full">
-                  parar leitura
+                  stop reading
                 </div>
                 <div class="text-gray-700 dark:text-gray-300 text-sm md:text-base flex items-center">
-                  Para a leitura em andamento
+                  Stops the ongoing reading
                 </div>
               </div>
+
               <div class="flex flex-col md:flex-row bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm border border-blue-100 dark:border-blue-700 hover:shadow-md transition-shadow">
                 <div class="font-mono text-sm bg-blue-50 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-3 py-2 rounded-md mb-2 md:mb-0 md:mr-3 flex-shrink-0 md:w-auto w-full">
-                  tecla M
+                  M key
                 </div>
                 <div class="text-gray-700 dark:text-gray-300 text-sm md:text-base flex items-center">
-                  Ativa ou desativa o microfone
+                  Toggles the microphone on or off
                 </div>
               </div>
+
               <div class="flex flex-col md:flex-row bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm border border-blue-100 dark:border-blue-700 hover:shadow-md transition-shadow">
                 <div class="font-mono text-sm bg-blue-50 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-3 py-2 rounded-md mb-2 md:mb-0 md:mr-3 flex-shrink-0 md:w-auto w-full">
-                  ajuda [categoria]
+                  help [category]
                 </div>
                 <div class="text-gray-700 dark:text-gray-300 text-sm md:text-base flex items-center">
-                  Mostra comandos de uma categoria específica
+                  Shows commands for a specific category
                 </div>
               </div>
             </div>
@@ -225,13 +229,13 @@
         <div class="p-4 border-t border-gray-200 dark:border-gray-700 bg-blue-50 dark:bg-gray-800">
           <div class="flex items-center justify-between">
             <p class="text-sm text-[#3b82f6] dark:text-[#93c5fd]">
-              <span class="font-bold">Dica:</span> Você pode dizer "ajuda" a qualquer momento para ver estes comandos novamente.
+               <span class="font-bold">Tip:</span> You can say "help" at any time to view these commands again
             </p>
             <button 
               @click="closeCommandsList"
               class="px-4 py-2 bg-[#3b82f6] hover:bg-[#1d4ed8] text-white rounded-lg shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-[#3b82f6] focus:ring-offset-2"
             >
-              Fechar
+               Close
             </button>
           </div>
         </div>
@@ -280,51 +284,84 @@ export default {
         navegacao: {
           name: 'Navegação',
           keywords: ['navegação', 'navegacao', 'navegar', 'página', 'pagina'],
+          // commands: {
+          //   "ir para início": { action: "/dashboard/", description: "Navega para a página inicial" },
+          //   "voltar": { action: "history_back", description: "Retorna à página anterior" },
+          //   "avançar": { action: "history_forward", description: "Avança para a próxima página" },
+          //   "rolar para baixo": { action: "scroll_down", description: "Rola a página para baixo" },
+          //   "rolar para cima": { action: "scroll_up", description: "Rola a página para cima" },
+          //   "atualizar página": { action: "reload_page", description: "Recarrega a página atual" },
+          //   "onde estou": { action: "announce_location", description: "Informa a página atual" },
+          //   "repetir última ação": { action: "repeat_last", description: "Repete o último comando executado" },
+          //   "ler página": { action: "read_page_content", description: "Lê todo o conteúdo da página atual" },
+          //   "parar leitura": { action: "stop_reading", description: "Para a leitura em andamento" }
+          // }
           commands: {
-            "ir para início": { action: "/dashboard/", description: "Navega para a página inicial" },
-            "voltar": { action: "history_back", description: "Retorna à página anterior" },
-            "avançar": { action: "history_forward", description: "Avança para a próxima página" },
-            "rolar para baixo": { action: "scroll_down", description: "Rola a página para baixo" },
-            "rolar para cima": { action: "scroll_up", description: "Rola a página para cima" },
-            "atualizar página": { action: "reload_page", description: "Recarrega a página atual" },
-            "onde estou": { action: "announce_location", description: "Informa a página atual" },
-            "repetir última ação": { action: "repeat_last", description: "Repete o último comando executado" },
-            "ler página": { action: "read_page_content", description: "Lê todo o conteúdo da página atual" },
-            "parar leitura": { action: "stop_reading", description: "Para a leitura em andamento" }
-          }
+              "go to home": { action: "/dashboard/", description: "Navigate to the home page" },
+              "back": { action: "history_back", description: "Return to the previous page" },
+              "forward": { action: "history_forward", description: "Go to the next page" },
+              "scroll down": { action: "scroll_down", description: "Scroll the page down" },
+              "scroll up": { action: "scroll_up", description: "Scroll the page up" },
+              "refresh page": { action: "reload_page", description: "Reload the current page" },
+              "where am I": { action: "announce_location", description: "Announce the current page" },
+              "repeat last action": { action: "repeat_last", description: "Repeat the last executed command" },
+              "read page": { action: "read_page_content", description: "Read the full content of the current page" },
+              "stop reading": { action: "stop_reading", description: "Stop the ongoing reading" }
+             }
         },
         modulos: {
           name: 'Módulos',
           keywords: ['módulos', 'modulos', 'sistema', 'aplicação', 'aplicacao'],
+          // commands: {
+          //   "abrir avaliações": { action: "/painel_estudante/avaliacoes/", description: "Acede ao módulo de avaliações" },
+          //   "abrir inscrições": { action: "/painel_estudante/inscricoes/", description: "Acede ao módulo de inscrições" },
+          //   "abrir matrículas": { action: "/painel_estudante/matriculas/", description: "Acede ao módulo de matrículas" },
+          //   "abrir faturas": { action: "/painel_estudante/facturas/", description: "Acede ao módulo de faturas" },
+          //   "abrir mensalidades": { action: "/painel_estudante/mensalidades/", description: "Acede ao módulo de mensalidades" },
+          //   "abrir vula": { action: "/painel_estudante/vula/", description: "Acede à plataforma Vula" },
+          //   "abrir perfil": { action: "/painel_estudante/", description: "Acede ao perfil do utilizador" },
+          //   "ir para painel": { action: "/painel_estudante/", description: "Volta ao painel principal" }
+          // }
+
           commands: {
-            "abrir avaliações": { action: "/painel_estudante/avaliacoes/", description: "Acede ao módulo de avaliações" },
-            "abrir inscrições": { action: "/painel_estudante/inscricoes/", description: "Acede ao módulo de inscrições" },
-            "abrir matrículas": { action: "/painel_estudante/matriculas/", description: "Acede ao módulo de matrículas" },
-            "abrir faturas": { action: "/painel_estudante/facturas/", description: "Acede ao módulo de faturas" },
-            "abrir mensalidades": { action: "/painel_estudante/mensalidades/", description: "Acede ao módulo de mensalidades" },
-            "abrir vula": { action: "/painel_estudante/vula/", description: "Acede à plataforma Vula" },
-            "abrir perfil": { action: "/painel_estudante/", description: "Acede ao perfil do utilizador" },
-            "ir para painel": { action: "/painel_estudante/", description: "Volta ao painel principal" }
+            "open assessments": { action: "/painel_estudante/avaliacoes/", description: "Access the assessments module" },
+            "open enrollments": { action: "/painel_estudante/inscricoes/", description: "Access the enrollments module" },
+            "open registrations": { action: "/painel_estudante/matriculas/", description: "Access the registrations module" },
+            "open invoices": { action: "/painel_estudante/facturas/", description: "Access the invoices module" },
+            "open payments": { action: "/painel_estudante/mensalidades/", description: "Access the tuition payments module" },
+            "open vula": { action: "/painel_estudante/vula/", description: "Access the Vula platform" },
+            "open profile": { action: "/painel_estudante/", description: "Access the user profile" },
+            "go to dashboard": { action: "/painel_estudante/", description: "Return to the main dashboard" }
           }
         },
         acessibilidade: {
           name: 'Acessibilidade',
           keywords: ['acessibilidade', 'acesso', 'visual', 'contraste', 'fonte'],
+          // commands: {
+          //   "ativar alto contraste": { action: "toggle_high_contrast", description: "Ativa o modo de alto contraste" },
+          //   "desativar alto contraste": { action: "toggle_high_contrast", description: "Desativa o modo de alto contraste" },
+          //   "aumentar fonte": { action: "increase_font_size", description: "Aumenta o tamanho da fonte" },
+          //   "diminuir fonte": { action: "decrease_font_size", description: "Diminui o tamanho da fonte" },
+          //   "tamanho normal": { action: "reset_font_size", description: "Restaura fonte ao tamanho padrão" },
+          //   "ativar áudio": { action: "enable_audio", description: "Ativa feedback de voz" },
+          //   "desativar áudio": { action: "disable_audio", description: "Desativa feedback de voz" }
+          // }
+
           commands: {
-            "ativar alto contraste": { action: "toggle_high_contrast", description: "Ativa o modo de alto contraste" },
-            "desativar alto contraste": { action: "toggle_high_contrast", description: "Desativa o modo de alto contraste" },
-            "aumentar fonte": { action: "increase_font_size", description: "Aumenta o tamanho da fonte" },
-            "diminuir fonte": { action: "decrease_font_size", description: "Diminui o tamanho da fonte" },
-            "tamanho normal": { action: "reset_font_size", description: "Restaura fonte ao tamanho padrão" },
-            "ativar áudio": { action: "enable_audio", description: "Ativa feedback de voz" },
-            "desativar áudio": { action: "disable_audio", description: "Desativa feedback de voz" }
+            "enable high contrast": { action: "toggle_high_contrast", description: "Enable high contrast mode" },
+            "disable high contrast": { action: "toggle_high_contrast", description: "Disable high contrast mode" },
+            "increase font size": { action: "increase_font_size", description: "Increase font size" },
+            "decrease font size": { action: "decrease_font_size", description: "Decrease font size" },
+            "reset font size": { action: "reset_font_size", description: "Restore default font size" },
+            "enable audio": { action: "enable_audio", description: "Enable voice feedback" },
+            "disable audio": { action: "disable_audio", description: "Disable voice feedback" }
           }
         }
       },
       
       // Comandos especiais do sistema
       systemCommands: {
-        "ajuda": "show_help_categories"
+        "Help": "show_help_categories"
       }
     }
   },
@@ -332,30 +369,30 @@ export default {
     statusMessage() {
       if (this.helpMode) {
         if (this.waitingForCategory) {
-          return 'Aguardando categoria...';
+          return 'Waiting for category...';
         }
         return this.currentHelpCategory ? 
-          `Ajuda: ${this.commandCategories[this.currentHelpCategory].name}` : 
-          'Modo ajuda ativo';
+          `Help: ${this.commandCategories[this.currentHelpCategory].name}` : 
+          'Help mode active';
       }
       
       switch(this.recognitionState) {
         case 'listening':
-          return 'Ouvindo comandos...';
+          return 'Listening for commands...';
         case 'thinking':
-          return 'Processando comando...';
+          return 'Processing command...';
         case 'navigating':
-          return 'Carregando página...';
+          return 'Loading page...';
         case 'error':
           return `Erro: ${this.recognitionMessage}`;
         case 'silenced':
           if (this.isListening) {
-            return 'Sistema ativo - Diga um comando';
+            return 'System active - Say a command';
           } else {
-            return 'Sistema ativo - Pressione M para microfone';
+            return 'System active - Press M for microphone';
           }
         default:
-          return 'Sistema pronto';
+          return 'System ready';
       }
     }
   },

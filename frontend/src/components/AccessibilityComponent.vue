@@ -34,7 +34,7 @@
                 <div class="w-10 h-10 bg-[#3b82f6] rounded-md flex items-center justify-center text-white accessibility-logo">G</div>
                 <div class="text-[#1a202c] accessibility-text">
                     <h3 class="text-lg font-semibold">AccessJay</h3>
-                    <p class="text-sm text-[#64758b]">Personalize sua experiência de navegação</p>
+                    <p class="text-sm text-[#64758b]">Customize your browsing experience</p>
                 </div>
             </div>
         
@@ -110,7 +110,7 @@
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
             </svg>
-            Salvar Preferências
+            Save Preferences
           </button>
           
           <!-- Reset Settings Button -->
@@ -122,7 +122,7 @@
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
             </svg>
-            Restaurar Configurações Padrão
+            Reset to Default
           </button>
         </div>
       </div>
@@ -313,10 +313,10 @@ export default {
     applySettings() {
       // Aplicar configurações de tamanho de fonte
       const fontSize = {
-        'Pequeno': '0.85rem',
+        'Small': '0.85rem',
         'Normal': '1rem',
-        'Grande': '1.15rem',
-        'Muito Grande': '1.3rem'
+        'Large': '1.15rem',
+        'Extra Large': '1.3rem'
       }[this.settings.fontSize] || '1rem';
       
       // Aplicar ao documento inteiro, não apenas ao main-content
@@ -413,16 +413,16 @@ export default {
       // Atalhos para tamanho de fonte
       if (event.ctrlKey && event.altKey) {
         if (event.key === '1') {
-          this.updateSetting('fontSize', 'Pequeno');
+          this.updateSetting('fontSize', 'Small');
           event.preventDefault();
         } else if (event.key === '2') {
           this.updateSetting('fontSize', 'Normal');
           event.preventDefault();
         } else if (event.key === '3') {
-          this.updateSetting('fontSize', 'Grande');
+          this.updateSetting('fontSize', 'Large');
           event.preventDefault();
         } else if (event.key === '4') {
-          this.updateSetting('fontSize', 'Muito Grande');
+          this.updateSetting('fontSize', 'Extra Large');
           event.preventDefault();
         }
       }
@@ -573,14 +573,14 @@ export default {
           if (this.settings.screenReader) this.updateSetting('screenReader', false);
         },
         "aumentar fonte": () => {
-          const sizes = ['Pequeno', 'Normal', 'Grande', 'Muito Grande'];
+          const sizes = ['Small', 'Normal', 'Large', 'Extra Large'];
           const currentIndex = sizes.indexOf(this.settings.fontSize);
           if (currentIndex < sizes.length - 1) {
             this.updateSetting('fontSize', sizes[currentIndex + 1]);
           }
         },
         "diminuir fonte": () => {
-          const sizes = ['Pequeno', 'Normal', 'Grande', 'Muito Grande'];
+          const sizes = ['Small', 'Normal', 'Large', 'Extra Large'];
           const currentIndex = sizes.indexOf(this.settings.fontSize);
           if (currentIndex > 0) {
             this.updateSetting('fontSize', sizes[currentIndex - 1]);

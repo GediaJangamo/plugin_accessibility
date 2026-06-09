@@ -7,8 +7,8 @@
         </svg>
       </div>
       <div class="flex-grow">
-        <span class="block text-lg text-gray-800 dark:text-white font-medium">Leitor de ecrã</span>
-        <span class="text-sm text-[#64748b] dark:text-gray-300">Narração de conteúdos</span>
+        <span class="block text-lg text-gray-800 dark:text-white font-medium">Screen Reader</span>
+        <span class="text-sm text-[#64748b] dark:text-gray-300">Content narration</span>
       </div>
       <div class="flex items-center">
         <input 

@@ -18,8 +18,8 @@
 
         </div>
         <div class="flex-grow">
-          <span class="block text-lg text-gray-800 dark:text-white font-medium">Alto Contraste</span>
-          <span class="text-sm text-[#64748b] dark:text-gray-300">Melhora visualização de textos</span>
+          <span class="block text-lg text-gray-800 dark:text-white font-medium">High Contrast</span>
+          <span class="text-sm text-[#64748b] dark:text-gray-300">Improves text visibility</span>
         </div>
         <div class="flex items-center">
           <input 
